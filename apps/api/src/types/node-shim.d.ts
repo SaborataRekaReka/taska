@@ -2,7 +2,6 @@ declare module 'node:http' {
   export interface IncomingMessage {
     method?: string;
     url?: string;
-    headers: Record<string, string | string[] | undefined>;
   }
 
   export interface ServerResponse {

@@ -1,31 +1,39 @@
-import { createHttpApp, jsonValidationMiddleware, respondOk } from './core/http.js';
-import type { RouteDefinition } from './core/http.js';
-import { moduleRegistry, moduleRoutes } from './modules/index.js';
-import { openApiDocument } from './swagger.js';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-const foundationRoutes: RouteDefinition[] = [
-  {
-    method: 'GET',
-    path: '/health',
-    handler: ({ res, requestId }) => {
-      respondOk(res, requestId, {
-        ok: true,
-        service: 'taska-api',
-        architecture: 'modular-bootstrap',
-        modules: moduleRegistry,
-      });
-    },
-  },
-  {
-    method: 'GET',
-    path: '/openapi.json',
-    handler: ({ res, requestId }) => {
-      respondOk(res, requestId, openApiDocument as unknown as Record<string, unknown>);
-    },
-  },
-];
+import { moduleRegistry } from './modules/index.js';
 
+interface JsonResponse {
+  status: number;
+  body: Record<string, unknown>;
+}
+
+function json(res: ServerResponse, response: JsonResponse): void {
+  res.statusCode = response.status;
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.end(JSON.stringify(response.body));
+}
 
 export function createApiApp() {
-  return createHttpApp([...foundationRoutes, ...moduleRoutes], [jsonValidationMiddleware]);
+  return {
+    handle(req: IncomingMessage, res: ServerResponse): void {
+      if (req.url === '/health' && req.method === 'GET') {
+        json(res, {
+          status: 200,
+          body: {
+            ok: true,
+            service: 'taska-api',
+            modules: moduleRegistry,
+          },
+        });
+        return;
+      }
+
+      json(res, {
+        status: 404,
+        body: {
+          error: 'Not Found',
+        },
+      });
+    },
+  };
 }

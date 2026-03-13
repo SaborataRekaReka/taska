@@ -17,40 +17,9 @@ pnpm install
 pnpm build
 ```
 
-If `pnpm` is not available in your environment, use direct TypeScript checks as a temporary fallback:
-
-```bash
-npm --prefix apps/api run build
-npm --prefix apps/api run lint
-npm --prefix apps/app-mobile-web run build
-```
-
-## API shell endpoints (A1 foundation)
-
-Base endpoints:
-
-- `GET /health` — service health and module registry.
-- `GET /openapi.json` — temporary OpenAPI document for current shell routes.
-
-Module endpoints:
-
-- `GET /auth/health`
-- `GET /users/health`
-- `GET /lists/health`
-- `GET /tasks/health`
-- `GET /subtasks/health`
-- `GET /history/health`
-- `GET /ai-assistant/health`
-
-All responses use a unified envelope with `meta.requestId` and `meta.timestamp`.
-
-## Note about NestJS/Fastify
-
-The implementation plan targets NestJS + Fastify for A1. In this execution environment, npm registry access is blocked (`403`), so external dependencies could not be installed. The current code provides a dependency-free modular bootstrap with equivalent boundaries and contracts, ready to be swapped to NestJS when package installation is available.
-
 ## Workspace structure
 
-- `apps/api` — API skeleton with modular route registry, request-id and unified error format
+- `apps/api` — API skeleton with module registry and health endpoint
 - `apps/app-mobile-web` — mobile/web app placeholder to be replaced by Expo app
 - `packages/types` — shared domain DTO types
 - `packages/ui` — shared design tokens and UI exports
@@ -58,7 +27,7 @@ The implementation plan targets NestJS + Fastify for A1. In this execution envir
 
 ## Next implementation steps
 
-1. Install and wire NestJS + Fastify packages, keeping current route contracts.
-2. Add Prisma schema and first migration (users/lists/tasks/subtasks/history).
-3. Add Docker Compose for PostgreSQL/Redis/API local environment.
-4. Continue with auth module (email/password + Google OAuth).
+1. Replace API shell with NestJS + Fastify bootstrap and module scaffolding.
+2. Initialize Expo Router app and connect query/state/i18n providers.
+3. Add Prisma schema and first migration (users/lists/tasks/subtasks/history).
+4. Add Docker Compose for PostgreSQL/Redis/API local environment.
