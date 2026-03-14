@@ -19,15 +19,15 @@
 - ✅ Core infrastructure: request-id, response envelope, error filter, Swagger
 
 ### Что НЕ сделано
-- ❌ Бизнес-логика в **любом** модуле (все — заглушки с `/health`)
-- ❌ JWT авторизация
-- ❌ CRUD для lists/tasks/subtasks
-- ❌ История изменений
+- ✅ ~~Бизнес-логика~~ — реализована для auth, lists, tasks, subtasks, history
+- ✅ ~~JWT авторизация~~ — JwtAuthGuard + register/login/refresh/logout/me
+- ✅ ~~CRUD для lists/tasks/subtasks~~ — полный CRUD с ownership и history
+- ✅ ~~История изменений~~ — append-only service + read API
 - ❌ AI-ассистент
 - ❌ Frontend (Expo shell пустой)
 
-### Оценка готовности к фронтенду: **15%**
-Фундамент заложен хорошо. Схема БД качественная. Но для фронтенда нужны работающие API.
+### Оценка готовности к фронтенду: **55%**
+Backend API полностью рабочий: auth, lists, tasks, subtasks, history. Осталось инициализировать Expo и писать экраны.
 
 ---
 
@@ -344,35 +344,35 @@ apps/app-mobile-web/app/
 ## Раздел 4: Приоритизированный беклог
 
 ### P0 — Без этого ничего не работает
-1. `PrismaModule` + `PrismaService` (injectable, global)
-2. `JwtAuthGuard` + JWT стратегия
-3. `POST /auth/register` + `POST /auth/login`
-4. `GET /lists` + `GET /tasks` (с базовыми фильтрами)
-5. `POST /tasks` + `PATCH /tasks/:id`
-6. Инициализация Expo + TanStack Query + Zustand
+1. ~~`PrismaModule` + `PrismaService` (injectable, global)~~ ✅
+2. ~~`JwtAuthGuard` + JWT стратегия~~ ✅
+3. ~~`POST /auth/register` + `POST /auth/login`~~ ✅
+4. ~~`GET /lists` + `GET /tasks` (с базовыми фильтрами)~~ ✅
+5. ~~`POST /tasks` + `PATCH /tasks/:id`~~ ✅
+6. Инициализация Expo + TanStack Query + Zustand ⏳
 
 ### P1 — Базовый UX работает
-7. `POST /lists`, `PATCH/DELETE /lists/:id`
-8. `DELETE /tasks/:id` (soft)
-9. Subtasks API (полный CRUD)
-10. TaskCard с subtask items
-11. Floating add button + quick create
-12. Auth screens (login/register)
+7. ~~`POST /lists`, `PATCH/DELETE /lists/:id`~~ ✅
+8. ~~`DELETE /tasks/:id` (soft)~~ ✅
+9. ~~Subtasks API (полный CRUD)~~ ✅
+10. TaskCard с subtask items ⏳
+11. Floating add button + quick create ⏳
+12. Auth screens (login/register) ⏳
 
 ### P2 — Ключевые фичи
-13. History recording на всех мутациях
-14. "Мой день" modal (mood + energy + prefs)
-15. AI Prompt bar + chips
-16. `POST /ai/plan` + confirm + execute
-17. AI Response modal (Visual/Editor tabs)
+13. ~~History recording на всех мутациях~~ ✅
+14. "Мой день" modal (mood + energy + prefs) ⏳
+15. AI Prompt bar + chips ⏳
+16. `POST /ai/plan` + confirm + execute ⏳
+17. AI Response modal (Visual/Editor tabs) ⏳
 
 ### P3 — Полный MVP
-18. `POST /ai/operations/:id/undo`
-19. Statistics endpoints + Radar chart
-20. Search + Filter UI
-21. Settings screen (язык, профиль)
-22. Google OAuth (B2)
-23. Polish: skeleton, empty states, toasts
+18. `POST /ai/operations/:id/undo` ⏳
+19. Statistics endpoints + Radar chart ⏳
+20. Search + Filter UI ⏳
+21. Settings screen (язык, профиль) ⏳
+22. Google OAuth (B2) ⏳
+23. Polish: skeleton, empty states, toasts ⏳
 
 ---
 

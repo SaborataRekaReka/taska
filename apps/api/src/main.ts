@@ -15,6 +15,8 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ logger: false }),
   );
 
+  app.enableCors({ origin: true, credentials: true });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -28,8 +30,9 @@ async function bootstrap(): Promise<void> {
 
   const openApiConfig = new DocumentBuilder()
     .setTitle('Taska API')
-    .setDescription('A1 foundation with NestJS + Fastify modular bootstrap.')
-    .setVersion('0.2.0')
+    .setDescription('Task Manager API with AI assistant. Auth, Lists, Tasks, Subtasks, History.')
+    .setVersion('0.3.0')
+    .addBearerAuth()
     .build();
   const openApiDocument = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup('docs', app, openApiDocument, {

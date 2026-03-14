@@ -4,15 +4,18 @@
 
 ---
 
-## Текущая стадия: A3 ✅ — Backend инфраструктура готова, бизнес-логика в разработке
+## Текущая стадия: C4 ✅ — Backend API полностью рабочий, готов к фронтенду
 
 | Этап | Статус | Описание |
 |------|--------|----------|
-| A1 | ✅ | NestJS + Fastify, все модули, Swagger, health endpoints |
+| A1 | ✅ | NestJS + Fastify, модульная архитектура, Swagger |
 | A2 | ✅ | Prisma schema, миграции, seed |
 | A3 | ✅ | Docker Compose (postgres + redis + api) |
-| B (Auth) | ⏳ | Email/password + JWT |
-| C (CRUD) | ⏳ | Lists / Tasks / Subtasks / History |
+| B1 (Auth) | ✅ | Register, login, refresh, logout, me + JWT guard |
+| C1 (Lists) | ✅ | CRUD + ownership + soft-delete + history |
+| C2 (Tasks) | ✅ | CRUD + 6 фильтров + history |
+| C3 (Subtasks) | ✅ | CRUD + ownership + history |
+| C4 (History) | ✅ | Append-only service + read API |
 | D (Frontend) | ⏳ | Expo Router + React Native Web |
 | E (AI) | ⏳ | AI-ассистент safe-mode |
 
@@ -58,14 +61,51 @@ API доступен на `http://localhost:3000`
 
 ## API Endpoints (текущие)
 
+### System
 | Endpoint | Описание |
 |----------|----------|
 | `GET /health` | Статус API |
 | `GET /docs` | Swagger UI |
 | `GET /openapi.json` | OpenAPI спецификация |
-| `GET /auth/health` | Health auth module |
-| `GET /tasks/health` | Health tasks module |
-| ... | Аналогично для всех модулей |
+
+### Auth (public)
+| Endpoint | Описание |
+|----------|----------|
+| `POST /auth/register` | Регистрация (email + password) |
+| `POST /auth/login` | Вход |
+| `POST /auth/refresh` | Обновить access token |
+| `POST /auth/logout` | Выход (Bearer) |
+| `GET /auth/me` | Профиль текущего пользователя (Bearer) |
+
+### Lists (Bearer required)
+| Endpoint | Описание |
+|----------|----------|
+| `GET /lists` | Все списки пользователя |
+| `POST /lists` | Создать список |
+| `PATCH /lists/:id` | Обновить список |
+| `DELETE /lists/:id` | Soft-delete (задачи переносятся в "без списка") |
+
+### Tasks (Bearer required)
+| Endpoint | Описание |
+|----------|----------|
+| `GET /tasks?listId=&status=&priority=&dueToday=&noList=&search=` | Задачи с фильтрами |
+| `GET /tasks/:id` | Одна задача с подзадачами |
+| `POST /tasks` | Создать задачу |
+| `PATCH /tasks/:id` | Обновить задачу |
+| `DELETE /tasks/:id` | Soft-delete |
+
+### Subtasks (Bearer required)
+| Endpoint | Описание |
+|----------|----------|
+| `GET /tasks/:taskId/subtasks` | Подзадачи задачи |
+| `POST /tasks/:taskId/subtasks` | Создать подзадачу |
+| `PATCH /tasks/:taskId/subtasks/:id` | Обновить подзадачу |
+| `DELETE /tasks/:taskId/subtasks/:id` | Удалить подзадачу |
+
+### History (Bearer required)
+| Endpoint | Описание |
+|----------|----------|
+| `GET /history?entityType=&entityId=&limit=` | Лог изменений |
 
 ---
 

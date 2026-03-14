@@ -22,26 +22,31 @@
 ### Выполненные этапы
 | Этап | Статус | Описание |
 |------|--------|----------|
-| A1 | ✅ DONE | NestJS + Fastify bootstrap, все модули со stub-контроллерами |
-| A2 | ✅ DONE | Prisma schema v1, миграция 0001_init, seed (Работа/Личное/Без списка) |
-| A3 | ✅ DONE | Docker Compose (postgres, redis, api), .env.example |
-| B1 | ⏳ NEXT | Auth — email/password + JWT (модуль есть, логика не реализована) |
+| A1 | ✅ DONE | NestJS + Fastify bootstrap, модульная архитектура |
+| A2 | ✅ DONE | Prisma schema v1, миграция 0001_init, seed |
+| A3 | ✅ DONE | Docker Compose (postgres, redis, api) |
+| B1 | ✅ DONE | Auth — register, login, refresh, logout, me + JwtAuthGuard |
+| C1 | ✅ DONE | Lists CRUD + ownership + soft-delete + history |
+| C2 | ✅ DONE | Tasks CRUD + filters (listId, status, priority, dueToday, search) + history |
+| C3 | ✅ DONE | Subtasks CRUD + ownership check + history |
+| C4 | ✅ DONE | History service + read API |
 
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
 | B2 | Google OAuth |
-| B3 | JWT refresh rotation, сессии |
-| C1 | Lists CRUD |
-| C2 | Tasks CRUD + фильтры |
-| C3 | Subtasks CRUD |
-| C4 | History append-only |
 | D | Frontend (Expo Router + React Native Web) |
 | E | AI Assistant safe-mode |
 | F | Polishing, документация |
 
-### Важно: все модули сейчас — заглушки
-Все контроллеры (auth, users, lists, tasks, subtasks, history, ai-assistant) содержат **только** `/health` endpoint со статусом `"planned"`. Бизнес-логики нет ни в одном модуле.
+### Текущее состояние модулей
+- **auth**: register, login, refresh, logout, me — полностью рабочий
+- **users**: GET /users/me — профиль текущего пользователя
+- **lists**: полный CRUD + ownership + soft-delete + запрет удаления дефолтных
+- **tasks**: полный CRUD + 6 фильтров + includes subtasks/list
+- **subtasks**: полный CRUD через /tasks/:taskId/subtasks + ownership
+- **history**: append-only запись + read API с фильтрами
+- **ai-assistant**: заглушка (только /health)
 
 ---
 
@@ -150,34 +155,38 @@ curl http://localhost:3000/openapi.json
 
 ## 7) Модули и их контракты (целевые)
 
-### Auth (`/auth`)
+### Auth (`/auth`) — ✅ IMPLEMENTED
 - `POST /auth/register` — email, password → user + tokens
 - `POST /auth/login` — email, password → tokens
 - `POST /auth/refresh` — refreshToken → новые tokens
-- `POST /auth/logout` — инвалидировать refresh token
-- `GET /auth/me` — текущий пользователь
+- `POST /auth/logout` — инвалидировать refresh token (Bearer)
+- `GET /auth/me` — текущий пользователь (Bearer)
 
-### Lists (`/lists`)
-- `GET /lists` — все списки пользователя
-- `POST /lists` — создать список
-- `PATCH /lists/:id` — обновить
-- `DELETE /lists/:id` — soft-delete (нельзя удалять системный "Без списка")
+### Lists (`/lists`) — ✅ IMPLEMENTED
+- `GET /lists` — все списки пользователя (Bearer)
+- `POST /lists` — создать список (Bearer)
+- `PATCH /lists/:id` — обновить (Bearer)
+- `DELETE /lists/:id` — soft-delete, задачи переносятся в "без списка" (Bearer)
 
-### Tasks (`/tasks`)
-- `GET /tasks?listId=&status=&priority=&dueToday=&search=` — задачи с фильтрами
-- `POST /tasks` — создать задачу
-- `PATCH /tasks/:id` — обновить
-- `DELETE /tasks/:id` — soft-delete
+### Tasks (`/tasks`) — ✅ IMPLEMENTED
+- `GET /tasks?listId=&status=&priority=&dueToday=&noList=&search=` — задачи с фильтрами (Bearer)
+- `GET /tasks/:id` — одна задача с subtasks (Bearer)
+- `POST /tasks` — создать задачу (Bearer)
+- `PATCH /tasks/:id` — обновить (Bearer)
+- `DELETE /tasks/:id` — soft-delete (Bearer)
 
-### Subtasks (`/tasks/:id/subtasks`)
-- `GET /tasks/:id/subtasks`
-- `POST /tasks/:id/subtasks`
-- `PATCH /tasks/:id/subtasks/:subId`
-- `DELETE /tasks/:id/subtasks/:subId`
+### Subtasks (`/tasks/:taskId/subtasks`) — ✅ IMPLEMENTED
+- `GET /tasks/:taskId/subtasks` (Bearer)
+- `POST /tasks/:taskId/subtasks` (Bearer)
+- `PATCH /tasks/:taskId/subtasks/:id` (Bearer)
+- `DELETE /tasks/:taskId/subtasks/:id` (Bearer)
 
-### AI Assistant (`/ai`)
-- `POST /ai/chat` — free-form запрос, возвращает текстовый ответ или план
-- `POST /ai/plan` — сформировать план изменений (без мутаций)
+### History (`/history`) — ✅ IMPLEMENTED
+- `GET /history?entityType=&entityId=&limit=` — лог изменений (Bearer)
+
+### AI Assistant (`/ai`) — ⏳ PLANNED
+- `POST /ai/chat` — free-form запрос
+- `POST /ai/plan` — сформировать план изменений
 - `POST /ai/operations/:id/confirm` — подтвердить план
 - `POST /ai/operations/:id/execute` — применить подтвержденный план
 - `POST /ai/operations/:id/undo` — откатить последнюю AI-операцию

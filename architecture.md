@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-14 | **Стадия:** A3 завершена, B1 следующий
+> **Последнее обновление:** 2026-03-14 | **Стадия:** B1+C1-C4 завершены, D (frontend) следующий
 
 ---
 
@@ -178,11 +178,11 @@ id, userId, operationType, prompt, planPayload (JSON), status (PLANNED|CONFIRMED
 #### Auth
 | Method | Path | Auth | Статус |
 |--------|------|------|--------|
-| POST | `/auth/register` | — | ⏳ planned |
-| POST | `/auth/login` | — | ⏳ planned |
-| POST | `/auth/refresh` | — | ⏳ planned |
-| POST | `/auth/logout` | Bearer | ⏳ planned |
-| GET | `/auth/me` | Bearer | ⏳ planned |
+| POST | `/auth/register` | — | ✅ done |
+| POST | `/auth/login` | — | ✅ done |
+| POST | `/auth/refresh` | — | ✅ done |
+| POST | `/auth/logout` | Bearer | ✅ done |
+| GET | `/auth/me` | Bearer | ✅ done |
 
 Register/Login response:
 ```json
@@ -198,26 +198,27 @@ Register/Login response:
 #### Lists
 | Method | Path | Auth | Статус |
 |--------|------|------|--------|
-| GET | `/lists` | Bearer | ⏳ planned |
-| POST | `/lists` | Bearer | ⏳ planned |
-| PATCH | `/lists/:id` | Bearer | ⏳ planned |
-| DELETE | `/lists/:id` | Bearer | ⏳ planned |
+| GET | `/lists` | Bearer | ✅ done |
+| POST | `/lists` | Bearer | ✅ done |
+| PATCH | `/lists/:id` | Bearer | ✅ done |
+| DELETE | `/lists/:id` | Bearer | ✅ done |
 
 #### Tasks
 | Method | Path | Query params | Статус |
 |--------|------|------|--------|
-| GET | `/tasks` | `listId`, `status`, `priority`, `dueToday`, `search` | ⏳ planned |
-| POST | `/tasks` | — | ⏳ planned |
-| PATCH | `/tasks/:id` | — | ⏳ planned |
-| DELETE | `/tasks/:id` | — | ⏳ planned |
+| GET | `/tasks` | `listId`, `status`, `priority`, `dueToday`, `noList`, `search` | ✅ done |
+| GET | `/tasks/:id` | — | ✅ done |
+| POST | `/tasks` | — | ✅ done |
+| PATCH | `/tasks/:id` | — | ✅ done |
+| DELETE | `/tasks/:id` | — | ✅ done |
 
 #### Subtasks
 | Method | Path | Статус |
 |--------|------|--------|
-| GET | `/tasks/:id/subtasks` | ⏳ planned |
-| POST | `/tasks/:id/subtasks` | ⏳ planned |
-| PATCH | `/tasks/:id/subtasks/:subId` | ⏳ planned |
-| DELETE | `/tasks/:id/subtasks/:subId` | ⏳ planned |
+| GET | `/tasks/:taskId/subtasks` | ✅ done |
+| POST | `/tasks/:taskId/subtasks` | ✅ done |
+| PATCH | `/tasks/:taskId/subtasks/:id` | ✅ done |
+| DELETE | `/tasks/:taskId/subtasks/:id` | ✅ done |
 
 #### AI Assistant
 | Method | Path | Описание | Статус |
@@ -318,12 +319,12 @@ UI action
 ### Backend модули
 | Модуль | Health | Auth | CRUD | Filters | History |
 |--------|--------|------|------|---------|---------|
-| auth | ✅ | ⏳ | ⏳ | — | — |
-| users | ✅ | ⏳ | ⏳ | — | — |
-| lists | ✅ | ⏳ | ⏳ | — | ⏳ |
-| tasks | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
-| subtasks | ✅ | ⏳ | ⏳ | — | ⏳ |
-| history | ✅ | ⏳ | ⏳ | — | — |
+| auth | ✅ | ✅ | ✅ | — | — |
+| users | ✅ | ✅ | ✅ | — | — |
+| lists | ✅ | ✅ | ✅ | — | ✅ |
+| tasks | ✅ | ✅ | ✅ | ✅ | ✅ |
+| subtasks | ✅ | ✅ | ✅ | — | ✅ |
+| history | ✅ | ✅ | ✅ | ✅ | — |
 | ai-assistant | ✅ | ⏳ | ⏳ | — | ⏳ |
 
 ### Infrastructure
@@ -341,9 +342,10 @@ UI action
 | Seed script | ✅ |
 | Docker Compose | ✅ |
 | .env.example | ✅ |
-| Auth guard (JWT) | ⏳ |
+| Auth guard (JWT) | ✅ |
+| PrismaModule (global) | ✅ |
+| CORS enabled | ✅ |
 | Rate limiting | ⏳ |
-| PrismaModule (global) | ⏳ |
 
 ---
 
