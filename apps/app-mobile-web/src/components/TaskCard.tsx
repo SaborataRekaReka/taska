@@ -1,15 +1,5 @@
-import { useState } from 'react';
 import type { Task } from '../lib/types';
-import { useUpdateTask, useDeleteTask, useUpdateSubtask } from '../hooks/queries';
-import { useUiStore } from '../stores/ui';
 import styles from './TaskCard.module.css';
-
-const PRIORITY_ICON: Record<string, string> = {
-  CRITICAL: '🔴',
-  HIGH: '🟠',
-  MEDIUM: '',
-  LOW: '🔵',
-};
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -17,82 +7,58 @@ function formatDate(iso: string): string {
 }
 
 export function TaskCard({ task }: { task: Task }) {
-  const updateTask = useUpdateTask();
-  const deleteTask = useDeleteTask();
-  const updateSubtask = useUpdateSubtask();
-  const setEditingTask = useUiStore((s) => s.setEditingTask);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const isDone = task.status === 'DONE';
-
-  function toggleStatus() {
-    updateTask.mutate({
-      id: task.id,
-      status: isDone ? 'TODO' : 'DONE',
-    });
-  }
-
-  function toggleSubtask(subId: string, currentStatus: string) {
-    updateSubtask.mutate({
-      taskId: task.id,
-      id: subId,
-      status: currentStatus === 'DONE' ? 'TODO' : 'DONE',
-    });
-  }
+  const hasSubs = task.subtasks.length > 0;
 
   return (
-    <div className={`${styles.card} ${isDone ? styles.done : ''}`}>
+    <div className={styles.card}>
       <div className={styles.row}>
-        <button className={styles.checkbox} onClick={toggleStatus}>
-          {isDone ? '✓' : ''}
-        </button>
-        <div className={styles.content} onClick={() => setEditingTask(task.id)}>
-          <span className={styles.title}>
-            {PRIORITY_ICON[task.priority]}{' '}
-            {task.title}
-          </span>
+        <button className={styles.checkbox} />
+        <div className={styles.content}>
+          <span className={styles.title}>{task.title}</span>
           <div className={styles.meta}>
-            {task.subtasks.length > 0 && (
+            {hasSubs && (
               <span className={styles.metaItem}>
-                ↪ {task.subtasks.filter((s) => s.status === 'DONE').length}/{task.subtasks.length}
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M3 4h8M3 7h6M3 10h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                {task.subtasks.length}
               </span>
             )}
             {task.deadline && (
-              <span className={styles.metaItem}>⏰ {formatDate(task.deadline)}</span>
+              <span className={styles.metaItem}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.1"/><path d="M6 3v3.5l2 1.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>
+                {formatDate(task.deadline)}
+              </span>
             )}
             {task.list && (
-              <span className={styles.metaItem}>≡ {task.list.name}</span>
+              <span className={styles.metaItem}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h10" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
+                {task.list.name}
+              </span>
             )}
           </div>
         </div>
         <div className={styles.actions}>
-          <button className={styles.menuBtn} onClick={() => setMenuOpen(!menuOpen)}>⋮</button>
-          {menuOpen && (
-            <div className={styles.menu}>
-              <button onClick={() => { setEditingTask(task.id); setMenuOpen(false); }}>
-                Редактировать
-              </button>
-              <button onClick={() => { deleteTask.mutate(task.id); setMenuOpen(false); }}>
-                Удалить
-              </button>
-            </div>
-          )}
+          <button className={styles.actionCircle}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.8" strokeLinecap="round"/></svg>
+          </button>
+          <button className={styles.menuBtn}>
+            <svg width="4" height="16" viewBox="0 0 4 16" fill="none">
+              <circle cx="2" cy="2" r="1.3" fill="currentColor"/>
+              <circle cx="2" cy="8" r="1.3" fill="currentColor"/>
+              <circle cx="2" cy="14" r="1.3" fill="currentColor"/>
+            </svg>
+          </button>
         </div>
       </div>
 
-      {task.subtasks.length > 0 && (
+      {hasSubs && (
         <div className={styles.subtasks}>
-          {task.subtasks.map((sub) => (
-            <div key={sub.id} className={styles.subtaskRow}>
-              <button
-                className={`${styles.subCheckbox} ${sub.status === 'DONE' ? styles.subDone : ''}`}
-                onClick={() => toggleSubtask(sub.id, sub.status)}
-              >
-                {sub.status === 'DONE' ? '✓' : ''}
-              </button>
-              <span className={sub.status === 'DONE' ? styles.subTitleDone : ''}>
-                {sub.title}
-              </span>
+          {task.subtasks.map((sub, i) => (
+            <div key={sub.id}>
+              {i > 0 && <div className={styles.divider} />}
+              <div className={styles.subtaskRow}>
+                <button className={styles.subCheckbox} />
+                <span className={styles.subTitle}>{sub.title}</span>
+              </div>
             </div>
           ))}
         </div>

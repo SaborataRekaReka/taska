@@ -1,0 +1,61 @@
+.panel {
+  background: var(--panel-bg-solid);
+  border: 1px solid var(--border);
+  border-radius: var(--r-panel);
+  padding: 28px 32px 20px;
+  margin: 20px 0 24px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: min-height 0.2s;
+}
+
+.inactive {
+  min-height: 160px;
+}
+
+.active {
+  min-height: 220px;
+}
+
+.input {
+  width: 100%;
+  resize: none;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: transparent;
+  min-height: 80px;
+  font-weight: 400;
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.chip {
+  font-size: 15px;
+  font-weight: 400;
+  padding: 9px 20px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.60);
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(20, 20, 20, 0.10);
+}

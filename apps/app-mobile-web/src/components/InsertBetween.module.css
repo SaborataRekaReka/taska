@@ -1,0 +1,26 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--btn-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s;
+}
+
+.btn:hover {
+  transform: scale(1.1);
+}

@@ -1,0 +1,22 @@
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.10);
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.circle:hover {
+  background: rgba(20, 20, 20, 0.18);
+}
+
+.active {
+  border-color: var(--btn-black);
+  background: rgba(20, 20, 20, 0.22);
+}

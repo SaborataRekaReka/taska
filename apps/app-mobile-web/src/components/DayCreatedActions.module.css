@@ -1,0 +1,45 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.55);
+  transition: background 0.15s;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.80);
+}
+
+.secondary svg {
+  color: var(--text-primary);
+}
+
+.primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: var(--r-pill);
+  background: var(--btn-black);
+  color: var(--btn-white);
+  transition: opacity 0.15s;
+}
+
+.primary:hover {
+  opacity: 0.85;
+}

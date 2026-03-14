@@ -1,15 +1,11 @@
 .header {
-  padding: 16px 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(12px);
-  background: rgba(244, 240, 251, 0.8);
+  padding: 44px var(--side-padding) 0;
+  max-width: calc(var(--content-width) + var(--side-padding) * 2);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .inner {
-  max-width: 960px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,34 +14,52 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .logo {
-  font-size: 22px;
+  font-size: 40px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.day {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-left: 4px;
+}
+
+.sparkle {
+  width: 16px;
+  height: 16px;
+  color: var(--text-primary);
+  margin-left: -2px;
 }
 
 .right {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.name {
-  font-size: 14px;
-  color: var(--color-text-secondary);
+  gap: 16px;
 }
 
 .logoutBtn {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  transition: background 0.15s;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-primary);
+  transition: opacity 0.15s;
 }
 
 .logoutBtn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  opacity: 0.6;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--border);
 }

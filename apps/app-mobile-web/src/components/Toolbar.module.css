@@ -2,51 +2,57 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .searchWrap {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--color-bg-card);
-  border-radius: var(--radius-md);
-  padding: 8px 14px;
-  flex: 1;
-  min-width: 200px;
-  box-shadow: var(--shadow-card);
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: var(--r-pill);
+  padding: 9px 14px;
+  width: 310px;
+  border: 1px solid var(--border);
+  cursor: text;
 }
 
 .searchIcon {
-  font-size: 14px;
-  opacity: 0.5;
+  color: var(--icon-muted);
+  flex-shrink: 0;
 }
 
-.searchInput {
+.searchText {
   flex: 1;
-  font-size: 14px;
-  background: transparent;
+  font-size: 15px;
+  color: var(--text-placeholder);
 }
 
-.clearBtn {
-  font-size: 16px;
-  color: var(--color-text-muted);
-  padding: 0 4px;
+.kbd {
+  font-size: 11px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  line-height: 1;
+  font-weight: 500;
 }
 
-.filters {
+.filterBtn {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-primary);
+  padding: 8px 4px;
+  transition: opacity 0.15s;
 }
 
-.select {
-  font-family: var(--font);
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-card);
-  color: var(--color-text);
-  cursor: pointer;
+.filterBtn svg {
+  color: var(--text-primary);
+}
+
+.filterBtn:hover {
+  opacity: 0.6;
 }

@@ -34,7 +34,11 @@ async function handleResponse<T>(res: Response): Promise<T> {
     const err = body.error ?? {};
     throw new ApiError(res.status, err.code ?? 'UNKNOWN', err.message ?? 'Request failed');
   }
-  return body.data as T;
+  const data = body.data;
+  if (data && typeof data === 'object' && 'value' in data) {
+    return (data.value as T);
+  }
+  return data as T;
 }
 
 async function tryRefresh(): Promise<boolean> {

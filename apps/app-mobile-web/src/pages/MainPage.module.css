@@ -2,12 +2,43 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.emotional {
+  background: linear-gradient(135deg,
+    rgba(200, 180, 240, 0.15) 0%,
+    rgba(160, 190, 255, 0.12) 30%,
+    rgba(180, 160, 230, 0.18) 50%,
+    rgba(140, 200, 240, 0.10) 70%,
+    rgba(220, 200, 250, 0.08) 100%);
+}
+
+.emotionalBloom {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 25%,
+    rgba(140, 110, 220, 0.14) 0%,
+    rgba(100, 150, 240, 0.08) 50%,
+    transparent 80%);
 }
 
 .main {
-  max-width: 960px;
+  max-width: var(--content-width);
   width: 100%;
   margin: 0 auto;
-  padding: 0 24px 100px;
+  padding: 0 var(--side-padding) 120px;
   flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tabRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 24px;
 }
