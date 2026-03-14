@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+.turbo
+.pnpm-store
+dist
+.git
+.gitignore
+*.log
+coverage
+.expo
