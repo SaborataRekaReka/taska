@@ -1,34 +1,67 @@
-import { accessSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+﻿import { PrismaClient } from '@prisma/client';
 
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  console.error('[seed] DATABASE_URL is not set');
-  process.exit(1);
+const prisma = new PrismaClient();
+const defaultListNames = ['Работа', 'Личное', 'Без списка'];
+
+async function ensureDefaultListsForUser(userId) {
+  for (const name of defaultListNames) {
+    await prisma.list.upsert({
+      where: {
+        userId_name: {
+          userId,
+          name,
+        },
+      },
+      update: {
+        isDefault: true,
+        deletedAt: null,
+      },
+      create: {
+        userId,
+        name,
+        isDefault: true,
+      },
+    });
+  }
 }
 
-const sqlPath = resolve(process.cwd(), 'prisma/seed.sql');
+async function main() {
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@taska.local' },
+    update: {
+      displayName: 'Demo User',
+      provider: 'LOCAL',
+    },
+    create: {
+      email: 'demo@taska.local',
+      displayName: 'Demo User',
+      provider: 'LOCAL',
+    },
+  });
 
-try {
-  accessSync(sqlPath);
-} catch {
-  console.error(`[seed] seed file not found: ${sqlPath}`);
-  process.exit(1);
+  await ensureDefaultListsForUser(demoUser.id);
+
+  const otherUsers = await prisma.user.findMany({
+    where: { id: { not: demoUser.id } },
+    select: { id: true },
+  });
+
+  for (const user of otherUsers) {
+    await ensureDefaultListsForUser(user.id);
+  }
+
+  console.log(
+    `[seed] default lists ensured (${defaultListNames.join(', ')}) for ${
+      otherUsers.length + 1
+    } user(s)`,
+  );
 }
 
-const result = spawnSync('psql', [databaseUrl, '-f', sqlPath], {
-  stdio: 'inherit',
-});
-
-if (result.error) {
-  console.error('[seed] failed to execute psql. Ensure PostgreSQL client is installed.');
-  console.error(result.error.message);
-  process.exit(1);
-}
-
-if (result.status !== 0) {
-  process.exit(result.status ?? 1);
-}
-
-console.log('[seed] default lists ensured: Работа, Личное, Без списка');
+main()
+  .catch((error) => {
+    console.error('[seed] failed', error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

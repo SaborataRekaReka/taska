@@ -1,12 +1,8 @@
-import { respondOk } from '../../core/http.js';
-import type { RouteDefinition } from '../../core/http.js';
+import { Module } from '@nestjs/common';
 
-export const aiAssistantModuleRoutes: RouteDefinition[] = [
-  {
-    method: 'GET',
-    path: '/ai-assistant/health',
-    handler: ({ res, requestId }) => {
-      respondOk(res, requestId, { module: 'ai-assistant', status: 'planned' });
-    },
-  },
-];
+import { AiAssistantController } from './controller.js';
+
+@Module({
+  controllers: [AiAssistantController],
+})
+export class AiAssistantModule {}

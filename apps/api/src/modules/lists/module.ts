@@ -1,12 +1,8 @@
-import { respondOk } from '../../core/http.js';
-import type { RouteDefinition } from '../../core/http.js';
+import { Module } from '@nestjs/common';
 
-export const listsModuleRoutes: RouteDefinition[] = [
-  {
-    method: 'GET',
-    path: '/lists/health',
-    handler: ({ res, requestId }) => {
-      respondOk(res, requestId, { module: 'lists', status: 'planned' });
-    },
-  },
-];
+import { ListsController } from './controller.js';
+
+@Module({
+  controllers: [ListsController],
+})
+export class ListsModule {}

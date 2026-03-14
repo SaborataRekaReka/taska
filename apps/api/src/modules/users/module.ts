@@ -1,12 +1,8 @@
-import { respondOk } from '../../core/http.js';
-import type { RouteDefinition } from '../../core/http.js';
+import { Module } from '@nestjs/common';
 
-export const usersModuleRoutes: RouteDefinition[] = [
-  {
-    method: 'GET',
-    path: '/users/health',
-    handler: ({ res, requestId }) => {
-      respondOk(res, requestId, { module: 'users', status: 'planned' });
-    },
-  },
-];
+import { UsersController } from './controller.js';
+
+@Module({
+  controllers: [UsersController],
+})
+export class UsersModule {}
