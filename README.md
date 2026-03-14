@@ -1,136 +1,188 @@
-﻿# Taska
+# TASKA 2.0
 
-Monorepo foundation for a production-grade Task Manager with AI assistant.
+Менеджер задач с AI-ассистентом. Monorepo на TypeScript: NestJS API + Expo (React Native Web) frontend.
 
-## Stack
+---
 
-- TypeScript across all layers
-- pnpm workspaces + Turborepo
-- Backend: NestJS + Fastify (`apps/api`)
-- Frontend shell: Expo app placeholder (`apps/app-mobile-web`)
-- Shared packages in `packages/*`
+## Текущая стадия: A3 ✅ — Backend инфраструктура готова, бизнес-логика в разработке
 
-## Workspace structure
+| Этап | Статус | Описание |
+|------|--------|----------|
+| A1 | ✅ | NestJS + Fastify, все модули, Swagger, health endpoints |
+| A2 | ✅ | Prisma schema, миграции, seed |
+| A3 | ✅ | Docker Compose (postgres + redis + api) |
+| B (Auth) | ⏳ | Email/password + JWT |
+| C (CRUD) | ⏳ | Lists / Tasks / Subtasks / History |
+| D (Frontend) | ⏳ | Expo Router + React Native Web |
+| E (AI) | ⏳ | AI-ассистент safe-mode |
 
-- `apps/api` - API service
-- `apps/app-mobile-web` - mobile/web app shell
-- `packages/types` - shared domain types
-- `packages/ui` - shared design tokens and UI exports
-- `packages/config` - shared config presets
+---
 
-## Stage A1 status
+## Быстрый старт (локально)
 
-Implemented:
+### Требования
+- Node.js 20+
+- pnpm 9+
+- Docker Desktop
 
-- NestJS + Fastify bootstrap
-- Module boundaries: `auth`, `users`, `lists`, `tasks`, `subtasks`, `history`, `ai-assistant`
-- Global `ValidationPipe`
-- Request correlation via `x-request-id`
-- Unified API envelopes for success and error responses
-- Swagger/OpenAPI at:
-  - `GET /docs`
-  - `GET /openapi.json`
-- Service health endpoint:
-  - `GET /health`
-- Module health endpoints:
-  - `GET /auth/health`
-  - `GET /users/health`
-  - `GET /lists/health`
-  - `GET /tasks/health`
-  - `GET /subtasks/health`
-  - `GET /history/health`
-  - `GET /ai-assistant/health`
-
-## Stage A2 status
-
-Implemented Prisma schema v1 (`apps/api/prisma/schema.prisma`) with:
-
-- `User`
-- `List` (soft-delete via `deletedAt`)
-- `Task` (soft-delete via `deletedAt`)
-- `Subtask`
-- `History` (append-only events)
-- `AiOperation`
-
-Also included:
-
-- Initial migration: `apps/api/prisma/migrations/0001_init/migration.sql`
-- Seed script: `apps/api/prisma/seed.mjs`
-  - Ensures default lists `Работа`, `Личное`, `Без списка`
-
-## Local API setup
-
-1. Install dependencies:
-
+### 1. Установить зависимости
 ```bash
 pnpm install
 ```
 
-2. Start infrastructure:
+### 2. Настроить переменные окружения
+```bash
+cp .env.example .env
+# Отредактировать .env при необходимости (DATABASE_URL уже прописан для docker)
+```
 
+### 3. Поднять инфраструктуру
 ```bash
 docker compose up -d postgres redis
 ```
 
-3. Run migration and seed:
-
+### 4. Применить миграции и seed
 ```bash
 pnpm --filter @taska/api run db:migrate
 pnpm --filter @taska/api run db:seed
 ```
 
-4. Run API:
-
+### 5. Запустить API
 ```bash
 pnpm --filter @taska/api run dev
 ```
 
-## Validation commands
+API доступен на `http://localhost:3000`
 
-From repo root:
+---
 
-```bash
-pnpm --filter @taska/api run build
-pnpm --filter @taska/api run lint
+## API Endpoints (текущие)
+
+| Endpoint | Описание |
+|----------|----------|
+| `GET /health` | Статус API |
+| `GET /docs` | Swagger UI |
+| `GET /openapi.json` | OpenAPI спецификация |
+| `GET /auth/health` | Health auth module |
+| `GET /tasks/health` | Health tasks module |
+| ... | Аналогично для всех модулей |
+
+---
+
+## Структура проекта
+
+```
+TASKA 2.0/
+├── apps/
+│   ├── api/                    # NestJS + Fastify backend
+│   │   ├── prisma/             # Schema, миграции, seed
+│   │   └── src/
+│   │       ├── core/           # Infrastructure (request-id, errors, envelope)
+│   │       └── modules/        # auth | users | lists | tasks | subtasks | history | ai-assistant
+│   └── app-mobile-web/         # Expo shell (не инициализирован)
+├── packages/
+│   ├── types/                  # Shared TypeScript типы
+│   ├── ui/                     # Shared UI компоненты
+│   └── config/                 # Shared конфиги
+├── architecture.md             # Архитектурные инварианты
+├── roadmap.md                  # Детальный план фронтенда
+└── AGENTS.md                   # Контекст для AI-агентов
 ```
 
-## Backend delivery plan (aligned with current UI)
+---
 
-### Phase 0 - API baseline (1-2 days)
-- Wire module routes into `server.ts` and expose a versioned prefix (`/api/v1`).
-- Standardize response envelopes and error codes for all modules.
-- Add request logging + `x-request-id` propagation.
+## Команды
 
-### Phase 1 - Auth + session foundation (1-2 days)
-- Implement `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.
-- Add protected route middleware (single-user MVP today, multi-user-safe boundaries tomorrow).
+### Backend
+```bash
+# Dev с hot-reload
+pnpm --filter @taska/api run dev
 
-### Phase 2 - Lists + tasks core CRUD (3-5 days)
-- Lists: CRUD, reorder, default/system lists.
-- Tasks: CRUD, status/priority/deadline, assign to list.
-- Search + filter endpoint for the toolbar UX (`search`, `status`, `priority`, `listId`, `dueFrom`, `dueTo`).
+# Сборка
+pnpm --filter @taska/api run build
 
-### Phase 3 - Subtasks + hierarchy safety (2-3 days)
-- Subtasks CRUD and completion toggles.
-- Guardrails: ownership consistency and no hierarchy cycles.
+# Линт
+pnpm --filter @taska/api run lint
 
-### Phase 4 - History + undo-ready audit trail (2-3 days)
-- Append-only history events for list/task/subtask mutations.
-- History feed endpoint for UI timeline and future rollback diagnostics.
+# Prisma миграция
+pnpm --filter @taska/api run db:migrate
 
-### Phase 5 - AI assistant safe-mode (4-6 days)
-- `POST /ai/plan` -> plan preview without mutation.
-- `POST /ai/operations/:id/confirm` -> explicit user confirmation.
-- `POST /ai/operations/:id/execute` -> transactional apply.
-- `POST /ai/operations/:id/undo` -> rollback last AI operation.
+# Prisma seed
+pnpm --filter @taska/api run db:seed
 
-### Phase 6 - Statistics and "balance day" data (2-4 days)
-- Daily/weekly aggregates for focus, urgency, completion, and workload.
-- Endpoints for dashboard cards and radar chart payloads.
+# Генерация Prisma клиента
+pnpm --filter @taska/api run db:generate
+```
 
-## Immediate next step
+### Вся монорепа
+```bash
+# Сборка всего
+pnpm run build
 
-Start Phase 0:
-1. Implement route composition in `apps/api/src/server.ts`.
-2. Publish the first API contract draft (OpenAPI or markdown) for Auth/Lists/Tasks.
-3. Align frontend query keys and DTOs with that contract before coding UI integrations.
+# Линт всего
+pnpm run lint
+```
+
+### Docker
+```bash
+# Поднять всё (postgres + redis + api)
+docker compose up -d
+
+# Только инфраструктура
+docker compose up -d postgres redis
+
+# Логи API
+docker compose logs -f api
+
+# Остановить
+docker compose down
+```
+
+---
+
+## Переменные окружения
+
+Смотри `.env.example`. Ключевые:
+
+| Переменная | Описание | Пример |
+|-----------|----------|--------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://taska:taska@localhost:5432/taska` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+| `JWT_SECRET` | Секрет для JWT | `change-me-in-production` |
+| `OPENAI_API_KEY` | Ключ OpenAI (для AI-функций) | `sk-...` |
+| `PORT` | Порт API | `3000` |
+
+---
+
+## База данных
+
+### Модели
+- `User` — пользователь (email/password или Google OAuth)
+- `List` — список задач (soft-delete через `deletedAt`)
+- `Task` — задача с приоритетом, дедлайном, статусом (soft-delete)
+- `Subtask` — подзадача
+- `History` — append-only лог изменений
+- `AiOperation` — операция AI с lifecycle: PLANNED → CONFIRMED → EXECUTED / UNDONE
+
+### Seed данные
+Seed создаёт тестового пользователя и три дефолтных списка: `Работа`, `Личное`, `Без списка`.
+
+---
+
+## Архитектура
+
+Подробности в [`architecture.md`](./architecture.md).  
+План разработки фронтенда в [`roadmap.md`](./roadmap.md).  
+Контекст для AI-агентов в [`AGENTS.md`](./AGENTS.md).
+
+---
+
+## Stack
+
+- **TypeScript** — единый язык всего стека
+- **NestJS 11** + **Fastify 5** — backend framework
+- **Prisma 6** — ORM
+- **PostgreSQL 16** + **Redis 7** — хранилище
+- **Expo Router** + **React Native Web** — frontend (запланировано)
+- **Zustand** + **TanStack Query** — state management (запланировано)
+- **pnpm workspaces** + **Turborepo** — monorepo tooling
