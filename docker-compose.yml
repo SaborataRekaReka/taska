@@ -1,20 +1,22 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: taska-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: taska
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-taska}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - '5432:5432'
     volumes:
       - taska_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d taska']
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taska}',
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -39,12 +41,16 @@ services:
       dockerfile: apps/api/Dockerfile
     container_name: taska-api
     restart: unless-stopped
+    command: >
+      sh -c "npm run db:deploy &&
+             npm run db:seed &&
+             npm run start"
     env_file:
       - .env.example
     environment:
       PORT: 3000
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/taska
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://postgres:postgres@postgres:5432/taska}
+      REDIS_URL: ${REDIS_URL_DOCKER:-redis://redis:6379}
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,7 +59,11 @@ services:
     ports:
       - '3000:3000'
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
+      test:
+        [
+          'CMD-SHELL',
+          "node -e \"require('http').get('http://127.0.0.1:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));\"",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
