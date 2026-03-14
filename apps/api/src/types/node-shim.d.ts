@@ -2,11 +2,6 @@ declare module 'node:http' {
   export interface IncomingMessage {
     method?: string;
     url?: string;
-    headers: Record<string, string | string[] | undefined>;
-    setEncoding(encoding: string): void;
-    on(event: 'data', listener: (chunk: string) => void): this;
-    on(event: 'end', listener: () => void): this;
-    on(event: 'error', listener: (error: unknown) => void): this;
   }
 
   export interface ServerResponse {
@@ -24,5 +19,4 @@ declare module 'node:http' {
 
 declare const process: {
   env: Record<string, string | undefined>;
-  exit(code?: number): never;
 };

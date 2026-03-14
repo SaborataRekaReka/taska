@@ -11,6 +11,4 @@ const server = createServer((req, res) => {
 
 server.listen(port, () => {
   console.log(`[api] listening on :${port}`);
-  console.log(`[api] health: http://localhost:${port}/health`);
-  console.log(`[api] openapi: http://localhost:${port}/openapi.json`);
 });

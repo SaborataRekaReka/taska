@@ -16,9 +16,9 @@ export const openApiDocument = {
   openapi: '3.0.3',
   info: {
     title: 'Taska API',
-    version: '0.3.0',
+    version: '0.2.0',
     description:
-      'A-series bootstrap shell with auth flow, request-id envelopes, and module-scoped health routes.',
+      'A1 modular bootstrap shell with request-id, unified errors, and module-scoped health routes.',
   },
   servers: [
     {
@@ -34,26 +34,6 @@ export const openApiDocument = {
     '/openapi.json': {
       get: {
         summary: 'OpenAPI document',
-      },
-    },
-    '/auth/register': {
-      post: {
-        summary: 'Register with email and password',
-      },
-    },
-    '/auth/login': {
-      post: {
-        summary: 'Login with email and password',
-      },
-    },
-    '/auth/refresh': {
-      post: {
-        summary: 'Rotate token pair by refresh token',
-      },
-    },
-    '/auth/logout': {
-      post: {
-        summary: 'Logout by invalidating refresh token',
       },
     },
     ...moduleHealthPaths,

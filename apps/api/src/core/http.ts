@@ -31,7 +31,7 @@ export interface RequestContext {
 export interface RouteDefinition {
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   path: string;
-  handler: (context: RequestContext) => void | Promise<void>;
+  handler: (context: RequestContext) => void;
 }
 
 export type Middleware = (context: RequestContext) => void;
@@ -128,27 +128,26 @@ export function createHttpApp(routes: RouteDefinition[], middlewares: Middleware
         pathname,
       };
 
-      Promise.resolve()
-        .then(async () => {
-          for (const middleware of middlewares) {
-            middleware(context);
-          }
+      try {
+        for (const middleware of middlewares) {
+          middleware(context);
+        }
 
-          const route = routeMap.get(`${method} ${pathname}`);
-          if (!route) {
-            throw new HttpError(404, 'NOT_FOUND', 'Route not found', { method, pathname });
-          }
+        const route = routeMap.get(`${method} ${pathname}`);
 
-          await route.handler(context);
-        })
-        .catch((error: unknown) => {
-          if (error instanceof HttpError) {
-            respondError(res, error.statusCode, requestId, error.code, error.message, error.details);
-            return;
-          }
+        if (!route) {
+          throw new HttpError(404, 'NOT_FOUND', 'Route not found', { method, pathname });
+        }
 
-          respondError(res, 500, requestId, 'INTERNAL_ERROR', 'Unexpected server error');
-        });
+        route.handler(context);
+      } catch (error) {
+        if (error instanceof HttpError) {
+          respondError(res, error.statusCode, requestId, error.code, error.message, error.details);
+          return;
+        }
+
+        respondError(res, 500, requestId, 'INTERNAL_ERROR', 'Unexpected server error');
+      }
     },
   };
 }
@@ -168,37 +167,3 @@ export const jsonValidationMiddleware: Middleware = ({ method, req }) => {
     method,
   });
 };
-
-export async function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
-  const rawBody = await new Promise<string>((resolve, reject) => {
-    let body = '';
-
-    req.setEncoding('utf8');
-    req.on('data', (chunk: string) => {
-      body += chunk;
-    });
-    req.on('end', () => {
-      resolve(body);
-    });
-    req.on('error', reject);
-  });
-
-  if (rawBody.trim().length === 0) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(rawBody) as unknown;
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new HttpError(400, 'INVALID_JSON_BODY', 'Request body must be a JSON object');
-    }
-
-    return parsed as Record<string, unknown>;
-  } catch (error) {
-    if (error instanceof HttpError) {
-      throw error;
-    }
-
-    throw new HttpError(400, 'INVALID_JSON_BODY', 'Request body must be valid JSON');
-  }
-}
