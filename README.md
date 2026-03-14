@@ -22,6 +22,16 @@
 
 ---
 
+## Последние UI/UX обновления (2026-03-14)
+
+- Hero input: свёрнутое/развёрнутое состояние, плавная анимация, корректный фокус.
+- Поиск: реальный input, hotkey `Ctrl/Cmd+K`, clear `×`, `Esc`, живая фильтрация задач.
+- TaskCard: использование SVG-ассетов из `src/assests` (clock/list/subtasks/ai_flash).
+- Inline-редактирование текста задачи и подзадач (бесшовно, без визуального swаp).
+- Добавление подзадач через нижний `+` в карточке с автофокусом и Enter-потоком.
+
+---
+
 ## Быстрый старт (локально)
 
 ### Требования
@@ -120,7 +130,7 @@ TASKA 2.0/
 │   │   └── src/
 │   │       ├── core/           # Infrastructure (request-id, errors, envelope)
 │   │       └── modules/        # auth | users | lists | tasks | subtasks | history | ai-assistant
-│   └── app-mobile-web/         # Expo shell (не инициализирован)
+│   └── app-mobile-web/         # React + Vite frontend (web-first, реализован)
 ├── packages/
 │   ├── types/                  # Shared TypeScript типы
 │   ├── ui/                     # Shared UI компоненты
@@ -236,6 +246,6 @@ Seed создаёт тестового пользователя и три деф
 - **NestJS 11** + **Fastify 5** — backend framework
 - **Prisma 6** — ORM
 - **PostgreSQL 16** + **Redis 7** — хранилище
-- **Expo Router** + **React Native Web** — frontend (запланировано)
-- **Zustand** + **TanStack Query** — state management (запланировано)
+- **React 19** + **Vite 6** — frontend (desktop web)
+- **Zustand** + **TanStack Query** — state management
 - **pnpm workspaces** + **Turborepo** — monorepo tooling

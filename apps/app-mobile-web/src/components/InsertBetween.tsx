@@ -1,9 +1,9 @@
 import styles from './InsertBetween.module.css';
 
-export function InsertBetween() {
+export function InsertBetween({ visible }: { visible: boolean }) {
   return (
     <div className={styles.wrap}>
-      <button className={styles.btn}>
+      <button className={`${styles.btn} ${visible ? styles.visible : ''}`}>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
         </svg>

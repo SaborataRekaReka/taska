@@ -26,7 +26,7 @@
 }
 
 .main {
-  max-width: var(--content-width);
+  max-width: calc(var(--content-width) + var(--side-padding) * 2);
   width: 100%;
   margin: 0 auto;
   padding: 0 var(--side-padding) 120px;

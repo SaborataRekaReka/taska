@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-14 | **Стадия:** B1+C1-C4 завершены, D (frontend) следующий
+> **Последнее обновление:** 2026-03-14 | **Стадия:** B1+C1-C4 + D0-D4 завершены, frontend в UX-итерации
 
 ---
 
@@ -55,14 +55,22 @@
 | class-validator | 0.14 | Валидация DTO |
 | @nestjs/swagger | 11 | OpenAPI документация |
 
-### Frontend (`apps/app-mobile-web`) — запланировано
+### Frontend (`apps/app-mobile-web`) — реализовано (web-first)
 | Инструмент | Версия | Роль |
 |-----------|--------|------|
-| Expo + Expo Router | 51+ | Роутинг, iOS/Android/Web |
-| React Native Web | 0.19+ | Рендер web-версии |
+| React | 19 | UI runtime |
+| Vite | 6 | Dev server / build |
+| React Router DOM | 7 | Роутинг |
 | Zustand | 5+ | Клиентский state |
 | TanStack Query | 5+ | Серверный state, кэш, invalidation |
-| i18n (expo-localization) | — | RU/EN интернационализация |
+| CSS Modules | — | Pixel-perfect стили и токены |
+
+### Frontend UX-срез (актуально)
+- Pixel-perfect desktop layout (base 1440), собственные дизайн-токены и градиентный фон.
+- Hero panel с анимированным сворачиванием/раскрытием и интерактивными AI-чипами.
+- Списки и карточки задач с inline-editing текста (задачи/подзадачи).
+- Добавление подзадач через контекстный `+` в карточке, автофокус и Enter-flow.
+- Реальный поиск по title/list/subtasks + UX-хоткеи (`Ctrl/Cmd+K`, `Esc`, clear).
 
 ### Shared packages
 | Пакет | Роль |

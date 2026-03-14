@@ -42,7 +42,7 @@ export function EditTaskModal() {
             <div className={styles.visualContent}>
               <div className={styles.taskPreview}>
                 <TaskCard task={DEMO_TASKS[0]!} />
-                <InsertBetween />
+                <InsertBetween visible />
               </div>
             </div>
           ) : (

@@ -1,0 +1,14 @@
+.editable {
+  outline: none;
+  cursor: text;
+  word-break: break-word;
+  white-space: pre-wrap;
+  border-radius: 3px;
+  position: relative;
+}
+
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder);
+  pointer-events: none;
+}

@@ -18,7 +18,14 @@
   position: absolute;
   top: -14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-  transition: transform 0.15s;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .btn:hover {

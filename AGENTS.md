@@ -57,6 +57,12 @@
 - **TaskEditModal**: полная форма редактирования (title, desc, priority, status, deadline, list, subtasks)
 - **State**: Zustand (auth, UI) + TanStack Query (server data)
 - **API client**: fetch wrapper с JWT auto-refresh при 401
+- **UX updates (2026-03-14)**:
+  - Hero input с мягкой анимацией collapsed/expanded.
+  - Реальный search input: hotkey `Ctrl/Cmd+K`, `Esc`, clear `×`, фильтрация списка.
+  - TaskCard использует ассеты из `src/assests` (clock/list/subtasks/ai_flash/back_svg-style bg via CSS gradients).
+  - Inline-editing текста задачи/подзадач без смены визуального компонента.
+  - Добавление подзадач через нижний `+` на карточке (автофокус + Enter chain).
 
 ---
 
@@ -219,11 +225,12 @@ curl http://localhost:3000/openapi.json
 - **Redis** (кэш/rate-limit, в MVP не используется активно)
 - TypeScript strict, ESM modules
 
-### Frontend (запланировано, не реализовано)
-- **Expo Router** (React Native + React Native Web) — web-first в MVP
+### Frontend (реализовано для web)
+- **React 19 + Vite 6** — desktop web frontend
+- **React Router DOM 7** — роутинг
 - **Zustand** — клиентский state
 - **TanStack Query (React Query)** — серверный state
-- **i18n** — RU/EN, дефолт по системному языку
+- **CSS Modules** — pixel-perfect UI
 
 ### Shared packages
 - `@taska/types` — DTO и enum-типы

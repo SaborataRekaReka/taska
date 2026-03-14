@@ -15,6 +15,13 @@
   width: 310px;
   border: 1px solid var(--border);
   cursor: text;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.searchWrap:focus-within {
+  background: rgba(255, 255, 255, 0.76);
+  border-color: rgba(20, 20, 20, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.48);
 }
 
 .searchIcon {
@@ -22,10 +29,25 @@
   flex-shrink: 0;
 }
 
-.searchText {
+.searchInput {
   flex: 1;
   font-size: 15px;
+  color: var(--text-primary);
+  background: transparent;
+  min-width: 0;
+}
+
+.searchInput::placeholder {
   color: var(--text-placeholder);
+}
+
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-results-button,
+.searchInput::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
 }
 
 .kbd {
@@ -36,6 +58,25 @@
   padding: 2px 6px;
   line-height: 1;
   font-weight: 500;
+}
+
+.clearBtn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.06);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.clearBtn:hover {
+  background: rgba(20, 20, 20, 0.1);
+  color: var(--text-primary);
 }
 
 .filterBtn {

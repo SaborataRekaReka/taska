@@ -4,6 +4,7 @@
   padding: 20px 24px 18px;
   border: 1px solid var(--border-light);
   transition: background 0.15s;
+  position: relative;
 }
 
 .card:hover {
@@ -41,6 +42,7 @@
   line-height: 1.4;
   color: var(--text-primary);
   display: block;
+  width: 100%;
 }
 
 .meta {
@@ -58,8 +60,11 @@
   color: var(--text-muted);
 }
 
-.metaItem svg {
-  color: var(--icon-muted);
+.metaIcon {
+  width: 12px;
+  height: 12px;
+  display: block;
+  opacity: 0.9;
 }
 
 .actions {
@@ -74,7 +79,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--btn-black);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,6 +88,12 @@
 
 .actionCircle:hover {
   opacity: 0.8;
+}
+
+.actionIcon {
+  width: 19px;
+  height: 19px;
+  display: block;
 }
 
 .menuBtn {
@@ -98,6 +109,8 @@
 .subtasks {
   margin-top: 14px;
   padding-left: 36px;
+  position: relative;
+  z-index: 1;
 }
 
 .divider {
@@ -110,6 +123,11 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+}
+
+.subtaskEnter {
+  animation: subtask-enter 0.34s cubic-bezier(0.2, 0.9, 0.3, 1);
+  transform-origin: top;
 }
 
 .subCheckbox {
@@ -126,4 +144,62 @@
   font-size: 15px;
   line-height: 1.4;
   color: var(--text-primary);
+  display: block;
+  width: 100%;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.subTitle:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder);
+  pointer-events: none;
+}
+
+/* --- Plus button at bottom of card --- */
+
+.plusWrap {
+  display: flex;
+  justify-content: center;
+  height: 0;
+  position: relative;
+}
+
+.plusBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--btn-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+
+.card:hover .plusBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.plusBtn:hover {
+  transform: scale(1.1);
+}
+
+@keyframes subtask-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 56px;
+  }
 }

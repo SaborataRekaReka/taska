@@ -3,7 +3,6 @@ import { HeroPanel } from '../components/HeroPanel';
 import { ListTabs } from '../components/ListTabs';
 import { Toolbar } from '../components/Toolbar';
 import { TaskList } from '../components/TaskList';
-import { FloatingAddButton } from '../components/FloatingAddButton';
 import { DayCreatedActions } from '../components/DayCreatedActions';
 import { EditTaskModal } from '../components/EditTaskModal';
 import { BalanceModal } from '../components/BalanceModal';
@@ -29,7 +28,6 @@ export function MainPage() {
         {isDayCreated && <DayCreatedActions />}
         <TaskList />
       </main>
-      <FloatingAddButton />
       {showBalance && <BalanceModal />}
       {showEditModal && <EditTaskModal />}
     </div>
