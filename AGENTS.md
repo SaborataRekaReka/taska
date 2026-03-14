@@ -35,7 +35,8 @@
 | Этап | Описание |
 |------|----------|
 | B2 | Google OAuth |
-| D | Frontend (Expo Router + React Native Web) |
+| D5 | "Мой день" modal |
+| D6 | AI Prompt bar + Response modal |
 | E | AI Assistant safe-mode |
 | F | Polishing, документация |
 
@@ -47,6 +48,15 @@
 - **subtasks**: полный CRUD через /tasks/:taskId/subtasks + ownership
 - **history**: append-only запись + read API с фильтрами
 - **ai-assistant**: заглушка (только /health)
+
+### Frontend (apps/app-mobile-web) — React + Vite
+- **Auth**: Login/Register pages с auth guard routing
+- **Main layout**: Header, AI Prompt bar, ListTabs, Search + Filter toolbar
+- **TaskList + TaskCard**: полный рендер задач с subtasks, meta, priority icons
+- **Quick add**: floating + button → inline input (Enter/Esc)
+- **TaskEditModal**: полная форма редактирования (title, desc, priority, status, deadline, list, subtasks)
+- **State**: Zustand (auth, UI) + TanStack Query (server data)
+- **API client**: fetch wrapper с JWT auto-refresh при 401
 
 ---
 
@@ -72,7 +82,15 @@ TASKA 2.0/
 │   │           ├── subtasks/   # Подзадачи (STUB)
 │   │           ├── history/    # История изменений (STUB)
 │   │           └── ai-assistant/ # AI-ассистент (STUB)
-│   └── app-mobile-web/         # Expo Router shell (заглушка, не инициализирован)
+│   └── app-mobile-web/         # React + Vite web frontend
+│       ├── src/
+│       │   ├── components/     # Header, TaskCard, ListTabs, AiPromptBar, etc.
+│       │   ├── hooks/          # TanStack Query hooks (queries.ts)
+│       │   ├── lib/            # API client, types
+│       │   ├── pages/          # LoginPage, RegisterPage, MainPage
+│       │   ├── stores/         # Zustand stores (auth, ui)
+│       │   └── styles/         # Global CSS
+│       └── index.html          # Entry point
 ├── packages/
 │   ├── types/                  # Shared TS типы: TaskDto, TaskPriority, TaskStatus
 │   ├── ui/                     # Shared UI токены (пусто)

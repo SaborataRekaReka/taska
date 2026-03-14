@@ -26,8 +26,8 @@
 - ❌ AI-ассистент
 - ❌ Frontend (Expo shell пустой)
 
-### Оценка готовности к фронтенду: **55%**
-Backend API полностью рабочий: auth, lists, tasks, subtasks, history. Осталось инициализировать Expo и писать экраны.
+### Оценка готовности к фронтенду: **80%**
+Backend API + Frontend (D0-D4) реализованы. Auth, task list, create/edit, filters, subtasks — всё работает. Осталось: "Мой день" modal, AI prompt UI, AI backend.
 
 ---
 

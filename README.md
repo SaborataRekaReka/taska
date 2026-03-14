@@ -4,7 +4,7 @@
 
 ---
 
-## Текущая стадия: C4 ✅ — Backend API полностью рабочий, готов к фронтенду
+## Текущая стадия: D4 ✅ — Frontend рабочий, подключен к API
 
 | Этап | Статус | Описание |
 |------|--------|----------|
@@ -16,7 +16,8 @@
 | C2 (Tasks) | ✅ | CRUD + 6 фильтров + history |
 | C3 (Subtasks) | ✅ | CRUD + ownership + history |
 | C4 (History) | ✅ | Append-only service + read API |
-| D (Frontend) | ⏳ | Expo Router + React Native Web |
+| D0-D4 (Frontend) | ✅ | React + Vite: auth, task list, create/edit, filters |
+| D5-D6 | ⏳ | "Мой день" modal, AI prompt/response UI |
 | E (AI) | ⏳ | AI-ассистент safe-mode |
 
 ---
@@ -132,6 +133,18 @@ TASKA 2.0/
 ---
 
 ## Команды
+
+### Frontend
+```bash
+# Dev (http://localhost:5173, проксирует API на :3000)
+pnpm --filter @taska/web run dev
+
+# Сборка
+pnpm --filter @taska/web run build
+
+# Линт
+pnpm --filter @taska/web run lint
+```
 
 ### Backend
 ```bash
