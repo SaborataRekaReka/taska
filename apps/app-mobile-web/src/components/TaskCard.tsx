@@ -15,8 +15,9 @@ function formatDate(iso: string): string {
 export function TaskCard({ task }: { task: Task }) {
   const [localTitle, setLocalTitle] = useState(task.title);
   const [localSubtasks, setLocalSubtasks] = useState<Subtask[]>(task.subtasks);
-  const [animatingId, setAnimatingId] = useState<string | null>(null);
+  const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
   const enterPressedRef = useRef(false);
+  const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
 
   function addDraft() {
@@ -29,8 +30,7 @@ export function TaskCard({ task }: { task: Task }) {
       createdAt: new Date().toISOString(),
     };
     setLocalSubtasks((prev) => [...prev, draft]);
-    setAnimatingId(id);
-    setTimeout(() => setAnimatingId(null), 350);
+    setIsSubtasksOpen(true);
   }
 
   function updateSubtaskTitle(id: string, newTitle: string) {
@@ -56,11 +56,16 @@ export function TaskCard({ task }: { task: Task }) {
             multiline
           />
           <div className={styles.meta}>
-            {hasSubs && (
-              <span className={styles.metaItem}>
+            {persistedSubtasksCount > 0 && (
+              <button
+                type="button"
+                className={`${styles.metaItem} ${styles.metaToggle} ${isSubtasksOpen ? styles.metaToggleActive : ''}`}
+                onClick={() => setIsSubtasksOpen((prev) => !prev)}
+                aria-label={isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи'}
+              >
                 <img src={subtasksIcon} alt="" className={styles.metaIcon} />
-                {localSubtasks.length}
-              </span>
+                {persistedSubtasksCount}
+              </button>
             )}
             {task.deadline && (
               <span className={styles.metaItem}>
@@ -91,34 +96,37 @@ export function TaskCard({ task }: { task: Task }) {
       </div>
 
       {hasSubs && (
-        <div className={styles.subtasks}>
-          {localSubtasks.map((sub, i) => (
-            <div key={sub.id} className={sub.id === animatingId ? styles.subtaskEnter : ''}>
-              {i > 0 && <div className={styles.divider} />}
-              <div className={styles.subtaskRow}>
-                <button className={styles.subCheckbox} />
-                <SubtaskEditable
-                  sub={sub}
-                  isDraft={sub.id.startsWith('draft-')}
-                  onSave={(title) => updateSubtaskTitle(sub.id, title)}
-                  onEnter={() => {
-                    if (!enterPressedRef.current) {
-                      enterPressedRef.current = true;
-                      setTimeout(() => {
-                        enterPressedRef.current = false;
-                        addDraft();
-                      }, 0);
-                    }
-                  }}
-                  onCancel={() => {
-                    if (sub.id.startsWith('draft-')) {
-                      setLocalSubtasks((prev) => prev.filter((s) => s.id !== sub.id));
-                    }
-                  }}
-                />
+        <div className={`${styles.subtasksPanel} ${isSubtasksOpen ? styles.subtasksOpen : styles.subtasksClosed}`}>
+          <div className={styles.subtasks}>
+            {localSubtasks.map((sub, i) => (
+              <div key={sub.id}>
+                {i > 0 && <div className={styles.divider} />}
+                <div className={styles.subtaskRow}>
+                  <button className={styles.subCheckbox} />
+                  <SubtaskEditable
+                    sub={sub}
+                    isDraft={sub.id.startsWith('draft-')}
+                    onSave={(title) => updateSubtaskTitle(sub.id, title)}
+                    onEnter={() => {
+                      if (!enterPressedRef.current) {
+                        enterPressedRef.current = true;
+                        setTimeout(() => {
+                          enterPressedRef.current = false;
+                          setIsSubtasksOpen(true);
+                          addDraft();
+                        }, 0);
+                      }
+                    }}
+                    onCancel={() => {
+                      if (sub.id.startsWith('draft-')) {
+                        setLocalSubtasks((prev) => prev.filter((s) => s.id !== sub.id));
+                      }
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
