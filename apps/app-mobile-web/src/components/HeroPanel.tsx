@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { useUiStore } from '../stores/ui';
+import sendIcon from '../assests/send.svg';
 import styles from './HeroPanel.module.css';
 
 const CHIPS = [
@@ -48,11 +49,19 @@ export function HeroPanel() {
     if (!el) return;
 
     el.style.height = 'auto';
-    el.style.height = `${Math.max(el.scrollHeight, 26)}px`;
+    el.style.height = `${Math.max(el.scrollHeight, 37)}px`;
   }, [value]);
 
   const handleBlur = useCallback(() => setIsFocused(false), []);
   const handleFocus = useCallback(() => setIsFocused(true), []);
+  const submitPrompt = useCallback(() => {
+    const normalized = value.toLowerCase();
+    const shouldCreateTempList = normalized.includes('сроч') || normalized.includes('urgent');
+
+    if (shouldCreateTempList) {
+      triggerTempListFromAi();
+    }
+  }, [triggerTempListFromAi, value]);
 
   const panelClass = [
     styles.panel,
@@ -62,27 +71,33 @@ export function HeroPanel() {
 
   return (
     <div className={panelClass}>
-      <textarea
-        ref={textareaRef}
-        className={styles.input}
-        placeholder="Что бы вы хотели сделать?"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            const normalized = value.toLowerCase();
-            const shouldCreateTempList = normalized.includes('сроч') || normalized.includes('urgent');
-
-            if (shouldCreateTempList) {
-              triggerTempListFromAi();
+      <div className={styles.inputRow}>
+        <textarea
+          ref={textareaRef}
+          className={styles.input}
+          placeholder="Что бы вы хотели сделать?"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              submitPrompt();
             }
-          }
-        }}
-        rows={1}
-      />
+          }}
+          rows={1}
+        />
+        <button
+          type="button"
+          className={styles.sendBtn}
+          aria-label="Отправить"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={submitPrompt}
+        >
+          <img src={sendIcon} alt="" className={styles.sendIcon} />
+        </button>
+      </div>
       <div className={styles.chips}>
         {CHIPS.map((chip) => (
           <button

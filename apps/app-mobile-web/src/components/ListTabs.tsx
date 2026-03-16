@@ -97,11 +97,9 @@ export function ListTabs() {
                   &#x2713;
                 </span>
               )}
-              {isActive && (
-                <span className={styles.more} aria-hidden>
-                  &#8942;
-                </span>
-              )}
+              <span className={styles.more} aria-hidden>
+                &#8942;
+              </span>
             </button>
           );
         })}

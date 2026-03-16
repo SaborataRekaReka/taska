@@ -25,7 +25,6 @@ export function TaskList() {
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
 
   const listScopedTasks = useMemo(

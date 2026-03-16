@@ -17,29 +17,44 @@
 
 .collapsed {
   height: 83px;
-  padding: 28px 32px;
+  padding: 23px 32px;
 }
 
 .expanded {
   height: 198px;
-  padding: 28px 32px 18px;
+  padding: 23px 32px 18px;
   box-shadow: var(--shadow-elevated);
 }
 
 /* --- Textarea --- */
 
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding-right: 56px;
+}
+
+.expanded .inputRow {
+  align-items: flex-end;
+}
+
 .input {
   width: 100%;
+  flex: 1;
   resize: none;
   font-size: 17px;
   line-height: 1.5;
   color: var(--text-primary);
   background: transparent;
-  min-height: 26px;
+  min-height: 37px;
+  padding: 6px 0;
   font-weight: 400;
   overflow: hidden;
   scrollbar-width: none;
   flex-shrink: 0;
+  transition: min-height 0.44s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input::-webkit-scrollbar {
@@ -48,11 +63,55 @@
 
 .input::placeholder {
   color: var(--text-placeholder);
-  line-height: 1.5;
+  line-height: inherit;
 }
 
 .collapsed .input::placeholder {
   color: var(--text-calm-input);
+}
+
+.expanded .input {
+  min-height: 76px;
+}
+
+.sendBtn {
+  position: absolute;
+  right: 32px;
+  bottom: 23px;
+  z-index: 3;
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  background: #111111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    bottom 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+    right 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.expanded .sendBtn {
+  right: 24px;
+  bottom: 22px;
+}
+
+.sendBtn:hover {
+  transform: translateY(-1px);
+}
+
+.sendBtn:active {
+  transform: translateY(0);
+  opacity: 0.92;
+}
+
+.sendIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 /* --- Chips --- */
@@ -68,12 +127,13 @@
   opacity: 0;
   transform: translateY(5px);
   pointer-events: none;
+  z-index: 1;
 }
 
 .chipsShow .chips {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: auto;
+  pointer-events: none;
   transition:
     opacity 0.32s ease,
     transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -95,15 +155,23 @@
   font-weight: 400;
   padding: 9px 20px;
   border-radius: var(--r-pill);
-  border: 1px solid var(--border);
+  border: none;
   color: var(--text-primary);
   background: var(--surface-62);
-  transition: background 0.15s, border-color 0.15s;
+  box-shadow: none;
+  outline: none;
+  transition: background 0.15s;
   white-space: nowrap;
   line-height: 1;
+  pointer-events: auto;
 }
 
 .chip:hover {
   background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(20, 20, 20, 0.10);
+}
+
+.chip:focus,
+.chip:focus-visible {
+  outline: none;
+  box-shadow: none;
 }

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_TASKS } from '../lib/demoData';
+import { useTasks, useUpdateTask } from '../hooks/queries';
 import { TaskCard } from './TaskCard';
 import { AiToolChips } from './AiToolChips';
+import sendIcon from '../assests/send.svg';
 import styles from './EditTaskModal.module.css';
 
 function toMarkdown(taskTitle: string, subtasks: { title: string; status: string }[], dueDate?: string | null) {
@@ -14,30 +16,112 @@ function toMarkdown(taskTitle: string, subtasks: { title: string; status: string
   return `- [ ] ${taskTitle}\n- priority:: medium${dueLine}\n- tags:: #taska #assistant${subtasksBlock}`;
 }
 
+function extractTitleFromMarkdown(markdown: string, fallbackTitle: string): string {
+  const firstNonEmptyLine = markdown
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+
+  if (!firstNonEmptyLine) {
+    return fallbackTitle;
+  }
+
+  const checklistMatch = firstNonEmptyLine.match(/^- \[[ xX]\]\s+(.+)$/);
+  const rawTitle = checklistMatch ? checklistMatch[1] : firstNonEmptyLine;
+  const normalizedTitle = rawTitle.replace(/^-+\s*/, '').trim();
+
+  return normalizedTitle || fallbackTitle;
+}
+
+type AutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
+
 export function EditTaskModal() {
   const selectedTaskId = useUiStore((s) => s.selectedTaskId);
   const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
+  const { data: tasks } = useTasks();
+  const updateTask = useUpdateTask();
   const selectedTask = useMemo(
-    () => DEMO_TASKS.find((task) => task.id === selectedTaskId) ?? DEMO_TASKS[0],
-    [selectedTaskId],
+    () => {
+      if (!selectedTaskId) {
+        return null;
+      }
+
+      const apiTask = tasks?.find((task) => task.id === selectedTaskId);
+      if (apiTask) {
+        return apiTask;
+      }
+
+      return DEMO_TASKS.find((task) => task.id === selectedTaskId) ?? null;
+    },
+    [selectedTaskId, tasks],
   );
   const [activeTab, setActiveTab] = useState<'visual' | 'editor'>('visual');
   const [markdownValue, setMarkdownValue] = useState('');
+  const [lastSavedMarkdown, setLastSavedMarkdown] = useState('');
   const [assistantPrompt, setAssistantPrompt] = useState('');
+  const [autosaveState, setAutosaveState] = useState<AutosaveState>('idle');
+  const [autosaveError, setAutosaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedTask) {
       return;
     }
 
-    setMarkdownValue(toMarkdown(selectedTask.title, selectedTask.subtasks, selectedTask.deadline));
+    const initialMarkdown = selectedTask.description?.trim().length
+      ? selectedTask.description
+      : toMarkdown(selectedTask.title, selectedTask.subtasks, selectedTask.deadline);
+
+    setMarkdownValue(initialMarkdown);
+    setLastSavedMarkdown(initialMarkdown);
     setAssistantPrompt('');
     setActiveTab('visual');
+    setAutosaveState('idle');
+    setAutosaveError(null);
   }, [selectedTask]);
 
   if (!selectedTaskId || !selectedTask) {
     return null;
   }
+
+  async function handleEditorBlur(): Promise<void> {
+    if (!selectedTask) {
+      return;
+    }
+
+    if (markdownValue === lastSavedMarkdown || updateTask.isPending) {
+      if (markdownValue === lastSavedMarkdown) {
+        setAutosaveState('saved');
+      }
+      return;
+    }
+
+    setAutosaveState('saving');
+    setAutosaveError(null);
+
+    try {
+      const nextTitle = extractTitleFromMarkdown(markdownValue, selectedTask.title);
+      await updateTask.mutateAsync({
+        id: selectedTask.id,
+        title: nextTitle,
+        description: markdownValue,
+      });
+
+      setLastSavedMarkdown(markdownValue);
+      setAutosaveState('saved');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось сохранить изменения';
+      setAutosaveState('error');
+      setAutosaveError(message);
+    }
+  }
+
+  const autosaveLabel = (() => {
+    if (autosaveState === 'saving') return 'Saving...';
+    if (autosaveState === 'saved') return 'Saved';
+    if (autosaveState === 'dirty') return 'Unsaved changes';
+    if (autosaveState === 'error') return 'Save failed';
+    return 'Autosave on blur';
+  })();
 
   return (
     <div className={styles.overlay} onClick={closeTaskAssistantModal}>
@@ -80,9 +164,20 @@ export function EditTaskModal() {
                   <textarea
                     className={styles.editorInput}
                     value={markdownValue}
-                    onChange={(e) => setMarkdownValue(e.target.value)}
+                    onChange={(e) => {
+                      const nextValue = e.target.value;
+                      setMarkdownValue(nextValue);
+                      setAutosaveError(null);
+                      setAutosaveState(nextValue === lastSavedMarkdown ? 'saved' : 'dirty');
+                    }}
+                    onBlur={handleEditorBlur}
                   />
-                  <span className={styles.savedLabel}>Saved...</span>
+                  <span
+                    className={`${styles.savedLabel} ${autosaveState === 'error' ? styles.savedLabelError : ''}`}
+                    title={autosaveError ?? undefined}
+                  >
+                    {autosaveLabel}
+                  </span>
                 </div>
               </div>
             </div>
@@ -98,6 +193,9 @@ export function EditTaskModal() {
               value={assistantPrompt}
               onChange={(e) => setAssistantPrompt(e.target.value)}
             />
+            <button className={styles.sendBtn} type="button" aria-label="Send">
+              <img src={sendIcon} alt="" className={styles.sendIcon} />
+            </button>
           </div>
         </div>
       </div>
