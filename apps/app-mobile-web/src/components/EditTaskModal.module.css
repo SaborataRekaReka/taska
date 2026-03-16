@@ -16,7 +16,7 @@
   border-radius: var(--r-huge);
   width: 100%;
   max-width: 1240px;
-  max-height: 82vh;
+  height: min(82vh, 860px);
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-modal);
@@ -66,13 +66,14 @@
 
 .body {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
   padding: 10px 18px 14px;
 }
 
 .visualContent,
 .editorContent {
   height: 100%;
+  min-height: 0;
 }
 
 .contentPanel {
@@ -82,6 +83,7 @@
   padding: 20px 22px;
   height: 100%;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .taskPreview {
@@ -91,18 +93,13 @@
 }
 
 .editorArea {
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 20px 22px;
-  min-height: 420px;
+  height: 100%;
   position: relative;
-  min-height: 100%;
 }
 
 .editorInput {
   width: 100%;
-  min-height: 360px;
+  height: 100%;
   resize: none;
   border: none;
   background: transparent;
@@ -123,6 +120,7 @@
 
 .footer {
   padding: 10px 18px 16px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;

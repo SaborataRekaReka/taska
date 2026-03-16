@@ -5,7 +5,7 @@ import { TaskCard } from './TaskCard';
 import { AiToolChips } from './AiToolChips';
 import styles from './EditTaskModal.module.css';
 
-function toMarkdown(taskTitle: string, subtasks: { title: string; status: 'TODO' | 'DONE' }[], dueDate?: string | null) {
+function toMarkdown(taskTitle: string, subtasks: { title: string; status: string }[], dueDate?: string | null) {
   const dueLine = dueDate ? `\n- due:: ${dueDate.slice(0, 10)}` : '';
   const subtasksBlock = subtasks.length > 0
     ? `\n- subtasks::\n${subtasks.map((sub) => `  - [${sub.status === 'DONE' ? 'x' : ' '}] ${sub.title}`).join('\n')}`
@@ -67,20 +67,23 @@ export function EditTaskModal() {
         <div className={styles.body}>
           {activeTab === 'visual' ? (
             <div className={styles.visualContent}>
-              <div className={styles.taskPreview}>
-                <TaskCard task={selectedTask} />
-                <InsertBetween visible />
+              <div className={styles.contentPanel}>
+                <div className={styles.taskPreview}>
+                  <TaskCard task={selectedTask} />
+                </div>
               </div>
             </div>
           ) : (
             <div className={styles.editorContent}>
-              <div className={styles.editorArea}>
-                <textarea
-                  className={styles.editorInput}
-                  value={markdownValue}
-                  onChange={(e) => setMarkdownValue(e.target.value)}
-                />
-                <span className={styles.savedLabel}>Saved...</span>
+              <div className={styles.contentPanel}>
+                <div className={styles.editorArea}>
+                  <textarea
+                    className={styles.editorInput}
+                    value={markdownValue}
+                    onChange={(e) => setMarkdownValue(e.target.value)}
+                  />
+                  <span className={styles.savedLabel}>Saved...</span>
+                </div>
               </div>
             </div>
           )}
