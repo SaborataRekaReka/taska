@@ -24,6 +24,10 @@ export function ListTabs() {
   const [activeTab, setActiveTab] = useState<string>('work');
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, visible: false });
+
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isBalance = demoState === 'balanceModalOpen' || demoState === 'dayCreated';
   const tabFromStore = (() => {
@@ -109,7 +113,13 @@ export function ListTabs() {
           const isActive = currentActiveTab === id;
 
           return (
-            <div key={id} className={`${styles.tab} ${isActive ? styles.active : ''}`}>
+            <div
+              key={id}
+              ref={(node) => {
+                tabRefs.current[id] = node;
+              }}
+              className={`${styles.tab} ${isActive ? styles.active : ''}`}
+            >
               <button type="button" className={styles.tabMain} onClick={() => handleTabClick(id)}>
                 <span>{getLabel(id)}</span>
                 {id === 'no-list' && noListCount > 0 && <span className={styles.badge}>{noListCount}</span>}
