@@ -4,6 +4,7 @@ import subtasksIcon from '../assests/subtasks.svg';
 import clockIcon from '../assests/clock.svg';
 import listIcon from '../assests/list.svg';
 import aiFlashIcon from '../assests/ai_flash.svg';
+import plusMenuIcon from '../assests/plus.svg';
 import { EditableText } from './EditableText';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './TaskCard.module.css';
@@ -34,17 +35,20 @@ export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant
       id: 'open-assistant',
       label: 'Открыть AI-ассистент',
       onSelect: handleOpenAssistant,
+      icon: aiFlashIcon,
     },
     {
       id: 'toggle-subtasks',
       label: isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи',
       onSelect: () => setIsSubtasksOpen((prev) => !prev),
       disabled: !hasSubs,
+      icon: subtasksIcon,
     },
     {
       id: 'add-subtask',
       label: 'Добавить подзадачу',
       onSelect: addDraft,
+      icon: plusMenuIcon,
     },
   ];
 

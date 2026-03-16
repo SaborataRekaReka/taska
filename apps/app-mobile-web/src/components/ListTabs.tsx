@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
+import eyeIcon from '../assests/eye.svg';
+import editIcon from '../assests/edit.svg';
+import trashIcon from '../assests/trash.svg';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
@@ -102,12 +105,14 @@ export function ListTabs() {
                     id: `open-${id}`,
                     label: 'Открыть список',
                     onSelect: () => handleTabClick(id),
+                    icon: eyeIcon,
                   },
                   {
                     id: `rename-${id}`,
                     label: 'Переименовать (скоро)',
                     onSelect: () => undefined,
                     disabled: true,
+                    icon: editIcon,
                   },
                   {
                     id: `delete-${id}`,
@@ -115,6 +120,7 @@ export function ListTabs() {
                     onSelect: () => undefined,
                     disabled: true,
                     danger: true,
+                    icon: trashIcon,
                   },
                 ]}
                 triggerAriaLabel={`Меню списка ${getLabel(id)}`}
