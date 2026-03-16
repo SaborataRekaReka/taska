@@ -23,8 +23,11 @@
   background: rgba(255, 255, 255, 0.80);
 }
 
-.secondary svg {
-  color: var(--text-primary);
+.secondaryIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
 }
 
 .primary {
@@ -42,4 +45,11 @@
 
 .primary:hover {
   opacity: 0.85;
+}
+
+.primaryIcon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  object-fit: contain;
 }

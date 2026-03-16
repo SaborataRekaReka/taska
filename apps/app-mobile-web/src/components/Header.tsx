@@ -1,22 +1,26 @@
 import { useAuthStore } from '../stores/auth';
+import { useUiStore } from '../stores/ui';
+import aiStarsIcon from '../assests/ai_stars.svg';
 import styles from './Header.module.css';
 
 export function Header() {
-  const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const openMyDayModal = useUiStore((s) => s.openMyDayModal);
 
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.left}>
           <span className={styles.logo}>TASKA</span>
-          <span className={styles.day}>Мой день</span>
-          <svg className={styles.sparkle} width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M9 0L10.8 6.3L17.1 4.5L12.6 9L17.1 13.5L10.8 11.7L9 18L7.2 11.7L0.9 13.5L5.4 9L0.9 4.5L7.2 6.3L9 0Z" fill="currentColor"/>
-          </svg>
         </div>
+        <button type="button" className={styles.dayButton} onClick={openMyDayModal}>
+          {'\u041c\u043e\u0439 \u0434\u0435\u043d\u044c'}
+          <img src={aiStarsIcon} alt="" className={styles.sparkle} />
+        </button>
         <div className={styles.right}>
-          <button className={styles.logoutBtn} onClick={logout}>Выход</button>
+          <button className={styles.logoutBtn} onClick={logout}>
+            {'\u0412\u044b\u0445\u043e\u0434'}
+          </button>
           <div className={styles.avatar} />
         </div>
       </div>

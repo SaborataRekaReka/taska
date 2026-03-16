@@ -1,0 +1,106 @@
+.wrap {
+  width: min(520px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  display: none;
+}
+
+.chartShell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 438px;
+  position: relative;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.grid {
+  fill: none;
+  stroke: #f1f1f1;
+  stroke-opacity: 0.36;
+  stroke-width: 0.85;
+}
+
+.dataFill {
+  fill: rgba(255, 255, 255, 0.14);
+}
+
+.dataStroke {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.1;
+}
+
+.axisLabel {
+  position: absolute;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #ffffff;
+}
+
+.topLabel {
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rightLabel {
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bottomLabel {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.leftLabel {
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dayLabel {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  max-width: 320px;
+}
+
+.stats {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .chartShell {
+    max-width: 350px;
+  }
+
+  .rightLabel {
+    right: 0;
+  }
+
+  .leftLabel {
+    left: 0;
+  }
+}

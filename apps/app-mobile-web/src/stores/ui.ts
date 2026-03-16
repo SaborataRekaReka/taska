@@ -5,6 +5,9 @@ import { CURRENT_DEMO_STATE } from '../lib/demoData';
 interface UiState {
   demoState: DemoState;
   activeListId: string | null;
+  isMyDayModalOpen: boolean;
+  isMyDaySaved: boolean;
+  dayColors: [string, string] | null;
   searchQuery: string;
   filterStatus: string | null;
   filterPriority: string | null;
@@ -17,11 +20,18 @@ interface UiState {
   setFilterPriority: (p: string | null) => void;
   toggleAddTask: () => void;
   setEditingTask: (id: string | null) => void;
+  openMyDayModal: () => void;
+  closeMyDayModal: () => void;
+  setMyDaySaved: (saved: boolean) => void;
+  setDayColors: (colors: [string, string]) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
   demoState: CURRENT_DEMO_STATE,
   activeListId: null,
+  isMyDayModalOpen: CURRENT_DEMO_STATE === 'balanceModalOpen',
+  isMyDaySaved: false,
+  dayColors: null,
   searchQuery: '',
   filterStatus: null,
   filterPriority: null,
@@ -34,4 +44,8 @@ export const useUiStore = create<UiState>()((set) => ({
   setFilterPriority: (p) => set({ filterPriority: p }),
   toggleAddTask: () => set((s) => ({ showAddTask: !s.showAddTask })),
   setEditingTask: (id) => set({ editingTaskId: id }),
+  openMyDayModal: () => set({ isMyDayModalOpen: true }),
+  closeMyDayModal: () => set({ isMyDayModalOpen: false }),
+  setMyDaySaved: (saved) => set({ isMyDaySaved: saved }),
+  setDayColors: (colors) => set({ dayColors: colors }),
 }));

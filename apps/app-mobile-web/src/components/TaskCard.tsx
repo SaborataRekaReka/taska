@@ -12,11 +12,19 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-export function TaskCard({ task }: { task: Task }) {
+interface TaskCardProps {
+  task: Task;
+  isCompleted?: boolean;
+  onToggleCompleted?: (taskId: string, nextCompleted: boolean) => void;
+}
+
+export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps) {
   const [localTitle, setLocalTitle] = useState(task.title);
   const [localSubtasks, setLocalSubtasks] = useState<Subtask[]>(task.subtasks);
+  const [localTaskCompleted, setLocalTaskCompleted] = useState(task.status === 'DONE');
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
   const enterPressedRef = useRef(false);
+  const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
 
@@ -44,10 +52,40 @@ export function TaskCard({ task }: { task: Task }) {
     );
   }
 
+  function toggleTaskCompleted() {
+    const nextCompleted = !taskCompleted;
+
+    if (onToggleCompleted) {
+      onToggleCompleted(task.id, nextCompleted);
+      return;
+    }
+
+    setLocalTaskCompleted(nextCompleted);
+  }
+
+  function toggleSubtaskCompleted(id: string) {
+    setLocalSubtasks((prev) =>
+      prev.map((subtask) => {
+        if (subtask.id !== id) {
+          return subtask;
+        }
+
+        const nextStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
+        return { ...subtask, status: nextStatus };
+      })
+    );
+  }
+
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${taskCompleted ? styles.cardDone : ''}`}>
       <div className={styles.row}>
-        <button className={styles.checkbox} />
+        <button
+          type="button"
+          className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
+          onClick={toggleTaskCompleted}
+          aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
+          aria-pressed={taskCompleted}
+        />
         <div className={styles.content}>
           <EditableText
             value={localTitle}
@@ -98,34 +136,44 @@ export function TaskCard({ task }: { task: Task }) {
       {hasSubs && (
         <div className={`${styles.subtasksPanel} ${isSubtasksOpen ? styles.subtasksOpen : styles.subtasksClosed}`}>
           <div className={styles.subtasks}>
-            {localSubtasks.map((sub, i) => (
-              <div key={sub.id}>
-                {i > 0 && <div className={styles.divider} />}
-                <div className={styles.subtaskRow}>
-                  <button className={styles.subCheckbox} />
-                  <SubtaskEditable
-                    sub={sub}
-                    isDraft={sub.id.startsWith('draft-')}
-                    onSave={(title) => updateSubtaskTitle(sub.id, title)}
-                    onEnter={() => {
-                      if (!enterPressedRef.current) {
-                        enterPressedRef.current = true;
-                        setTimeout(() => {
-                          enterPressedRef.current = false;
-                          setIsSubtasksOpen(true);
-                          addDraft();
-                        }, 0);
-                      }
-                    }}
-                    onCancel={() => {
-                      if (sub.id.startsWith('draft-')) {
-                        setLocalSubtasks((prev) => prev.filter((s) => s.id !== sub.id));
-                      }
-                    }}
-                  />
+            {localSubtasks.map((sub, i) => {
+              const isSubtaskCompleted = sub.status === 'DONE';
+
+              return (
+                <div key={sub.id}>
+                  {i > 0 && <div className={styles.divider} />}
+                  <div className={styles.subtaskRow}>
+                    <button
+                      type="button"
+                      className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
+                      onClick={() => toggleSubtaskCompleted(sub.id)}
+                      aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
+                      aria-pressed={isSubtaskCompleted}
+                    />
+                    <SubtaskEditable
+                      sub={sub}
+                      isDraft={sub.id.startsWith('draft-')}
+                      onSave={(title) => updateSubtaskTitle(sub.id, title)}
+                      onEnter={() => {
+                        if (!enterPressedRef.current) {
+                          enterPressedRef.current = true;
+                          setTimeout(() => {
+                            enterPressedRef.current = false;
+                            setIsSubtasksOpen(true);
+                            addDraft();
+                          }, 0);
+                        }
+                      }}
+                      onCancel={() => {
+                        if (sub.id.startsWith('draft-')) {
+                          setLocalSubtasks((prev) => prev.filter((s) => s.id !== sub.id));
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -214,7 +262,7 @@ function SubtaskEditable({
       suppressContentEditableWarning
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      className={styles.subTitle}
+      className={`${styles.subTitle} ${sub.status === 'DONE' ? styles.subTitleDone : ''}`}
       style={{ outline: 'none', cursor: 'text' }}
       onFocus={(e) => { originalRef.current = e.currentTarget.textContent ?? ''; }}
       data-placeholder="Введите подзадачу..."

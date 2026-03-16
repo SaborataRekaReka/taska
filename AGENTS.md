@@ -17,7 +17,7 @@
 
 ---
 
-## 2) Текущее состояние проекта (обновлено: 2026-03-14)
+## 2) Текущее состояние проекта (обновлено: 2026-03-15)
 
 ### Выполненные этапы
 | Этап | Статус | Описание |
@@ -30,12 +30,12 @@
 | C2 | ✅ DONE | Tasks CRUD + filters (listId, status, priority, dueToday, search) + history |
 | C3 | ✅ DONE | Subtasks CRUD + ownership check + history |
 | C4 | ✅ DONE | History service + read API |
+| D5 | ✅ DONE | "Мой день" modal (premium UI + profile radar + Framer Motion) |
 
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
 | B2 | Google OAuth |
-| D5 | "Мой день" modal |
 | D6 | AI Prompt bar + Response modal |
 | E | AI Assistant safe-mode |
 | F | Polishing, документация |
@@ -57,12 +57,13 @@
 - **TaskEditModal**: полная форма редактирования (title, desc, priority, status, deadline, list, subtasks)
 - **State**: Zustand (auth, UI) + TanStack Query (server data)
 - **API client**: fetch wrapper с JWT auto-refresh при 401
-- **UX updates (2026-03-14)**:
+- **UX updates (2026-03-15)**:
   - Hero input с мягкой анимацией collapsed/expanded.
   - Реальный search input: hotkey `Ctrl/Cmd+K`, `Esc`, clear `×`, фильтрация списка.
   - TaskCard использует ассеты из `src/assests` (clock/list/subtasks/ai_flash/back_svg-style bg via CSS gradients).
   - Inline-editing текста задачи/подзадач без смены визуального компонента.
   - Добавление подзадач через нижний `+` на карточке (автофокус + Enter chain).
+  - My Day modal: bottom-sheet premium modal with mood, energy, wishes and live day profile radar.
 
 ---
 
@@ -90,7 +91,7 @@ TASKA 2.0/
 │   │           └── ai-assistant/ # AI-ассистент (STUB)
 │   └── app-mobile-web/         # React + Vite web frontend
 │       ├── src/
-│       │   ├── components/     # Header, TaskCard, ListTabs, AiPromptBar, etc.
+│       │   ├── components/     # Header, TaskCard, ListTabs, AiPromptBar, MyDayModal (my-day/*), etc.
 │       │   ├── hooks/          # TanStack Query hooks (queries.ts)
 │       │   ├── lib/            # API client, types
 │       │   ├── pages/          # LoginPage, RegisterPage, MainPage
