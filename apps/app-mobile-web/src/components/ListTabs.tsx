@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
 import eyeIcon from '../assests/eye.svg';
@@ -8,6 +8,7 @@ import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
 const BASE_TAB_ORDER = ['no-list', 'my-day', 'work', 'personal', 'study'] as const;
+const PRIMARY_VISIBLE_COUNT = 4;
 
 export function ListTabs() {
   const demoState = useUiStore((s) => s.demoState);
@@ -46,6 +47,9 @@ export function ListTabs() {
     ? tabOrder.filter((id) => id !== 'no-list')
     : tabOrder;
 
+  const primaryTabs = visibleTabs.slice(0, PRIMARY_VISIBLE_COUNT);
+  const secondaryTabs = visibleTabs.slice(PRIMARY_VISIBLE_COUNT);
+
   function getLabel(id: string): string {
     if (id === 'my-day') return 'Мой день';
     return DEMO_LISTS.find((l) => l.id === id)?.name ?? id;
@@ -73,10 +77,35 @@ export function ListTabs() {
     closeMyDayModal();
   }
 
+  const isSecondaryActive = secondaryTabs.includes(currentActiveTab ?? '');
+
+  const moreItems = useMemo(() => {
+    const baseItems = secondaryTabs.map((id) => ({
+      id: `more-open-${id}`,
+      label: getLabel(id),
+      onSelect: () => handleTabClick(id),
+      icon: eyeIcon,
+    }));
+
+    if (secondaryTabs.includes('temp') && !isTempListSaved) {
+      return [
+        {
+          id: 'more-save-temp',
+          label: 'Сохранить временный список',
+          onSelect: () => saveTempList(),
+          icon: editIcon,
+        },
+        ...baseItems,
+      ];
+    }
+
+    return baseItems;
+  }, [secondaryTabs, isTempListSaved]);
+
   return (
     <div className={styles.bar}>
       <div className={styles.tabs}>
-        {visibleTabs.map((id) => {
+        {primaryTabs.map((id) => {
           const isActive = currentActiveTab === id;
 
           return (
@@ -99,36 +128,50 @@ export function ListTabs() {
                   </span>
                 )}
               </button>
-              <DropdownMenu
-                items={[
-                  {
-                    id: `open-${id}`,
-                    label: 'Открыть список',
-                    onSelect: () => handleTabClick(id),
-                    icon: eyeIcon,
-                  },
-                  {
-                    id: `rename-${id}`,
-                    label: 'Переименовать (скоро)',
-                    onSelect: () => undefined,
-                    disabled: true,
-                    icon: editIcon,
-                  },
-                  {
-                    id: `delete-${id}`,
-                    label: 'Удалить (скоро)',
-                    onSelect: () => undefined,
-                    disabled: true,
-                    danger: true,
-                    icon: trashIcon,
-                  },
-                ]}
-                triggerAriaLabel={`Меню списка ${getLabel(id)}`}
-                triggerClassName={styles.moreTrigger}
-              />
+              {isActive && (
+                <DropdownMenu
+                  items={[
+                    {
+                      id: `open-${id}`,
+                      label: 'Открыть список',
+                      onSelect: () => handleTabClick(id),
+                      icon: eyeIcon,
+                    },
+                    {
+                      id: `rename-${id}`,
+                      label: 'Переименовать (скоро)',
+                      onSelect: () => undefined,
+                      disabled: true,
+                      icon: editIcon,
+                    },
+                    {
+                      id: `delete-${id}`,
+                      label: 'Удалить (скоро)',
+                      onSelect: () => undefined,
+                      disabled: true,
+                      danger: true,
+                      icon: trashIcon,
+                    },
+                  ]}
+                  triggerAriaLabel={`Меню списка ${getLabel(id)}`}
+                  triggerClassName={styles.moreTrigger}
+                />
+              )}
             </div>
           );
         })}
+
+        {secondaryTabs.length > 0 && (
+          <div className={`${styles.tab} ${styles.moreTab} ${isSecondaryActive ? styles.active : ''}`}>
+            <DropdownMenu
+              items={moreItems}
+              triggerLabel={`Ещё (${secondaryTabs.length})`}
+              triggerAriaLabel="Открыть дополнительные списки"
+              triggerClassName={styles.moreListsTrigger}
+            />
+          </div>
+        )}
+
         {adding ? (
           <input
             className={styles.addInput}
