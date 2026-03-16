@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { DEMO_TASKS } from '../lib/demoData';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
 import styles from './TaskList.module.css';
@@ -25,10 +24,11 @@ export function TaskList() {
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
+  const demoTasks = useUiStore((s) => s.demoTasks);
   const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
 
   const listScopedTasks = useMemo(
-    () => DEMO_TASKS.filter((task) => {
+    () => demoTasks.filter((task) => {
       if (activeListId === '__no_list__') {
         return task.listId === null;
       }
@@ -43,7 +43,7 @@ export function TaskList() {
 
       return true;
     }),
-    [activeListId, isMyDaySaved],
+    [activeListId, demoTasks, isMyDaySaved],
   );
 
   const filteredTasks = useMemo(

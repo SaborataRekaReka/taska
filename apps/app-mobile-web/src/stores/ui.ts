@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { DemoState } from '../lib/demoData';
-import { CURRENT_DEMO_STATE } from '../lib/demoData';
+import { CURRENT_DEMO_STATE, DEMO_LISTS, DEMO_TASKS } from '../lib/demoData';
+import type { Task } from '../lib/types';
 
 interface UiState {
   demoState: DemoState;
@@ -16,6 +17,7 @@ interface UiState {
   selectedTaskId: string | null;
   isTempListVisible: boolean;
   isTempListSaved: boolean;
+  demoTasks: Task[];
   setDemoState: (s: DemoState) => void;
   setActiveList: (id: string | null) => void;
   setSearch: (q: string) => void;
@@ -31,6 +33,7 @@ interface UiState {
   setDayColors: (colors: [string, string]) => void;
   triggerTempListFromAi: () => void;
   saveTempList: () => void;
+  addDemoTask: (title: string) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -47,6 +50,7 @@ export const useUiStore = create<UiState>()((set) => ({
   selectedTaskId: null,
   isTempListVisible: false,
   isTempListSaved: false,
+  demoTasks: DEMO_TASKS,
   setDemoState: (s) => set({ demoState: s }),
   setActiveList: (id) => set({ activeListId: id }),
   setSearch: (q) => set({ searchQuery: q }),
@@ -69,5 +73,45 @@ export const useUiStore = create<UiState>()((set) => ({
   saveTempList: () => set({
     isTempListSaved: true,
     demoState: 'workListHover',
+  }),
+  addDemoTask: (title) => set((state) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      return state;
+    }
+
+    const normalizedListId = (() => {
+      if (state.activeListId === '__no_list__') {
+        return null;
+      }
+
+      if (state.activeListId?.startsWith('__')) {
+        return null;
+      }
+
+      return state.activeListId ?? null;
+    })();
+
+    const matchingList = normalizedListId
+      ? DEMO_LISTS.find((list) => list.id === normalizedListId)
+      : null;
+
+    const createdAt = new Date().toISOString();
+    const nextTask: Task = {
+      id: `demo-${Date.now()}`,
+      title: trimmedTitle,
+      description: null,
+      priority: 'MEDIUM',
+      deadline: null,
+      status: 'TODO',
+      listId: normalizedListId,
+      list: matchingList ? { id: matchingList.id, name: matchingList.name } : null,
+      subtasks: [],
+      createdAt,
+    };
+
+    return {
+      demoTasks: [nextTask, ...state.demoTasks],
+    };
   }),
 }));

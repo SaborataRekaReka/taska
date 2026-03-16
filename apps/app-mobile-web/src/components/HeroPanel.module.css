@@ -13,8 +13,6 @@
     box-shadow 0.3s ease;
 }
 
-/* --- Panel height states --- */
-
 .collapsed {
   height: 83px;
   padding: 23px 32px;
@@ -25,8 +23,6 @@
   padding: 23px 32px 18px;
   box-shadow: var(--shadow-elevated);
 }
-
-/* --- Textarea --- */
 
 .inputRow {
   display: flex;
@@ -94,9 +90,17 @@
     opacity 0.15s ease;
 }
 
+.collapsed .sendBtn {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+}
+
 .expanded .sendBtn {
   right: 24px;
   bottom: 22px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .sendBtn:hover {
@@ -113,8 +117,6 @@
   height: 16px;
   display: block;
 }
-
-/* --- Chips --- */
 
 .chips {
   position: absolute;
@@ -133,7 +135,7 @@
 .chipsShow .chips {
   opacity: 1;
   transform: translateY(0);
-  pointer-events: none;
+  pointer-events: auto;
   transition:
     opacity 0.32s ease,
     transform 0.38s cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -148,8 +150,6 @@
     transform 0.18s ease;
 }
 
-/* --- Individual chip --- */
-
 .chip {
   font-size: 15px;
   font-weight: 400;
@@ -163,7 +163,6 @@
   transition: background 0.15s;
   white-space: nowrap;
   line-height: 1;
-  pointer-events: auto;
 }
 
 .chip:hover {
