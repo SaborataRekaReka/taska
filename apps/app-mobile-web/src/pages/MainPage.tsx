@@ -50,7 +50,8 @@ export function MainPage() {
   const isDayCreated = demoState === 'dayCreated';
   const showLegacyBalance = demoState === 'balanceModalOpen';
   const showMyDayModal = isMyDayModalOpen || showLegacyBalance;
-  const showEditModal = demoState === 'visualEditModal' || demoState === 'markdownEditModal';
+  const selectedTaskId = useUiStore((s) => s.selectedTaskId);
+  const showEditModal = selectedTaskId !== null;
   const hasDayColors = dayColors !== null;
 
   const modalTasks = useMemo<DayTask[]>(
