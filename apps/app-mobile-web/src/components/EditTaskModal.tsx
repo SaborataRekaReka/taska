@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useUiStore } from '../stores/ui';
-import { DEMO_TASKS } from '../lib/demoData';
 import { useTasks, useUpdateTask } from '../hooks/queries';
 import { TaskCard } from './TaskCard';
 import { AiToolChips } from './AiToolChips';
@@ -38,6 +37,7 @@ type AutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
 export function EditTaskModal() {
   const selectedTaskId = useUiStore((s) => s.selectedTaskId);
   const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
+  const demoTasks = useUiStore((s) => s.demoTasks);
   const { data: tasks } = useTasks();
   const updateTask = useUpdateTask();
   const selectedTask = useMemo(
@@ -51,9 +51,9 @@ export function EditTaskModal() {
         return apiTask;
       }
 
-      return DEMO_TASKS.find((task) => task.id === selectedTaskId) ?? null;
+      return demoTasks.find((task) => task.id === selectedTaskId) ?? null;
     },
-    [selectedTaskId, tasks],
+    [demoTasks, selectedTaskId, tasks],
   );
   const [activeTab, setActiveTab] = useState<'visual' | 'editor'>('visual');
   const [markdownValue, setMarkdownValue] = useState('');

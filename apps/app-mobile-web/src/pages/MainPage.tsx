@@ -7,7 +7,6 @@ import { TaskList } from '../components/TaskList';
 import { DayCreatedActions } from '../components/DayCreatedActions';
 import { EditTaskModal } from '../components/EditTaskModal';
 import { MyDayModal } from '../components/my-day/MyDayModal';
-import { DEMO_TASKS } from '../lib/demoData';
 import { dayColorsToBackground } from '../lib/profileColors';
 import type { DayTask } from '../components/my-day/types';
 import { useUiStore } from '../stores/ui';
@@ -46,6 +45,7 @@ export function MainPage() {
   const closeMyDayModal = useUiStore((s) => s.closeMyDayModal);
   const setMyDaySaved = useUiStore((s) => s.setMyDaySaved);
   const dayColors = useUiStore((s) => s.dayColors);
+  const demoTasks = useUiStore((s) => s.demoTasks);
 
   const isDayCreated = demoState === 'dayCreated';
   const showLegacyBalance = demoState === 'balanceModalOpen';
@@ -55,7 +55,7 @@ export function MainPage() {
   const hasDayColors = dayColors !== null;
 
   const modalTasks = useMemo<DayTask[]>(
-    () => DEMO_TASKS.map((task, index) => {
+    () => demoTasks.map((task, index) => {
       const normalizedPriority = mapPriority(task.priority);
       const title = task.title.toLowerCase();
 
@@ -81,7 +81,7 @@ export function MainPage() {
         ),
       };
     }),
-    [],
+    [demoTasks],
   );
 
   function handleCloseMyDayModal(): void {

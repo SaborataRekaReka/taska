@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import sendIcon from '../assests/send.svg';
 import styles from './HeroPanel.module.css';
@@ -15,21 +15,21 @@ const CHIPS_FADE_MS = 180;
 
 export function HeroPanel() {
   const triggerTempListFromAi = useUiStore((s) => s.triggerTempListFromAi);
+  const addDemoTask = useUiStore((s) => s.addDemoTask);
   const [value, setValue] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [chipsVisible, setChipsVisible] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const wantOpen = isFocused || value.trim().length > 0;
 
   useEffect(() => {
     if (collapseTimer.current !== null) {
       clearTimeout(collapseTimer.current);
     }
 
-    if (wantOpen) {
+    if (isExpanded) {
       setPanelOpen(true);
       const id = setTimeout(() => setChipsVisible(true), 80);
       return () => clearTimeout(id);
@@ -42,7 +42,7 @@ export function HeroPanel() {
         clearTimeout(collapseTimer.current);
       }
     };
-  }, [wantOpen]);
+  }, [isExpanded]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -52,16 +52,47 @@ export function HeroPanel() {
     el.style.height = `${Math.max(el.scrollHeight, 37)}px`;
   }, [value]);
 
-  const handleBlur = useCallback(() => setIsFocused(false), []);
-  const handleFocus = useCallback(() => setIsFocused(true), []);
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent | TouchEvent): void {
+      const root = panelRef.current;
+      const target = event.target;
+
+      if (!root || !(target instanceof Node)) {
+        return;
+      }
+
+      if (!root.contains(target)) {
+        setIsExpanded(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, []);
+
   const submitPrompt = useCallback(() => {
-    const normalized = value.toLowerCase();
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    addDemoTask(trimmed);
+
+    const normalized = trimmed.toLowerCase();
     const shouldCreateTempList = normalized.includes('сроч') || normalized.includes('urgent');
 
     if (shouldCreateTempList) {
       triggerTempListFromAi();
     }
-  }, [triggerTempListFromAi, value]);
+
+    setValue('');
+    setIsExpanded(false);
+  }, [addDemoTask, triggerTempListFromAi, value]);
 
   const panelClass = [
     styles.panel,
@@ -70,7 +101,11 @@ export function HeroPanel() {
   ].join(' ');
 
   return (
-    <div className={panelClass}>
+    <div
+      ref={panelRef}
+      className={panelClass}
+      onMouseDown={() => setIsExpanded(true)}
+    >
       <div className={styles.inputRow}>
         <textarea
           ref={textareaRef}
@@ -78,8 +113,7 @@ export function HeroPanel() {
           placeholder="Что бы вы хотели сделать?"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          onFocus={() => setIsExpanded(true)}
           onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
               event.preventDefault();
@@ -104,7 +138,11 @@ export function HeroPanel() {
             key={chip}
             className={styles.chip}
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setValue(chip)}
+            onClick={() => {
+              setValue(chip);
+              setIsExpanded(true);
+              textareaRef.current?.focus();
+            }}
           >
             {chip}
           </button>
