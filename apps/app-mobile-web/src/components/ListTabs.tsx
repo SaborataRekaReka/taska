@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
+import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
 const BASE_TAB_ORDER = ['no-list', 'my-day', 'work', 'personal', 'study'] as const;
@@ -76,31 +77,50 @@ export function ListTabs() {
           const isActive = currentActiveTab === id;
 
           return (
-            <button
-              key={id}
-              className={`${styles.tab} ${isActive ? styles.active : ''}`}
-              onClick={() => handleTabClick(id)}
-            >
-              <span>{getLabel(id)}</span>
-              {id === 'no-list' && noListCount > 0 && <span className={styles.badge}>{noListCount}</span>}
-              {id === 'temp' && isTempListVisible && !isTempListSaved && (
-                <span
-                  className={styles.chevron}
-                  role="button"
-                  aria-label="Сохранить временный список"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    saveTempList();
-                  }}
-                >
-                  &#x2713;
-                </span>
-              )}
-              <span className={styles.more} aria-hidden>
-                &#8942;
-              </span>
-            </button>
+            <div key={id} className={`${styles.tab} ${isActive ? styles.active : ''}`}>
+              <button type="button" className={styles.tabMain} onClick={() => handleTabClick(id)}>
+                <span>{getLabel(id)}</span>
+                {id === 'no-list' && noListCount > 0 && <span className={styles.badge}>{noListCount}</span>}
+                {id === 'temp' && isTempListVisible && !isTempListSaved && (
+                  <span
+                    className={styles.chevron}
+                    role="button"
+                    aria-label="Сохранить временный список"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      saveTempList();
+                    }}
+                  >
+                    &#x2713;
+                  </span>
+                )}
+              </button>
+              <DropdownMenu
+                items={[
+                  {
+                    id: `open-${id}`,
+                    label: 'Открыть список',
+                    onSelect: () => handleTabClick(id),
+                  },
+                  {
+                    id: `rename-${id}`,
+                    label: 'Переименовать (скоро)',
+                    onSelect: () => undefined,
+                    disabled: true,
+                  },
+                  {
+                    id: `delete-${id}`,
+                    label: 'Удалить (скоро)',
+                    onSelect: () => undefined,
+                    disabled: true,
+                    danger: true,
+                  },
+                ]}
+                triggerAriaLabel={`Меню списка ${getLabel(id)}`}
+                triggerClassName={styles.moreTrigger}
+              />
+            </div>
           );
         })}
         {adding ? (
@@ -114,7 +134,7 @@ export function ListTabs() {
             autoFocus
           />
         ) : (
-          <button className={styles.addBtn} onClick={() => setAdding(true)}>+</button>
+          <button type="button" className={styles.addBtn} onClick={() => setAdding(true)}>+</button>
         )}
       </div>
     </div>

@@ -16,6 +16,8 @@
 }
 
 .tab {
+  border: none;
+  background: transparent;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -25,10 +27,19 @@
   color: #181D27;
   opacity: 0.75;
   transition: opacity 0.15s;
-  display: flex;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.tabMain {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  border-bottom: 2px solid transparent;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .tab:hover {
@@ -87,14 +98,6 @@
 }
 
 
-.more {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1;
+.moreTrigger {
+  margin-left: 1px;
 }

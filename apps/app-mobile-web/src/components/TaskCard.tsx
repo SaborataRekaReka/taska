@@ -5,6 +5,7 @@ import clockIcon from '../assests/clock.svg';
 import listIcon from '../assests/list.svg';
 import aiFlashIcon from '../assests/ai_flash.svg';
 import { EditableText } from './EditableText';
+import { DropdownMenu } from './DropdownMenu';
 import styles from './TaskCard.module.css';
 
 function formatDate(iso: string): string {
@@ -28,6 +29,24 @@ export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
+  const menuItems = [
+    {
+      id: 'open-assistant',
+      label: 'Открыть AI-ассистент',
+      onSelect: handleOpenAssistant,
+    },
+    {
+      id: 'toggle-subtasks',
+      label: isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи',
+      onSelect: () => setIsSubtasksOpen((prev) => !prev),
+      disabled: !hasSubs,
+    },
+    {
+      id: 'add-subtask',
+      label: 'Добавить подзадачу',
+      onSelect: addDraft,
+    },
+  ];
 
   function addDraft() {
     const id = `draft-${task.id}-${Date.now()}`;
@@ -162,13 +181,7 @@ export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant
           >
             <img src={aiFlashIcon} alt="" className={styles.actionIcon} />
           </button>
-          <button className={styles.menuBtn} onClick={(e) => e.stopPropagation()}>
-            <svg width="4" height="16" viewBox="0 0 4 16" fill="none">
-              <circle cx="2" cy="2" r="1.3" fill="currentColor"/>
-              <circle cx="2" cy="8" r="1.3" fill="currentColor"/>
-              <circle cx="2" cy="14" r="1.3" fill="currentColor"/>
-            </svg>
-          </button>
+          <DropdownMenu items={menuItems} triggerAriaLabel="Действия задачи" />
         </div>
       </div>
 

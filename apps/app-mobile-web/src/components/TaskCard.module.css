@@ -177,16 +177,6 @@
   display: block;
 }
 
-.menuBtn {
-  color: var(--icon-muted);
-  padding: 4px;
-  transition: color 0.15s;
-}
-
-.menuBtn:hover {
-  color: var(--text-secondary);
-}
-
 .subtasksPanel {
   overflow: hidden;
   transform-origin: top;
