@@ -17,6 +17,14 @@
     transform 0.18s ease;
 }
 
+
+.triggerWithLabel {
+  width: auto;
+  min-width: 28px;
+  padding: 0 8px;
+  gap: 6px;
+}
+
 .trigger:hover {
   color: var(--text-secondary);
   background: rgba(17, 17, 17, 0.06);
@@ -112,4 +120,11 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+
+.triggerLabel {
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
 }

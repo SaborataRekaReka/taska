@@ -2,6 +2,10 @@
   overflow-x: auto;
   scrollbar-width: none;
   flex-shrink: 0;
+  background: var(--surface-62);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-pill);
+  padding: 4px;
 }
 
 .bar::-webkit-scrollbar {
@@ -11,52 +15,62 @@
 .tabs {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   white-space: nowrap;
 }
 
 .tab {
   border: none;
   background: transparent;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font);
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
-  line-height: 23px;
-  padding: 8px 10px 10px;
-  color: #181D27;
-  opacity: 0.75;
-  transition: opacity 0.15s;
+  line-height: 1;
+  min-height: 32px;
+  padding: 0 12px;
+  color: var(--text-secondary);
+  transition: background-color 0.15s ease, color 0.15s ease;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  border-bottom: 2px solid transparent;
+  gap: 4px;
+  border-radius: var(--r-pill);
 }
 
 .tabMain {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: transparent;
   border: none;
   padding: 0;
+  color: inherit;
 }
 
 .tab:hover {
-  opacity: 1;
+  color: var(--text-primary);
+  background: rgba(17, 17, 17, 0.05);
 }
 
 .active {
-  opacity: 1;
-  font-weight: 400;
-  border-bottom-color: var(--text-primary);
+  color: var(--text-primary);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 1px var(--border-light);
 }
 
 .badge {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  margin-left: 2px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-primary);
+  background: rgba(17, 17, 17, 0.08);
 }
 
 .chevron {
@@ -72,32 +86,51 @@
 }
 
 .addBtn {
-  font-size: 16px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  font-size: 14px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
   color: var(--text-secondary);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
-  margin-left: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  padding: 0 12px;
 }
 
 .addBtn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  background: rgba(17, 17, 17, 0.06);
 }
 
 .addInput {
-  font-size: 15px;
-  padding: 6px 12px;
-  border-radius: var(--r-sm);
-  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border);
   width: 160px;
 }
 
-
 .moreTrigger {
-  margin-left: 1px;
+  margin-left: 2px;
+}
+
+.moreTab {
+  padding-right: 4px;
+}
+
+.moreListsTrigger {
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: inherit;
+}
+
+.moreListsTrigger:hover {
+  color: var(--text-primary);
+  background: rgba(17, 17, 17, 0.06);
 }
