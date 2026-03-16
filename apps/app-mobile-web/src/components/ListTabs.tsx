@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
 import eyeIcon from '../assests/eye.svg';
@@ -9,7 +9,6 @@ import styles from './ListTabs.module.css';
 
 const BASE_TAB_ORDER = ['no-list', 'my-day', 'work', 'personal', 'study'] as const;
 const PRIMARY_VISIBLE_COUNT = 4;
-const MORE_TAB_KEY = '__more__';
 
 export function ListTabs() {
   const demoState = useUiStore((s) => s.demoState);
@@ -83,7 +82,6 @@ export function ListTabs() {
   }
 
   const isSecondaryActive = secondaryTabs.includes(currentActiveTab ?? '');
-  const activeIndicatorKey = isSecondaryActive ? MORE_TAB_KEY : currentActiveTab;
 
   const moreItems = useMemo(() => {
     const baseItems = secondaryTabs.map((id) => ({
@@ -108,62 +106,9 @@ export function ListTabs() {
     return baseItems;
   }, [secondaryTabs, isTempListSaved]);
 
-  useLayoutEffect(() => {
-    if (!activeIndicatorKey) {
-      setIndicatorStyle((prev) => ({ ...prev, visible: false }));
-      return;
-    }
-
-    const container = tabsRef.current;
-    const activeElement = tabRefs.current[activeIndicatorKey];
-
-    if (!container || !activeElement) {
-      setIndicatorStyle((prev) => ({ ...prev, visible: false }));
-      return;
-    }
-
-    const containerRect = container.getBoundingClientRect();
-    const activeRect = activeElement.getBoundingClientRect();
-
-    setIndicatorStyle({
-      left: activeRect.left - containerRect.left + container.scrollLeft,
-      width: activeRect.width,
-      visible: true,
-    });
-  }, [activeIndicatorKey, visibleTabs.join('|'), adding]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const container = tabsRef.current;
-      const activeElement = activeIndicatorKey ? tabRefs.current[activeIndicatorKey] : null;
-
-      if (!container || !activeElement) {
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const activeRect = activeElement.getBoundingClientRect();
-
-      setIndicatorStyle({
-        left: activeRect.left - containerRect.left + container.scrollLeft,
-        width: activeRect.width,
-        visible: true,
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeIndicatorKey]);
-
   return (
     <div className={styles.bar}>
-      <div ref={tabsRef} className={styles.tabs}>
-        <span
-          className={`${styles.activeIndicator} ${indicatorStyle.visible ? styles.activeIndicatorVisible : ''}`}
-          style={{ left: `${indicatorStyle.left}px`, width: `${indicatorStyle.width}px` }}
-          aria-hidden
-        />
-
+      <div className={styles.tabs}>
         {primaryTabs.map((id) => {
           const isActive = currentActiveTab === id;
 
@@ -227,12 +172,7 @@ export function ListTabs() {
         })}
 
         {secondaryTabs.length > 0 && (
-          <div
-            ref={(node) => {
-              tabRefs.current[MORE_TAB_KEY] = node;
-            }}
-            className={`${styles.tab} ${styles.moreTab} ${isSecondaryActive ? styles.active : ''}`}
-          >
+          <div className={`${styles.tab} ${styles.moreTab} ${isSecondaryActive ? styles.active : ''}`}>
             <DropdownMenu
               items={moreItems}
               triggerLabel={`Ещё (${secondaryTabs.length})`}

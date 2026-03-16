@@ -2,11 +2,10 @@
   overflow-x: auto;
   scrollbar-width: none;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--surface-62);
   border: 1px solid var(--border-light);
   border-radius: var(--r-pill);
   padding: 4px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .bar::-webkit-scrollbar {
@@ -28,23 +27,18 @@
   left: 0;
   width: 0;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow:
-    0 6px 16px rgba(17, 17, 17, 0.08),
-    0 0 0 1px rgba(255, 255, 255, 0.8);
-  transform: translateZ(0);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0 0 1px var(--border-light);
   opacity: 0;
   transition:
     left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s ease,
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.2s ease;
   pointer-events: none;
 }
 
 .activeIndicatorVisible {
   opacity: 1;
-  transform: translateZ(0) scale(1);
 }
 
 .tab {
@@ -63,8 +57,6 @@
   align-items: center;
   gap: 4px;
   border-radius: var(--r-pill);
-  position: relative;
-  z-index: 1;
 }
 
 .tabMain {
@@ -79,12 +71,14 @@
 
 .tab:hover {
   color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.035);
+  background: rgba(17, 17, 17, 0.05);
 }
 
 .active {
   color: var(--text-primary);
   font-weight: 500;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 1px var(--border-light);
 }
 
 .badge {
