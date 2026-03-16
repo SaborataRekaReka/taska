@@ -14,6 +14,7 @@ export interface DropdownMenuItem {
 interface DropdownMenuProps {
   items: DropdownMenuItem[];
   triggerAriaLabel?: string;
+  triggerLabel?: string;
   triggerClassName?: string;
   menuClassName?: string;
   iconPosition?: 'left' | 'right';
@@ -22,6 +23,7 @@ interface DropdownMenuProps {
 export function DropdownMenu({
   items,
   triggerAriaLabel = 'Открыть меню',
+  triggerLabel,
   triggerClassName,
   menuClassName,
   iconPosition = 'left',
@@ -103,7 +105,7 @@ export function DropdownMenu({
       <button
         ref={triggerRef}
         type="button"
-        className={`${styles.trigger} ${isOpen ? styles.triggerOpen : ''} ${triggerClassName ?? ''}`.trim()}
+        className={`${styles.trigger} ${triggerLabel ? styles.triggerWithLabel : ''} ${isOpen ? styles.triggerOpen : ''} ${triggerClassName ?? ''}`.trim()}
         onClick={(event) => {
           event.stopPropagation();
           setIsOpen((prev) => !prev);
@@ -113,6 +115,7 @@ export function DropdownMenu({
         aria-label={triggerAriaLabel}
         aria-controls={isOpen ? menuId : undefined}
       >
+        {triggerLabel ? <span className={styles.triggerLabel}>{triggerLabel}</span> : null}
         <svg width="4" height="16" viewBox="0 0 4 16" fill="none" aria-hidden>
           <circle cx="2" cy="2" r="1.3" fill="currentColor" />
           <circle cx="2" cy="8" r="1.3" fill="currentColor" />
