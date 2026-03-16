@@ -13,6 +13,7 @@ interface UiState {
   filterPriority: string | null;
   showAddTask: boolean;
   editingTaskId: string | null;
+  selectedTaskId: string | null;
   setDemoState: (s: DemoState) => void;
   setActiveList: (id: string | null) => void;
   setSearch: (q: string) => void;
@@ -20,6 +21,8 @@ interface UiState {
   setFilterPriority: (p: string | null) => void;
   toggleAddTask: () => void;
   setEditingTask: (id: string | null) => void;
+  openTaskAssistantModal: (taskId: string) => void;
+  closeTaskAssistantModal: () => void;
   openMyDayModal: () => void;
   closeMyDayModal: () => void;
   setMyDaySaved: (saved: boolean) => void;
@@ -37,6 +40,7 @@ export const useUiStore = create<UiState>()((set) => ({
   filterPriority: null,
   showAddTask: false,
   editingTaskId: null,
+  selectedTaskId: null,
   setDemoState: (s) => set({ demoState: s }),
   setActiveList: (id) => set({ activeListId: id }),
   setSearch: (q) => set({ searchQuery: q }),
@@ -44,6 +48,8 @@ export const useUiStore = create<UiState>()((set) => ({
   setFilterPriority: (p) => set({ filterPriority: p }),
   toggleAddTask: () => set((s) => ({ showAddTask: !s.showAddTask })),
   setEditingTask: (id) => set({ editingTaskId: id }),
+  openTaskAssistantModal: (taskId) => set({ selectedTaskId: taskId }),
+  closeTaskAssistantModal: () => set({ selectedTaskId: null }),
   openMyDayModal: () => set({ isMyDayModalOpen: true }),
   closeMyDayModal: () => set({ isMyDayModalOpen: false }),
   setMyDaySaved: (saved) => set({ isMyDaySaved: saved }),

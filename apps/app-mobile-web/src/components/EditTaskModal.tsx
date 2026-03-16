@@ -1,20 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUiStore } from '../stores/ui';
-import { DEMO_TASKS, MARKDOWN_EDITOR_CONTENT } from '../lib/demoData';
+import { DEMO_TASKS } from '../lib/demoData';
 import { TaskCard } from './TaskCard';
 import { AiToolChips } from './AiToolChips';
-import { InsertBetween } from './InsertBetween';
 import styles from './EditTaskModal.module.css';
 
+function toMarkdown(taskTitle: string, subtasks: { title: string; status: 'TODO' | 'DONE' }[], dueDate?: string | null) {
+  const dueLine = dueDate ? `\n- due:: ${dueDate.slice(0, 10)}` : '';
+  const subtasksBlock = subtasks.length > 0
+    ? `\n- subtasks::\n${subtasks.map((sub) => `  - [${sub.status === 'DONE' ? 'x' : ' '}] ${sub.title}`).join('\n')}`
+    : '';
+
+  return `- [ ] ${taskTitle}\n- priority:: medium${dueLine}\n- tags:: #taska #assistant${subtasksBlock}`;
+}
+
 export function EditTaskModal() {
-  const demoState = useUiStore((s) => s.demoState);
-  const isMarkdown = demoState === 'markdownEditModal';
-  const [activeTab, setActiveTab] = useState<'visual' | 'editor'>(isMarkdown ? 'editor' : 'visual');
-  const setDemoState = useUiStore((s) => s.setDemoState);
+  const selectedTaskId = useUiStore((s) => s.selectedTaskId);
+  const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
+  const selectedTask = useMemo(
+    () => DEMO_TASKS.find((task) => task.id === selectedTaskId) ?? DEMO_TASKS[0],
+    [selectedTaskId],
+  );
+  const [activeTab, setActiveTab] = useState<'visual' | 'editor'>('visual');
+  const [markdownValue, setMarkdownValue] = useState('');
+  const [assistantPrompt, setAssistantPrompt] = useState('');
+
+  useEffect(() => {
+    if (!selectedTask) {
+      return;
+    }
+
+    setMarkdownValue(toMarkdown(selectedTask.title, selectedTask.subtasks, selectedTask.deadline));
+    setAssistantPrompt('');
+    setActiveTab('visual');
+  }, [selectedTask]);
+
+  if (!selectedTaskId || !selectedTask) {
+    return null;
+  }
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={closeTaskAssistantModal}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div className={styles.tabs}>
             <button
@@ -30,7 +57,7 @@ export function EditTaskModal() {
               Редактор
             </button>
           </div>
-          <button className={styles.closeBtn} onClick={() => setDemoState('workListHover')}>
+          <button className={styles.closeBtn} onClick={closeTaskAssistantModal}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
             </svg>
@@ -40,16 +67,23 @@ export function EditTaskModal() {
         <div className={styles.body}>
           {activeTab === 'visual' ? (
             <div className={styles.visualContent}>
-              <div className={styles.taskPreview}>
-                <TaskCard task={DEMO_TASKS[0]!} />
-                <InsertBetween visible />
+              <div className={styles.contentPanel}>
+                <div className={styles.taskPreview}>
+                  <TaskCard task={selectedTask} />
+                </div>
               </div>
             </div>
           ) : (
             <div className={styles.editorContent}>
-              <div className={styles.editorArea}>
-                <pre className={styles.editorText}>{MARKDOWN_EDITOR_CONTENT}</pre>
-                <span className={styles.savedLabel}>Saved...</span>
+              <div className={styles.contentPanel}>
+                <div className={styles.editorArea}>
+                  <textarea
+                    className={styles.editorInput}
+                    value={markdownValue}
+                    onChange={(e) => setMarkdownValue(e.target.value)}
+                  />
+                  <span className={styles.savedLabel}>Saved...</span>
+                </div>
               </div>
             </div>
           )}
@@ -61,7 +95,8 @@ export function EditTaskModal() {
             <input
               className={styles.inputField}
               placeholder="Что бы вы хотели сделать?"
-              readOnly
+              value={assistantPrompt}
+              onChange={(e) => setAssistantPrompt(e.target.value)}
             />
           </div>
         </div>

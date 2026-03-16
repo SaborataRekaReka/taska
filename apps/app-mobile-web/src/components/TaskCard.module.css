@@ -7,10 +7,16 @@
     background 0.15s ease,
     opacity 0.26s ease;
   position: relative;
+  cursor: pointer;
 }
 
 .card:hover {
   background: var(--card-bg-hover);
+}
+
+.card:focus-visible {
+  outline: 2px solid rgba(15, 15, 15, 0.32);
+  outline-offset: 2px;
 }
 
 .cardDone {
@@ -279,6 +285,7 @@
   justify-content: center;
   height: 0;
   position: relative;
+  cursor: pointer;
 }
 
 .plusBtn {
