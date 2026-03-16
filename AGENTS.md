@@ -31,12 +31,12 @@
 | C3 | ✅ DONE | Subtasks CRUD + ownership check + history |
 | C4 | ✅ DONE | History service + read API |
 | D5 | ✅ DONE | "Мой день" modal (premium UI + profile radar + Framer Motion) |
+| D6 | ✅ DONE | Task AI modal: visual/editor tabs, markdown edit mode, assistant prompt input |
 
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
 | B2 | Google OAuth |
-| D6 | AI Prompt bar + Response modal |
 | E | AI Assistant safe-mode |
 | F | Polishing, документация |
 
@@ -64,6 +64,7 @@
   - Inline-editing текста задачи/подзадач без смены визуального компонента.
   - Добавление подзадач через нижний `+` на карточке (автофокус + Enter chain).
   - My Day modal: bottom-sheet premium modal with mood, energy, wishes and live day profile radar.
+  - Task click opens assistant modal with Visual/Editor tabs and MD editing area + assistant input.
 
 ---
 

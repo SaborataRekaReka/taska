@@ -27,6 +27,7 @@ export function TaskList() {
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const showInsert = demoState === 'workListHover' || demoState === 'tempAiList';
+  const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
 
@@ -107,6 +108,7 @@ export function TaskList() {
             task={task}
             isCompleted={isCompleted}
             onToggleCompleted={handleToggleTaskCompleted}
+            onOpenAssistant={openTaskAssistantModal}
           />
           {showInsert && i < sortedTasks.length - 1 && <InsertBetween visible={hoveredIndex === i} />}
         </motion.div>

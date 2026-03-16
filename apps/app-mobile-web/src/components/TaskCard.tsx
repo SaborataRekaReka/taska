@@ -16,9 +16,10 @@ interface TaskCardProps {
   task: Task;
   isCompleted?: boolean;
   onToggleCompleted?: (taskId: string, nextCompleted: boolean) => void;
+  onOpenAssistant?: (taskId: string) => void;
 }
 
-export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps) {
+export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant }: TaskCardProps) {
   const [localTitle, setLocalTitle] = useState(task.title);
   const [localSubtasks, setLocalSubtasks] = useState<Subtask[]>(task.subtasks);
   const [localTaskCompleted, setLocalTaskCompleted] = useState(task.status === 'DONE');
@@ -76,13 +77,46 @@ export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps
     );
   }
 
+  function handleOpenAssistant() {
+    onOpenAssistant?.(task.id);
+  }
+
+  function isInteractiveTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    return Boolean(target.closest('button, [contenteditable="true"]'));
+  }
+
   return (
-    <div className={`${styles.card} ${taskCompleted ? styles.cardDone : ''}`}>
+    <div
+      className={`${styles.card} ${taskCompleted ? styles.cardDone : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        if (isInteractiveTarget(e.target)) {
+          return;
+        }
+
+        handleOpenAssistant();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (isInteractiveTarget(e.target)) {
+            return;
+          }
+
+          e.preventDefault();
+          handleOpenAssistant();
+        }
+      }}
+    >
       <div className={styles.row}>
         <button
           type="button"
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onClick={toggleTaskCompleted}
+          onClick={(e) => { e.stopPropagation(); toggleTaskCompleted(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
           aria-pressed={taskCompleted}
         />
@@ -98,7 +132,7 @@ export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps
               <button
                 type="button"
                 className={`${styles.metaItem} ${styles.metaToggle} ${isSubtasksOpen ? styles.metaToggleActive : ''}`}
-                onClick={() => setIsSubtasksOpen((prev) => !prev)}
+                onClick={(e) => { e.stopPropagation(); setIsSubtasksOpen((prev) => !prev); }}
                 aria-label={isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи'}
               >
                 <img src={subtasksIcon} alt="" className={styles.metaIcon} />
@@ -120,10 +154,15 @@ export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps
           </div>
         </div>
         <div className={styles.actions}>
-          <button className={styles.actionCircle} type="button" title="AI действие">
+          <button
+            className={styles.actionCircle}
+            type="button"
+            title="AI действие"
+            onClick={(e) => { e.stopPropagation(); handleOpenAssistant(); }}
+          >
             <img src={aiFlashIcon} alt="" className={styles.actionIcon} />
           </button>
-          <button className={styles.menuBtn}>
+          <button className={styles.menuBtn} onClick={(e) => e.stopPropagation()}>
             <svg width="4" height="16" viewBox="0 0 4 16" fill="none">
               <circle cx="2" cy="2" r="1.3" fill="currentColor"/>
               <circle cx="2" cy="8" r="1.3" fill="currentColor"/>
@@ -146,7 +185,7 @@ export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps
                     <button
                       type="button"
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onClick={() => toggleSubtaskCompleted(sub.id)}
+                      onClick={(e) => { e.stopPropagation(); toggleSubtaskCompleted(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
                       aria-pressed={isSubtaskCompleted}
                     />
@@ -182,8 +221,8 @@ export function TaskCard({ task, isCompleted, onToggleCompleted }: TaskCardProps
         <button
           className={styles.plusBtn}
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={addDraft}
+          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); addDraft(); }}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
