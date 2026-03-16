@@ -67,23 +67,20 @@ export function EditTaskModal() {
         <div className={styles.body}>
           {activeTab === 'visual' ? (
             <div className={styles.visualContent}>
-              <div className={styles.contentPanel}>
-                <div className={styles.taskPreview}>
-                  <TaskCard task={selectedTask} />
-                </div>
+              <div className={styles.taskPreview}>
+                <TaskCard task={selectedTask} />
+                <InsertBetween visible />
               </div>
             </div>
           ) : (
             <div className={styles.editorContent}>
-              <div className={styles.contentPanel}>
-                <div className={styles.editorArea}>
-                  <textarea
-                    className={styles.editorInput}
-                    value={markdownValue}
-                    onChange={(e) => setMarkdownValue(e.target.value)}
-                  />
-                  <span className={styles.savedLabel}>Saved...</span>
-                </div>
+              <div className={styles.editorArea}>
+                <textarea
+                  className={styles.editorInput}
+                  value={markdownValue}
+                  onChange={(e) => setMarkdownValue(e.target.value)}
+                />
+                <span className={styles.savedLabel}>Saved...</span>
               </div>
             </div>
           )}
