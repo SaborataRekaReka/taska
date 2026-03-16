@@ -14,6 +14,8 @@ interface UiState {
   showAddTask: boolean;
   editingTaskId: string | null;
   selectedTaskId: string | null;
+  isTempListVisible: boolean;
+  isTempListSaved: boolean;
   setDemoState: (s: DemoState) => void;
   setActiveList: (id: string | null) => void;
   setSearch: (q: string) => void;
@@ -27,6 +29,8 @@ interface UiState {
   closeMyDayModal: () => void;
   setMyDaySaved: (saved: boolean) => void;
   setDayColors: (colors: [string, string]) => void;
+  triggerTempListFromAi: () => void;
+  saveTempList: () => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -41,6 +45,8 @@ export const useUiStore = create<UiState>()((set) => ({
   showAddTask: false,
   editingTaskId: null,
   selectedTaskId: null,
+  isTempListVisible: false,
+  isTempListSaved: false,
   setDemoState: (s) => set({ demoState: s }),
   setActiveList: (id) => set({ activeListId: id }),
   setSearch: (q) => set({ searchQuery: q }),
@@ -54,4 +60,14 @@ export const useUiStore = create<UiState>()((set) => ({
   closeMyDayModal: () => set({ isMyDayModalOpen: false }),
   setMyDaySaved: (saved) => set({ isMyDaySaved: saved }),
   setDayColors: (colors) => set({ dayColors: colors }),
+  triggerTempListFromAi: () => set({
+    demoState: 'tempAiList',
+    isTempListVisible: true,
+    activeListId: 'temp',
+    isTempListSaved: false,
+  }),
+  saveTempList: () => set({
+    isTempListSaved: true,
+    demoState: 'workListHover',
+  }),
 }));

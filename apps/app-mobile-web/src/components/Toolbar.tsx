@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import styles from './Toolbar.module.css';
 
 export function Toolbar() {
   const query = useUiStore((s) => s.searchQuery);
   const setSearch = useUiStore((s) => s.setSearch);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const shortcutLabel = useMemo(() => (navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl K'), []);
 
@@ -24,7 +25,7 @@ export function Toolbar() {
   return (
     <div className={styles.toolbar}>
       <div className={styles.searchWrap} onClick={() => inputRef.current?.focus()}>
-        <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <svg className={`${styles.searchIcon} ${isSearchFocused ? styles.searchIconActive : ''}`} width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5"/>
           <path d="M10 10L13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
@@ -34,6 +35,8 @@ export function Toolbar() {
           className={styles.searchInput}
           value={query}
           onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {

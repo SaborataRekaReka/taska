@@ -85,3 +85,16 @@
   border: 1px solid var(--border);
   width: 160px;
 }
+
+
+.more {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+}

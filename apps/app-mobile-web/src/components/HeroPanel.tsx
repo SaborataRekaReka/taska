@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useUiStore } from '../stores/ui';
 import styles from './HeroPanel.module.css';
 
 const CHIPS = [
@@ -12,6 +13,7 @@ const CHIPS = [
 const CHIPS_FADE_MS = 180;
 
 export function HeroPanel() {
+  const triggerTempListFromAi = useUiStore((s) => s.triggerTempListFromAi);
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -68,6 +70,17 @@ export function HeroPanel() {
         onChange={(e) => setValue(e.target.value)}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            const normalized = value.toLowerCase();
+            const shouldCreateTempList = normalized.includes('сроч') || normalized.includes('urgent');
+
+            if (shouldCreateTempList) {
+              triggerTempListFromAi();
+            }
+          }
+        }}
         rows={1}
       />
       <div className={styles.chips}>
