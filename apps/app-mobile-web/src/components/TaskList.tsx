@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { DEMO_TASKS } from '../lib/demoData';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
-import { InsertBetween } from './InsertBetween';
 import styles from './TaskList.module.css';
 
 function isDueToday(deadline: string | null): boolean {
@@ -22,7 +21,6 @@ function isDueToday(deadline: string | null): boolean {
 }
 
 export function TaskList() {
-  const demoState = useUiStore((s) => s.demoState);
   const activeListId = useUiStore((s) => s.activeListId);
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
@@ -95,14 +93,12 @@ export function TaskList() {
 
   return (
     <div className={styles.list}>
-      {sortedTasks.map(({ task, isCompleted }, i) => (
+      {sortedTasks.map(({ task, isCompleted }) => (
         <motion.div
           key={task.id}
           className={styles.item}
           layout
           transition={{ layout: { duration: 0.34, ease: [0.22, 1, 0.36, 1] } }}
-          onMouseEnter={() => setHoveredIndex(i)}
-          onMouseLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
         >
           <TaskCard
             task={task}
@@ -110,11 +106,10 @@ export function TaskList() {
             onToggleCompleted={handleToggleTaskCompleted}
             onOpenAssistant={openTaskAssistantModal}
           />
-          {showInsert && i < sortedTasks.length - 1 && <InsertBetween visible={hoveredIndex === i} />}
         </motion.div>
       ))}
       {sortedTasks.length === 0 && (
-        <div className={styles.empty}>{'\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e'}</div>
+        <div className={styles.empty}>{'Ничего не найдено'}</div>
       )}
     </div>
   );

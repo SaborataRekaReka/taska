@@ -70,21 +70,24 @@
   padding: 10px 18px 14px;
 }
 
-.visualContent {
-  display: flex;
-  flex-direction: column;
+.visualContent,
+.editorContent {
+  height: 100%;
+}
+
+.contentPanel {
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px 22px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .taskPreview {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.editorContent {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
 .editorArea {
@@ -94,7 +97,7 @@
   padding: 20px 22px;
   min-height: 420px;
   position: relative;
-  overflow-y: auto;
+  min-height: 100%;
 }
 
 .editorInput {
@@ -112,8 +115,8 @@
 
 .savedLabel {
   position: absolute;
-  bottom: 16px;
-  right: 20px;
+  bottom: 0;
+  right: 0;
   font-size: 13px;
   color: var(--text-muted);
 }

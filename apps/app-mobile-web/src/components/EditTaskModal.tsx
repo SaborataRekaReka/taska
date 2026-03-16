@@ -3,7 +3,6 @@ import { useUiStore } from '../stores/ui';
 import { DEMO_TASKS } from '../lib/demoData';
 import { TaskCard } from './TaskCard';
 import { AiToolChips } from './AiToolChips';
-import { InsertBetween } from './InsertBetween';
 import styles from './EditTaskModal.module.css';
 
 function toMarkdown(taskTitle: string, subtasks: { title: string; status: 'TODO' | 'DONE' }[], dueDate?: string | null) {
