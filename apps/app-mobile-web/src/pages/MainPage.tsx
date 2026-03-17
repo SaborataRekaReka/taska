@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Header } from '../components/Header';
 import { HeroPanel } from '../components/HeroPanel';
 import { ListTabs } from '../components/ListTabs';
-import { Toolbar } from '../components/Toolbar';
 import { TaskList } from '../components/TaskList';
 import { DayCreatedActions } from '../components/DayCreatedActions';
 import { EditTaskModal } from '../components/EditTaskModal';
@@ -122,7 +121,6 @@ export function MainPage() {
         <HeroPanel />
         <div className={styles.tabRow}>
           <ListTabs />
-          <Toolbar />
         </div>
         {isDayCreated && (
           <DayCreatedActions
