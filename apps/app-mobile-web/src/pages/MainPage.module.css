@@ -45,7 +45,6 @@
 .tabRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 16px;
-  gap: 24px;
+  gap: 10px;
 }
