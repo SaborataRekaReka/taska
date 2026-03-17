@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
 import { DropdownMenu } from './DropdownMenu';

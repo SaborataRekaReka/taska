@@ -12,6 +12,7 @@ interface UiState {
   searchQuery: string;
   filterStatus: string | null;
   filterPriority: string | null;
+  filterUrgency: 'OVERDUE' | 'TODAY' | 'NEXT_24_HOURS' | null;
   showAddTask: boolean;
   editingTaskId: string | null;
   selectedTaskId: string | null;
@@ -23,6 +24,7 @@ interface UiState {
   setSearch: (q: string) => void;
   setFilterStatus: (s: string | null) => void;
   setFilterPriority: (p: string | null) => void;
+  setFilterUrgency: (u: 'OVERDUE' | 'TODAY' | 'NEXT_24_HOURS' | null) => void;
   toggleAddTask: () => void;
   setEditingTask: (id: string | null) => void;
   openTaskAssistantModal: (taskId: string) => void;
@@ -46,6 +48,7 @@ export const useUiStore = create<UiState>()((set) => ({
   searchQuery: '',
   filterStatus: null,
   filterPriority: null,
+  filterUrgency: null,
   showAddTask: false,
   editingTaskId: null,
   selectedTaskId: null,
@@ -57,6 +60,7 @@ export const useUiStore = create<UiState>()((set) => ({
   setSearch: (q) => set({ searchQuery: q }),
   setFilterStatus: (s) => set({ filterStatus: s }),
   setFilterPriority: (p) => set({ filterPriority: p }),
+  setFilterUrgency: (u) => set({ filterUrgency: u }),
   toggleAddTask: () => set((s) => ({ showAddTask: !s.showAddTask })),
   setEditingTask: (id) => set({ editingTaskId: id }),
   openTaskAssistantModal: (taskId) => set({ selectedTaskId: taskId }),
