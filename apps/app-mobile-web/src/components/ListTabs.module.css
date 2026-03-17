@@ -21,20 +21,6 @@
   white-space: nowrap;
 }
 
-.metaGroup {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.groupDivider {
-  width: 1px;
-  align-self: stretch;
-  margin: 6px 4px;
-  background: rgba(17, 24, 39, 0.12);
-}
-
-
 .activeIndicator {
   position: absolute;
   top: 4px;
