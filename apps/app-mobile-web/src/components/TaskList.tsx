@@ -28,6 +28,8 @@ export function TaskList() {
   const activeSmartListId = useUiStore((s) => s.activeSmartListId);
   const isTempListVisible = useUiStore((s) => s.isTempListVisible);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
+  const filterPriority = useUiStore((s) => s.filterPriority);
+  const filterUrgency = useUiStore((s) => s.filterUrgency);
   const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
   const demoTasks = useUiStore((s) => s.demoTasks);
   const updateDemoTask = useUiStore((s) => s.updateDemoTask);
@@ -71,6 +73,33 @@ export function TaskList() {
 
   const filteredTasks = useMemo(
     () => listScopedTasks.filter((task) => {
+      if (filterPriority && task.priority !== filterPriority) {
+        return false;
+      }
+
+      if (filterUrgency) {
+        if (!task.deadline) {
+          return false;
+        }
+
+        const dueAt = new Date(task.deadline).getTime();
+        const now = Date.now();
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+
+        if (filterUrgency === 'OVERDUE' && !(dueAt < now)) {
+          return false;
+        }
+
+        if (filterUrgency === 'TODAY' && !(dueAt >= now && dueAt <= endOfToday.getTime())) {
+          return false;
+        }
+
+        if (filterUrgency === 'NEXT_24_HOURS' && !(dueAt >= now && dueAt <= now + (24 * 60 * 60 * 1000))) {
+          return false;
+        }
+      }
+
       if (!searchQuery) {
         return true;
       }
@@ -85,7 +114,7 @@ export function TaskList() {
 
       return matchesTitle || matchesList || matchesSubtasks;
     }),
-    [listScopedTasks, searchQuery],
+    [filterPriority, filterUrgency, listScopedTasks, searchQuery],
   );
 
   const sortedTasks = useMemo(

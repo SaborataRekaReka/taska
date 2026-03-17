@@ -4,6 +4,23 @@ import { useUiStore } from '../stores/ui';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './Toolbar.module.css';
 
+const URGENCY_OPTIONS = [
+  { id: null, label: 'Не выбрано' },
+  { id: 'OVERDUE', label: 'Просрочено' },
+  { id: 'TODAY', label: 'Сегодня' },
+  { id: 'NEXT_24_HOURS', label: '24 часа' },
+] as const;
+
+const PRIORITY_OPTIONS = [
+  { id: null, label: 'Любой', color: 'transparent' },
+  { id: 'LOW', label: 'Низкий', color: '#22c55e' },
+  { id: 'MEDIUM', label: 'Средний', color: '#3b82f6' },
+  { id: 'HIGH', label: 'Высокий', color: '#f59e0b' },
+  { id: 'CRITICAL', label: 'Критичный', color: '#ef4444' },
+] as const;
+
+type OpenMenu = 'urgency' | 'priority' | null;
+
 export function Toolbar() {
   const query = useUiStore((s) => s.searchQuery);
   const setSearch = useUiStore((s) => s.setSearch);
@@ -14,6 +31,17 @@ export function Toolbar() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchPanelRef = useRef<HTMLDivElement | null>(null);
   const shortcutLabel = useMemo(() => (navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl K'), []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpenMenu(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -49,6 +77,9 @@ export function Toolbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSearchOpen]);
+
+  const urgencyLabel = URGENCY_OPTIONS.find((item) => item.id === filterUrgency)?.label ?? 'Не выбрано';
+  const priorityOption = PRIORITY_OPTIONS.find((item) => item.id === filterPriority) ?? PRIORITY_OPTIONS[0];
 
   return (
     <div className={styles.toolbar}>
