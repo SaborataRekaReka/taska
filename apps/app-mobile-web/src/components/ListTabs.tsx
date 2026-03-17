@@ -4,7 +4,7 @@ import { DEMO_LISTS } from '../lib/demoData';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
-const BASE_TAB_ORDER = ['no-list', 'my-day', 'work', 'personal', 'study'] as const;
+const BASE_TAB_ORDER = ['my-day', 'all', 'work', 'personal', 'study', 'no-list'] as const;
 
 interface IndicatorStyle {
   left: number;
@@ -53,7 +53,9 @@ export function ListTabs() {
   const currentActiveTab = tabFromStore ?? activeTab;
 
   const noListCount = DEMO_LISTS.find((l) => l.id === 'no-list')?._count.tasks ?? 0;
-  const tabOrder = isTempListVisible ? [...BASE_TAB_ORDER, 'temp'] : BASE_TAB_ORDER;
+  const tabOrder = isTempListVisible
+    ? [...BASE_TAB_ORDER.filter((id) => id !== 'no-list'), 'temp', 'no-list']
+    : BASE_TAB_ORDER;
 
   const visibleTabs = isBalance
     ? tabOrder.filter((id) => id !== 'no-list')
@@ -105,6 +107,7 @@ export function ListTabs() {
 
   function getLabel(id: string): string {
     if (id === 'my-day') return 'Мой день';
+    if (id === 'all') return 'Все';
     return DEMO_LISTS.find((l) => l.id === id)?.name ?? id;
   }
 
@@ -118,6 +121,12 @@ export function ListTabs() {
       } else {
         openMyDayModal();
       }
+      return;
+    }
+
+    if (id === 'all') {
+      setActiveList(null);
+      closeMyDayModal();
       return;
     }
 

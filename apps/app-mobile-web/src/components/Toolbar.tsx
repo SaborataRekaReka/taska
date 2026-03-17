@@ -78,6 +78,88 @@ export function Toolbar() {
 
   return (
     <div className={styles.toolbar} ref={rootRef}>
+      <div className={styles.filterWrap}>
+        <button
+          type="button"
+          className={`${styles.filterBtn} ${openMenu === 'urgency' ? styles.filterBtnOpen : ''}`}
+          onClick={() => setOpenMenu((prev) => (prev === 'urgency' ? null : 'urgency'))}
+          aria-haspopup="menu"
+          aria-expanded={openMenu === 'urgency'}
+        >
+          <span className={styles.iconText}>
+            <svg className={styles.filterIcon} width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden>
+              <circle cx="9" cy="9" r="7.2" stroke="currentColor" strokeWidth="1.7" />
+              <path d="M9 4.8V9H12.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            </svg>
+            <span>{`Срочность · ${urgencyLabel}`}</span>
+          </span>
+          <span className={styles.caret}>▾</span>
+        </button>
+
+        {openMenu === 'urgency' && (
+          <div className={styles.menu} role="menu">
+            {URGENCY_OPTIONS.map((option) => (
+              <button
+                key={option.id ?? 'all'}
+                type="button"
+                className={styles.menuItem}
+                onClick={() => {
+                  setFilterUrgency(option.id);
+                  setOpenMenu(null);
+                }}
+              >
+                <span>{option.label}</span>
+                {filterUrgency === option.id && <span className={styles.check}>✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.filterWrap}>
+        <button
+          type="button"
+          className={`${styles.filterBtn} ${openMenu === 'priority' ? styles.filterBtnOpen : ''}`}
+          onClick={() => setOpenMenu((prev) => (prev === 'priority' ? null : 'priority'))}
+          aria-haspopup="menu"
+          aria-expanded={openMenu === 'priority'}
+        >
+          <span className={styles.priorityGroup}>
+            <span
+              className={`${styles.dot} ${priorityOption.id ? styles.dotStrong : ''}`}
+              style={{ background: priorityOption.color }}
+            />
+            <span>{`Приоритет · ${priorityOption.label}`}</span>
+          </span>
+          <span className={styles.caret}>▾</span>
+        </button>
+
+        {openMenu === 'priority' && (
+          <div className={styles.menu} role="menu">
+            {PRIORITY_OPTIONS.map((option) => (
+              <button
+                key={option.id ?? 'all'}
+                type="button"
+                className={styles.menuItem}
+                onClick={() => {
+                  setFilterPriority(option.id);
+                  setOpenMenu(null);
+                }}
+              >
+                <span className={styles.priorityGroup}>
+                  <span
+                    className={`${styles.dot} ${option.id ? styles.dotStrong : ''}`}
+                    style={{ background: option.color }}
+                  />
+                  <span>{option.label}</span>
+                </span>
+                {filterPriority === option.id && <span className={styles.check}>✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className={styles.searchWrap} onClick={() => inputRef.current?.focus()}>
         <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
           <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5" />
@@ -119,82 +201,6 @@ export function Toolbar() {
           </button>
         ) : (
           <span className={styles.kbd}>{shortcutLabel}</span>
-        )}
-      </div>
-
-      <div className={styles.filterWrap}>
-        <button
-          type="button"
-          className={`${styles.filterBtn} ${openMenu === 'urgency' ? styles.filterBtnOpen : ''}`}
-          onClick={() => setOpenMenu((prev) => (prev === 'urgency' ? null : 'urgency'))}
-          aria-haspopup="menu"
-          aria-expanded={openMenu === 'urgency'}
-        >
-          <span className={styles.iconText}>
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden>
-              <circle cx="9" cy="9" r="7.2" stroke="currentColor" strokeWidth="1.7" />
-              <path d="M9 4.8V9H12.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-            </svg>
-            <span>{`Срочность · ${urgencyLabel}`}</span>
-          </span>
-          <span className={styles.caret}>▾</span>
-        </button>
-
-        {openMenu === 'urgency' && (
-          <div className={styles.menu} role="menu">
-            {URGENCY_OPTIONS.map((option) => (
-              <button
-                key={option.id ?? 'all'}
-                type="button"
-                className={styles.menuItem}
-                onClick={() => {
-                  setFilterUrgency(option.id);
-                  setOpenMenu(null);
-                }}
-              >
-                <span>{option.label}</span>
-                {filterUrgency === option.id && <span className={styles.check}>✓</span>}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className={styles.filterWrap}>
-        <button
-          type="button"
-          className={`${styles.filterBtn} ${openMenu === 'priority' ? styles.filterBtnOpen : ''}`}
-          onClick={() => setOpenMenu((prev) => (prev === 'priority' ? null : 'priority'))}
-          aria-haspopup="menu"
-          aria-expanded={openMenu === 'priority'}
-        >
-          <span className={styles.priorityGroup}>
-            <span className={styles.dot} style={{ background: priorityOption.color }} />
-            <span>{`Приоритет · ${priorityOption.label}`}</span>
-          </span>
-          <span className={styles.caret}>▾</span>
-        </button>
-
-        {openMenu === 'priority' && (
-          <div className={styles.menu} role="menu">
-            {PRIORITY_OPTIONS.map((option) => (
-              <button
-                key={option.id ?? 'all'}
-                type="button"
-                className={styles.menuItem}
-                onClick={() => {
-                  setFilterPriority(option.id);
-                  setOpenMenu(null);
-                }}
-              >
-                <span className={styles.priorityGroup}>
-                  <span className={styles.dot} style={{ background: option.color }} />
-                  <span>{option.label}</span>
-                </span>
-                {filterPriority === option.id && <span className={styles.check}>✓</span>}
-              </button>
-            ))}
-          </div>
         )}
       </div>
     </div>
