@@ -44,7 +44,7 @@ export function useCreateTask() {
 export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; title?: string; status?: string; priority?: string; deadline?: string; listId?: string | null; description?: string }) =>
+    mutationFn: ({ id, ...data }: { id: string; title?: string; status?: string; priority?: string; deadline?: string | null; listId?: string | null; description?: string }) =>
       api.patch<Task>(`/tasks/${id}`, data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['tasks'] }); qc.invalidateQueries({ queryKey: ['lists'] }); },
   });

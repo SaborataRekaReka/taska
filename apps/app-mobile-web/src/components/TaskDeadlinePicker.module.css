@@ -1,0 +1,165 @@
+.root {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.2;
+  transition: background 0.15s ease, color 0.15s ease;
+  padding: 2px 4px;
+}
+
+.trigger:hover {
+  color: #000000;
+}
+
+.triggerActive {
+  color: #000000;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.9;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.trigger:hover .icon,
+.triggerActive .icon {
+  filter: brightness(0) saturate(100%);
+  opacity: 1;
+}
+
+.dismissLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  cursor: default;
+  background: transparent;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 510;
+  width: 288px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-elevated);
+  padding: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.monthLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.navButton {
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navButton:hover {
+  background: rgba(17, 17, 17, 0.06);
+  color: var(--text-primary);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.weekdayCell {
+  text-align: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-placeholder);
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.emptyCell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.dayButton {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dayButton:hover {
+  background: rgba(17, 17, 17, 0.08);
+  color: var(--text-primary);
+}
+
+.dayButtonToday {
+  border: 1px solid rgba(17, 17, 17, 0.24);
+}
+
+.dayButtonSelected {
+  background: #111111;
+  color: #ffffff;
+}
+
+.dayButtonSelected:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.footer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clearButton {
+  font-size: 12px;
+  color: #b42318;
+  border-radius: 8px;
+  padding: 5px 8px;
+  transition: background 0.15s ease;
+}
+
+.clearButton:hover {
+  background: rgba(180, 35, 24, 0.08);
+}

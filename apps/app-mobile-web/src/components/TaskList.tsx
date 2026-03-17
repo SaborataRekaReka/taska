@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { DEMO_LISTS } from '../lib/demoData';
+import type { TaskPriority } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
 import styles from './TaskList.module.css';
@@ -22,10 +24,25 @@ function isDueToday(deadline: string | null): boolean {
 export function TaskList() {
   const activeListId = useUiStore((s) => s.activeListId);
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
+  const isTempListVisible = useUiStore((s) => s.isTempListVisible);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
   const demoTasks = useUiStore((s) => s.demoTasks);
+  const updateDemoTask = useUiStore((s) => s.updateDemoTask);
   const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
+
+  const availableTaskLists = useMemo(
+    () => DEMO_LISTS
+      .filter((list) => list.id !== 'no-list')
+      .filter((list) => list.id !== 'temp' || isTempListVisible)
+      .map((list) => ({ id: list.id, name: list.name })),
+    [isTempListVisible],
+  );
+
+  const listNameById = useMemo(
+    () => new Map(availableTaskLists.map((list) => [list.id, list.name])),
+    [availableTaskLists],
+  );
 
   const listScopedTasks = useMemo(
     () => demoTasks.filter((task) => {
@@ -89,6 +106,33 @@ export function TaskList() {
     }));
   }
 
+  function handleUpdateTaskDeadline(taskId: string, nextDeadline: string | null): void {
+    updateDemoTask(taskId, { deadline: nextDeadline });
+  }
+
+  function handleUpdateTaskList(taskId: string, nextListId: string | null): void {
+    if (!nextListId) {
+      updateDemoTask(taskId, {
+        listId: null,
+        list: null,
+      });
+      return;
+    }
+
+    const nextListName = listNameById.get(nextListId);
+    updateDemoTask(taskId, {
+      listId: nextListId,
+      list: {
+        id: nextListId,
+        name: nextListName ?? 'Список',
+      },
+    });
+  }
+
+  function handleUpdateTaskPriority(taskId: string, nextPriority: TaskPriority): void {
+    updateDemoTask(taskId, { priority: nextPriority });
+  }
+
   return (
     <div className={styles.list}>
       {sortedTasks.map(({ task, isCompleted }) => (
@@ -103,6 +147,10 @@ export function TaskList() {
             isCompleted={isCompleted}
             onToggleCompleted={handleToggleTaskCompleted}
             onOpenAssistant={openTaskAssistantModal}
+            onUpdateDeadline={handleUpdateTaskDeadline}
+            availableLists={availableTaskLists}
+            onUpdateList={handleUpdateTaskList}
+            onUpdatePriority={handleUpdateTaskPriority}
           />
         </motion.div>
       ))}

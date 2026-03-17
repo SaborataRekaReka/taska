@@ -34,6 +34,7 @@ interface UiState {
   triggerTempListFromAi: () => void;
   saveTempList: () => void;
   addDemoTask: (title: string) => void;
+  updateDemoTask: (taskId: string, patch: Partial<Task>) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -114,4 +115,9 @@ export const useUiStore = create<UiState>()((set) => ({
       demoTasks: [nextTask, ...state.demoTasks],
     };
   }),
+  updateDemoTask: (taskId, patch) => set((state) => ({
+    demoTasks: state.demoTasks.map((task) => (
+      task.id === taskId ? { ...task, ...patch } : task
+    )),
+  })),
 }));

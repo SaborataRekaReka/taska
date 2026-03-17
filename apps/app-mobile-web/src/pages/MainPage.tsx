@@ -138,7 +138,7 @@ export function MainPage() {
         tasks={modalTasks}
         onCreateMyDay={handleCreateMyDay}
       />
-      {showEditModal && <EditTaskModal />}
+      <EditTaskModal isOpen={showEditModal} />
     </div>
   );
 }

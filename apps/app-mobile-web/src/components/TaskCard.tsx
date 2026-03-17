@@ -1,35 +1,96 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Subtask, Task } from '../lib/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Subtask, Task, TaskPriority } from '../lib/types';
 import subtasksIcon from '../assests/subtasks.svg';
-import clockIcon from '../assests/clock.svg';
 import listIcon from '../assests/list.svg';
 import aiFlashIcon from '../assests/ai_flash.svg';
 import plusMenuIcon from '../assests/plus.svg';
 import { EditableText } from './EditableText';
 import { DropdownMenu } from './DropdownMenu';
+import { TaskChipMenu, type TaskChipMenuOption } from './TaskChipMenu';
+import { TaskDeadlinePicker } from './TaskDeadlinePicker';
 import styles from './TaskCard.module.css';
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+const NO_LIST_OPTION_VALUE = '__no_list__';
+
+const PRIORITY_OPTIONS: TaskChipMenuOption[] = [
+  { value: 'LOW', label: 'Низкий', dotColor: '#8f9aa7' },
+  { value: 'MEDIUM', label: 'Средний', dotColor: '#5f84f2' },
+  { value: 'HIGH', label: 'Высокий', dotColor: '#f59b0f' },
+  { value: 'CRITICAL', label: 'Критичный', dotColor: '#df4b4b' },
+];
 
 interface TaskCardProps {
   task: Task;
   isCompleted?: boolean;
   onToggleCompleted?: (taskId: string, nextCompleted: boolean) => void;
   onOpenAssistant?: (taskId: string) => void;
+  onUpdateDeadline?: (taskId: string, nextDeadline: string | null) => void;
+  availableLists?: { id: string; name: string }[];
+  onUpdateList?: (taskId: string, nextListId: string | null) => void;
+  onUpdatePriority?: (taskId: string, nextPriority: TaskPriority) => void;
 }
 
-export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant }: TaskCardProps) {
+export function TaskCard({
+  task,
+  isCompleted,
+  onToggleCompleted,
+  onOpenAssistant,
+  onUpdateDeadline,
+  availableLists,
+  onUpdateList,
+  onUpdatePriority,
+}: TaskCardProps) {
   const [localTitle, setLocalTitle] = useState(task.title);
   const [localSubtasks, setLocalSubtasks] = useState<Subtask[]>(task.subtasks);
   const [localTaskCompleted, setLocalTaskCompleted] = useState(task.status === 'DONE');
+  const [localDeadline, setLocalDeadline] = useState(task.deadline);
+  const [localListId, setLocalListId] = useState<string | null>(task.listId);
+  const [localPriority, setLocalPriority] = useState<TaskPriority>(task.priority);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
   const enterPressedRef = useRef(false);
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
+
+  const listOptions = useMemo<TaskChipMenuOption[]>(() => {
+    const normalized: TaskChipMenuOption[] = [
+      { value: NO_LIST_OPTION_VALUE, label: 'Без списка' },
+    ];
+
+    for (const list of availableLists ?? []) {
+      if (list.id === 'no-list') {
+        continue;
+      }
+
+      if (!normalized.some((option) => option.value === list.id)) {
+        normalized.push({ value: list.id, label: list.name });
+      }
+    }
+
+    const taskList = task.list;
+    if (taskList && !normalized.some((option) => option.value === taskList.id)) {
+      normalized.push({ value: taskList.id, label: taskList.name });
+    }
+
+    if (localListId && !normalized.some((option) => option.value === localListId)) {
+      normalized.push({ value: localListId, label: 'Список' });
+    }
+
+    return normalized;
+  }, [availableLists, localListId, task.list]);
+
+  useEffect(() => {
+    setLocalDeadline(task.deadline);
+  }, [task.deadline]);
+
+  useEffect(() => {
+    setLocalListId(task.listId);
+  }, [task.listId]);
+
+  useEffect(() => {
+    setLocalPriority(task.priority);
+  }, [task.priority]);
+
   const menuItems = [
     {
       id: 'open-assistant',
@@ -104,6 +165,22 @@ export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant
     onOpenAssistant?.(task.id);
   }
 
+  function handleListChange(nextValue: string): void {
+    const nextListId = nextValue === NO_LIST_OPTION_VALUE ? null : nextValue;
+    setLocalListId(nextListId);
+    onUpdateList?.(task.id, nextListId);
+  }
+
+  function handlePriorityChange(nextValue: string): void {
+    const nextPriority = nextValue as TaskPriority;
+    if (!PRIORITY_OPTIONS.some((option) => option.value === nextPriority)) {
+      return;
+    }
+
+    setLocalPriority(nextPriority);
+    onUpdatePriority?.(task.id, nextPriority);
+  }
+
   function isInteractiveTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {
       return false;
@@ -162,18 +239,33 @@ export function TaskCard({ task, isCompleted, onToggleCompleted, onOpenAssistant
                 {persistedSubtasksCount}
               </button>
             )}
-            {task.deadline && (
-              <span className={styles.metaItem}>
-                <img src={clockIcon} alt="" className={styles.metaIcon} />
-                {formatDate(task.deadline)}
-              </span>
-            )}
-            {task.list && (
-              <span className={styles.metaItem}>
-                <img src={listIcon} alt="" className={styles.metaIcon} />
-                {task.list.name}
-              </span>
-            )}
+            <div className={styles.metaItem}>
+              <TaskDeadlinePicker
+                value={localDeadline}
+                onChange={(nextDeadline) => {
+                  setLocalDeadline(nextDeadline);
+                  onUpdateDeadline?.(task.id, nextDeadline);
+                }}
+              />
+            </div>
+            <div className={styles.metaItem}>
+              <TaskChipMenu
+                value={localListId ?? NO_LIST_OPTION_VALUE}
+                options={listOptions}
+                onChange={handleListChange}
+                ariaLabel="Сменить список задачи"
+                iconSrc={listIcon}
+              />
+            </div>
+            <div className={styles.metaItem}>
+              <TaskChipMenu
+                value={localPriority}
+                options={PRIORITY_OPTIONS}
+                onChange={handlePriorityChange}
+                ariaLabel="Сменить приоритет задачи"
+                showColorDot
+              />
+            </div>
           </div>
         </div>
         <div className={styles.actions}>
