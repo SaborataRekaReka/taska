@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import type { DemoState } from '../lib/demoData';
 import { CURRENT_DEMO_STATE, DEMO_LISTS, DEMO_TASKS } from '../lib/demoData';
+import type { SmartListId } from '../lib/smartLists';
 import type { Task } from '../lib/types';
 
 interface UiState {
   demoState: DemoState;
   activeListId: string | null;
+  activeSmartListId: SmartListId | null;
   isMyDayModalOpen: boolean;
   isMyDaySaved: boolean;
   dayColors: [string, string] | null;
@@ -21,6 +23,7 @@ interface UiState {
   demoTasks: Task[];
   setDemoState: (s: DemoState) => void;
   setActiveList: (id: string | null) => void;
+  setActiveSmartList: (id: SmartListId | null) => void;
   setSearch: (q: string) => void;
   setFilterStatus: (s: string | null) => void;
   setFilterPriority: (p: string | null) => void;
@@ -42,6 +45,7 @@ interface UiState {
 export const useUiStore = create<UiState>()((set) => ({
   demoState: CURRENT_DEMO_STATE,
   activeListId: null,
+  activeSmartListId: null,
   isMyDayModalOpen: CURRENT_DEMO_STATE === 'balanceModalOpen',
   isMyDaySaved: false,
   dayColors: null,
@@ -56,7 +60,8 @@ export const useUiStore = create<UiState>()((set) => ({
   isTempListSaved: false,
   demoTasks: DEMO_TASKS,
   setDemoState: (s) => set({ demoState: s }),
-  setActiveList: (id) => set({ activeListId: id }),
+  setActiveList: (id) => set({ activeListId: id, activeSmartListId: null }),
+  setActiveSmartList: (id) => set({ activeSmartListId: id, activeListId: null }),
   setSearch: (q) => set({ searchQuery: q }),
   setFilterStatus: (s) => set({ filterStatus: s }),
   setFilterPriority: (p) => set({ filterPriority: p }),

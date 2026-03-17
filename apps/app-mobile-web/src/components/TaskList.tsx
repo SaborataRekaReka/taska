@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { DEMO_LISTS } from '../lib/demoData';
+import { isTaskInSmartList } from '../lib/smartLists';
 import type { TaskPriority } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
@@ -24,6 +25,7 @@ function isDueToday(deadline: string | null): boolean {
 export function TaskList() {
   const activeListId = useUiStore((s) => s.activeListId);
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
+  const activeSmartListId = useUiStore((s) => s.activeSmartListId);
   const isTempListVisible = useUiStore((s) => s.isTempListVisible);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const filterPriority = useUiStore((s) => s.filterPriority);
@@ -48,6 +50,10 @@ export function TaskList() {
 
   const listScopedTasks = useMemo(
     () => demoTasks.filter((task) => {
+      if (activeSmartListId) {
+        return isTaskInSmartList(task, activeSmartListId);
+      }
+
       if (activeListId === '__no_list__') {
         return task.listId === null;
       }
@@ -62,7 +68,7 @@ export function TaskList() {
 
       return true;
     }),
-    [activeListId, demoTasks, isMyDaySaved],
+    [activeListId, activeSmartListId, demoTasks, isMyDaySaved],
   );
 
   const filteredTasks = useMemo(
