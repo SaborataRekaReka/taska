@@ -1,11 +1,7 @@
-.bar {
+﻿.bar {
   overflow-x: auto;
   scrollbar-width: none;
   flex-shrink: 0;
-  background: var(--surface-62);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-pill);
-  padding: 4px;
 }
 
 .bar::-webkit-scrollbar {
@@ -14,27 +10,34 @@
 
 .tabs {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  min-height: 48px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 23, 42, 0.06);
   white-space: nowrap;
 }
 
 .activeIndicator {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 4px;
+  bottom: 4px;
   left: 0;
   width: 0;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 0 0 1px var(--border-light);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 8px 16px rgba(15, 23, 42, 0.1);
   opacity: 0;
-  transition:
-    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s ease;
   pointer-events: none;
+  transition:
+    left 0.32s cubic-bezier(0.25, 0.8, 0.25, 1),
+    width 0.32s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.18s ease;
 }
 
 .activeIndicatorVisible {
@@ -42,117 +45,105 @@
 }
 
 .tab {
-  border: none;
-  background: transparent;
-  font-family: var(--font);
-  font-style: normal;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1;
-  min-height: 32px;
-  padding: 0 12px;
-  color: var(--text-secondary);
-  transition: background-color 0.15s ease, color 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: var(--r-pill);
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  color: rgba(17, 24, 39, 0.58);
+  transition: color 0.2s ease;
 }
 
 .tabMain {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: transparent;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
   border: none;
-  padding: 0;
+  border-radius: 999px;
+  background: transparent;
   color: inherit;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .tab:hover {
-  color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.05);
+  color: rgba(17, 24, 39, 0.86);
 }
 
 .active {
-  color: var(--text-primary);
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 0 0 1px var(--border-light);
+  color: #111827;
 }
 
 .badge {
   min-width: 18px;
   height: 18px;
-  border-radius: var(--r-pill);
+  border-radius: 999px;
   padding: 0 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
-  color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.08);
+  color: #111827;
+  background: rgba(17, 24, 39, 0.1);
 }
 
 .chevron {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(20, 20, 20, 0.08);
+  background: rgba(17, 24, 39, 0.1);
   font-size: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 2px;
 }
 
 .addBtn {
-  font-size: 14px;
-  min-width: 32px;
-  height: 32px;
-  border-radius: var(--r-pill);
-  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: rgba(17, 24, 39, 0.72);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  padding: 0 12px;
+  font-size: 20px;
+  line-height: 1;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .addBtn:hover {
-  color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.06);
+  background: rgba(17, 24, 39, 0.08);
+  color: #111827;
 }
 
 .addInput {
-  font-size: 14px;
-  line-height: 1;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--border);
-  width: 160px;
-}
-
-.moreTrigger {
-  margin-left: 2px;
-}
-
-.moreTab {
-  padding-right: 4px;
-}
-
-.moreListsTrigger {
-  width: auto;
-  height: 28px;
-  padding: 0 10px;
+  position: relative;
+  z-index: 1;
+  height: 40px;
+  width: 170px;
+  padding: 0 14px;
   border-radius: 999px;
-  color: inherit;
+  border: 1px solid rgba(17, 24, 39, 0.16);
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+  font-size: 14px;
 }
 
-.moreListsTrigger:hover {
-  color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.06);
+.panelMenuTrigger {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 999px;
+  color: rgba(17, 24, 39, 0.72);
 }

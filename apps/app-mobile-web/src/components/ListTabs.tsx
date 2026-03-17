@@ -1,14 +1,22 @@
-import { useMemo, useState } from 'react';
+﻿import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useUiStore } from '../stores/ui';
 import { DEMO_LISTS } from '../lib/demoData';
-import eyeIcon from '../assests/eye.svg';
-import editIcon from '../assests/edit.svg';
-import trashIcon from '../assests/trash.svg';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
 const BASE_TAB_ORDER = ['no-list', 'my-day', 'work', 'personal', 'study'] as const;
-const PRIMARY_VISIBLE_COUNT = 4;
+
+interface IndicatorStyle {
+  left: number;
+  width: number;
+  visible: boolean;
+}
+
+const HIDDEN_INDICATOR: IndicatorStyle = {
+  left: 0,
+  width: 0,
+  visible: false,
+};
 
 export function ListTabs() {
   const demoState = useUiStore((s) => s.demoState);
@@ -24,7 +32,7 @@ export function ListTabs() {
   const [activeTab, setActiveTab] = useState<string>('work');
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, visible: false });
+  const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle>(HIDDEN_INDICATOR);
 
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -51,8 +59,49 @@ export function ListTabs() {
     ? tabOrder.filter((id) => id !== 'no-list')
     : tabOrder;
 
-  const primaryTabs = visibleTabs.slice(0, PRIMARY_VISIBLE_COUNT);
-  const secondaryTabs = visibleTabs.slice(PRIMARY_VISIBLE_COUNT);
+  const updateIndicator = useCallback(() => {
+    const tabsNode = tabsRef.current;
+    const activeId = currentActiveTab ?? visibleTabs[0] ?? null;
+
+    if (!tabsNode || !activeId) {
+      setIndicatorStyle(HIDDEN_INDICATOR);
+      return;
+    }
+
+    const activeNode = tabRefs.current[activeId];
+
+    if (!activeNode) {
+      setIndicatorStyle(HIDDEN_INDICATOR);
+      return;
+    }
+
+    const tabsRect = tabsNode.getBoundingClientRect();
+    const activeRect = activeNode.getBoundingClientRect();
+
+    setIndicatorStyle({
+      left: activeRect.left - tabsRect.left,
+      width: activeRect.width,
+      visible: true,
+    });
+  }, [currentActiveTab, visibleTabs]);
+
+  useLayoutEffect(() => {
+    const frameId = requestAnimationFrame(updateIndicator);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [updateIndicator, adding]);
+
+  useEffect(() => {
+    function onResize() {
+      updateIndicator();
+    }
+
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [updateIndicator]);
 
   function getLabel(id: string): string {
     if (id === 'my-day') return 'Мой день';
@@ -81,35 +130,19 @@ export function ListTabs() {
     closeMyDayModal();
   }
 
-  const isSecondaryActive = secondaryTabs.includes(currentActiveTab ?? '');
-
-  const moreItems = useMemo(() => {
-    const baseItems = secondaryTabs.map((id) => ({
-      id: `more-open-${id}`,
-      label: getLabel(id),
-      onSelect: () => handleTabClick(id),
-      icon: eyeIcon,
-    }));
-
-    if (secondaryTabs.includes('temp') && !isTempListSaved) {
-      return [
-        {
-          id: 'more-save-temp',
-          label: 'Сохранить временный список',
-          onSelect: () => saveTempList(),
-          icon: editIcon,
-        },
-        ...baseItems,
-      ];
-    }
-
-    return baseItems;
-  }, [secondaryTabs, isTempListSaved]);
-
   return (
     <div className={styles.bar}>
-      <div className={styles.tabs}>
-        {primaryTabs.map((id) => {
+      <div className={styles.tabs} ref={tabsRef}>
+        <span
+          className={`${styles.activeIndicator} ${indicatorStyle.visible ? styles.activeIndicatorVisible : ''}`}
+          style={{
+            left: `${indicatorStyle.left}px`,
+            width: `${indicatorStyle.width}px`,
+          }}
+          aria-hidden
+        />
+
+        {visibleTabs.map((id) => {
           const isActive = currentActiveTab === id;
 
           return (
@@ -138,62 +171,47 @@ export function ListTabs() {
                   </span>
                 )}
               </button>
-              {isActive && (
-                <DropdownMenu
-                  items={[
-                    {
-                      id: `open-${id}`,
-                      label: 'Открыть список',
-                      onSelect: () => handleTabClick(id),
-                      icon: eyeIcon,
-                    },
-                    {
-                      id: `rename-${id}`,
-                      label: 'Переименовать (скоро)',
-                      onSelect: () => undefined,
-                      disabled: true,
-                      icon: editIcon,
-                    },
-                    {
-                      id: `delete-${id}`,
-                      label: 'Удалить (скоро)',
-                      onSelect: () => undefined,
-                      disabled: true,
-                      danger: true,
-                      icon: trashIcon,
-                    },
-                  ]}
-                  triggerAriaLabel={`Меню списка ${getLabel(id)}`}
-                  triggerClassName={styles.moreTrigger}
-                />
-              )}
             </div>
           );
         })}
-
-        {secondaryTabs.length > 0 && (
-          <div className={`${styles.tab} ${styles.moreTab} ${isSecondaryActive ? styles.active : ''}`}>
-            <DropdownMenu
-              items={moreItems}
-              triggerLabel={`Ещё (${secondaryTabs.length})`}
-              triggerAriaLabel="Открыть дополнительные списки"
-              triggerClassName={styles.moreListsTrigger}
-            />
-          </div>
-        )}
 
         {adding ? (
           <input
             className={styles.addInput}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Escape') setAdding(false); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setAdding(false);
+              }
+            }}
             onBlur={() => setAdding(false)}
             placeholder="Название..."
             autoFocus
           />
         ) : (
-          <button type="button" className={styles.addBtn} onClick={() => setAdding(true)}>+</button>
+          <DropdownMenu
+            items={[
+              {
+                id: 'new-list',
+                label: 'Новый список',
+                onSelect: () => setAdding(true),
+              },
+              {
+                id: 'rename-list',
+                label: 'Переименовать',
+                onSelect: () => undefined,
+              },
+              {
+                id: 'delete-list',
+                label: 'Удалить',
+                onSelect: () => undefined,
+                danger: true,
+              },
+            ]}
+            triggerAriaLabel="Действия списков"
+            triggerClassName={styles.panelMenuTrigger}
+          />
         )}
       </div>
     </div>
