@@ -37,6 +37,10 @@
   cursor: grabbing;
 }
 
+.tabsOrderMode {
+  cursor: default;
+}
+
 .activeIndicator {
   position: absolute;
   top: 0;
@@ -64,6 +68,14 @@
   color: #000000;
 }
 
+.tabOrderable {
+  cursor: grab;
+}
+
+.tabDragging {
+  opacity: 0.52;
+}
+
 .tabMain {
   border: none;
   border-radius: inherit;
@@ -80,8 +92,33 @@
   white-space: nowrap;
 }
 
+.tabMainEditable {
+  min-width: 124px;
+  justify-content: flex-start;
+}
+
+.tabMainOrderable {
+  cursor: inherit;
+}
+
 .active .tabMain {
   background: transparent;
+}
+
+.renameInput {
+  width: 100%;
+  min-width: 88px;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font: inherit;
+  line-height: inherit;
+  padding: 0;
+  outline: none;
+}
+
+.renameInput::selection {
+  background: rgba(17, 24, 39, 0.12);
 }
 
 .badge,

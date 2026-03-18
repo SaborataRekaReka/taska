@@ -41,6 +41,8 @@ interface UiState {
   triggerTempListFromAi: () => void;
   saveTempList: () => void;
   addDemoList: (name: string) => string | null;
+  renameDemoList: (listId: string, name: string) => boolean;
+  reorderDemoLists: (sourceId: string, targetId: string, placement?: 'before' | 'after') => void;
   addDemoTask: (title: string) => void;
   updateDemoTask: (taskId: string, patch: Partial<Task>) => void;
 }
@@ -131,6 +133,66 @@ export const useUiStore = create<UiState>()((set) => ({
 
     return createdOrExistingId;
   },
+  renameDemoList: (listId, name) => {
+    const normalizedName = name.trim().replace(/\s+/g, ' ');
+    if (!normalizedName) {
+      return false;
+    }
+
+    let renamed = false;
+
+    set((state) => {
+      const currentList = state.demoLists.find((list) => list.id === listId);
+      if (!currentList) {
+        return state;
+      }
+
+      const hasDuplicate = state.demoLists.some((list) => (
+        list.id !== listId && list.name.trim().toLowerCase() === normalizedName.toLowerCase()
+      ));
+
+      if (hasDuplicate || currentList.name === normalizedName) {
+        return state;
+      }
+
+      renamed = true;
+
+      return {
+        demoLists: state.demoLists.map((list) => (
+          list.id === listId
+            ? { ...list, name: normalizedName }
+            : list
+        )),
+        demoTasks: state.demoTasks.map((task) => (
+          task.listId === listId && task.list
+            ? { ...task, list: { ...task.list, name: normalizedName } }
+            : task
+        )),
+      };
+    });
+
+    return renamed;
+  },
+  reorderDemoLists: (sourceId, targetId, placement = 'before') => set((state) => {
+    if (sourceId === targetId) {
+      return state;
+    }
+
+    const sourceIndex = state.demoLists.findIndex((list) => list.id === sourceId);
+    const targetIndex = state.demoLists.findIndex((list) => list.id === targetId);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return state;
+    }
+
+    const nextLists = [...state.demoLists];
+    const [movedList] = nextLists.splice(sourceIndex, 1);
+    const adjustedTargetIndex = nextLists.findIndex((list) => list.id === targetId);
+    const insertIndex = placement === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex;
+    nextLists.splice(insertIndex, 0, movedList);
+
+    return { demoLists: nextLists };
+  }),
   addDemoTask: (title) => set((state) => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
