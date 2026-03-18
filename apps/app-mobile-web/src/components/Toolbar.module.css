@@ -143,6 +143,9 @@
 .filterIcon {
   display: block;
   flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
 }
 
 .priorityGroup {

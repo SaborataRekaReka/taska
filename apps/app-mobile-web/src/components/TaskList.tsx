@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { DEMO_LISTS } from '../lib/demoData';
 import { isTaskInSmartList } from '../lib/smartLists';
 import type { TaskPriority } from '../lib/types';
 import { useUiStore } from '../stores/ui';
@@ -26,6 +25,7 @@ export function TaskList() {
   const activeListId = useUiStore((s) => s.activeListId);
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const activeSmartListId = useUiStore((s) => s.activeSmartListId);
+  const demoLists = useUiStore((s) => s.demoLists);
   const isTempListVisible = useUiStore((s) => s.isTempListVisible);
   const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
   const filterPriority = useUiStore((s) => s.filterPriority);
@@ -36,11 +36,11 @@ export function TaskList() {
   const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
 
   const availableTaskLists = useMemo(
-    () => DEMO_LISTS
+    () => demoLists
       .filter((list) => list.id !== 'no-list')
       .filter((list) => list.id !== 'temp' || isTempListVisible)
       .map((list) => ({ id: list.id, name: list.name })),
-    [isTempListVisible],
+    [demoLists, isTempListVisible],
   );
 
   const listNameById = useMemo(

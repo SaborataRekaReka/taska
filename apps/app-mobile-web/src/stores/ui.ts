@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import type { DemoState } from '../lib/demoData';
 import { CURRENT_DEMO_STATE, DEMO_LISTS, DEMO_TASKS } from '../lib/demoData';
 import type { SmartListId } from '../lib/smartLists';
+import type { List } from '../lib/types';
 import type { Task } from '../lib/types';
 
 interface UiState {
   demoState: DemoState;
+  demoLists: List[];
   activeListId: string | null;
   activeSmartListId: SmartListId | null;
   isMyDayModalOpen: boolean;
@@ -38,12 +40,14 @@ interface UiState {
   setDayColors: (colors: [string, string]) => void;
   triggerTempListFromAi: () => void;
   saveTempList: () => void;
+  addDemoList: (name: string) => string | null;
   addDemoTask: (title: string) => void;
   updateDemoTask: (taskId: string, patch: Partial<Task>) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
   demoState: CURRENT_DEMO_STATE,
+  demoLists: DEMO_LISTS,
   activeListId: null,
   activeSmartListId: null,
   isMyDayModalOpen: CURRENT_DEMO_STATE === 'balanceModalOpen',
@@ -84,6 +88,49 @@ export const useUiStore = create<UiState>()((set) => ({
     isTempListSaved: true,
     demoState: 'workListHover',
   }),
+  addDemoList: (name) => {
+    const normalizedName = name.trim().replace(/\s+/g, ' ');
+    if (!normalizedName) {
+      return null;
+    }
+
+    let createdOrExistingId: string | null = null;
+
+    set((state) => {
+      const existingList = state.demoLists.find(
+        (list) => list.name.trim().toLowerCase() === normalizedName.toLowerCase(),
+      );
+
+      if (existingList) {
+        createdOrExistingId = existingList.id;
+        return state;
+      }
+
+      const baseId = `list-${Date.now()}`;
+      let nextId = baseId;
+      let suffix = 1;
+      while (state.demoLists.some((list) => list.id === nextId)) {
+        nextId = `${baseId}-${suffix}`;
+        suffix += 1;
+      }
+
+      createdOrExistingId = nextId;
+      const nextList: List = {
+        id: nextId,
+        userId: 'u1',
+        name: normalizedName,
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        _count: { tasks: 0 },
+      };
+
+      return {
+        demoLists: [...state.demoLists, nextList],
+      };
+    });
+
+    return createdOrExistingId;
+  },
   addDemoTask: (title) => set((state) => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
@@ -103,7 +150,7 @@ export const useUiStore = create<UiState>()((set) => ({
     })();
 
     const matchingList = normalizedListId
-      ? DEMO_LISTS.find((list) => list.id === normalizedListId)
+      ? state.demoLists.find((list) => list.id === normalizedListId)
       : null;
 
     const createdAt = new Date().toISOString();

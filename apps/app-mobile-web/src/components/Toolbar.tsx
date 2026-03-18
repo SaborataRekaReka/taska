@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import clockIcon from '../assests/clock.svg';
 import { useUiStore } from '../stores/ui';
 import styles from './Toolbar.module.css';
 
@@ -87,10 +88,7 @@ export function Toolbar() {
           aria-expanded={openMenu === 'urgency'}
         >
           <span className={styles.iconText}>
-            <svg className={styles.filterIcon} width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden>
-              <circle cx="9" cy="9" r="7.2" stroke="currentColor" strokeWidth="1.7" />
-              <path d="M9 4.8V9H12.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-            </svg>
+            <img src={clockIcon} className={styles.filterIcon} alt="" aria-hidden />
             <span>{`Срочность · ${urgencyLabel}`}</span>
           </span>
           <span className={styles.caret}>▾</span>
