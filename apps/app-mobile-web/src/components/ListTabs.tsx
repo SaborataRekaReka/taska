@@ -5,8 +5,7 @@ import { useUiStore } from '../stores/ui';
 import { DropdownMenu } from './DropdownMenu';
 import styles from './ListTabs.module.css';
 
-const BASE_TAB_ORDER = ['my-day', 'all', 'work', 'personal', 'study', 'no-list'] as const;
-const STATIC_LIST_IDS = ['work', 'personal', 'study', 'no-list', 'temp'] as const;
+const META_TAB_ORDER = ['my-day', 'all'] as const;
 
 const URGENCY_OPTIONS = [
   { id: null, label: 'Любая' },
@@ -24,6 +23,7 @@ const PRIORITY_OPTIONS = [
 ] as const;
 
 type OpenMenu = 'urgency' | 'priority' | null;
+type ListsPanelMode = 'default' | 'rename' | 'order';
 
 interface IndicatorStyle {
   left: number;
@@ -58,6 +58,8 @@ export function ListTabs() {
   const setActiveList = useUiStore((s) => s.setActiveList);
   const addDemoList = useUiStore((s) => s.addDemoList);
   const saveTempList = useUiStore((s) => s.saveTempList);
+  const renameDemoList = useUiStore((s) => s.renameDemoList);
+  const reorderDemoLists = useUiStore((s) => s.reorderDemoLists);
   const filterUrgency = useUiStore((s) => s.filterUrgency);
   const setFilterUrgency = useUiStore((s) => s.setFilterUrgency);
   const filterPriority = useUiStore((s) => s.filterPriority);
@@ -70,6 +72,10 @@ export function ListTabs() {
   const [isIndicatorAnimated, setIsIndicatorAnimated] = useState(false);
   const [isTabsDragging, setIsTabsDragging] = useState(false);
   const [fixedActionsWidth, setFixedActionsWidth] = useState(0);
+  const [listsPanelMode, setListsPanelMode] = useState<ListsPanelMode>('default');
+  const [editingNames, setEditingNames] = useState<Record<string, string>>({});
+  const [focusedEditableId, setFocusedEditableId] = useState<string | null>(null);
+  const [draggedListId, setDraggedListId] = useState<string | null>(null);
 
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -86,6 +92,7 @@ export function ListTabs() {
   });
   const suppressTabClickRef = useRef(false);
   const suppressClickTimeoutRef = useRef<number | null>(null);
+  const renameInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const isBalance = demoState === 'balanceModalOpen' || demoState === 'dayCreated';
   const tabFromStore = (() => {
@@ -103,18 +110,18 @@ export function ListTabs() {
   const currentActiveTab = tabFromStore ?? 'all';
 
   const noListCount = demoLists.find((l) => l.id === 'no-list')?._count.tasks ?? 0;
-  const customTabIds = demoLists
+  const orderedListTabIds = demoLists
     .map((list) => list.id)
-    .filter((id) => !STATIC_LIST_IDS.includes(id as (typeof STATIC_LIST_IDS)[number]));
-  const tabOrder = [
-    ...BASE_TAB_ORDER.filter((id) => id !== 'no-list'),
-    ...customTabIds,
-    ...(isTempListVisible ? ['temp', 'no-list'] : ['no-list']),
-  ];
+    .filter((id) => (isTempListVisible ? true : id !== 'temp'));
+  const tabOrder = [...META_TAB_ORDER, ...orderedListTabIds];
 
   const visibleTabs = isBalance
     ? tabOrder.filter((id) => id !== 'no-list')
     : tabOrder;
+  const renameableTabIds = visibleTabs.filter((id) => id !== 'my-day' && id !== 'all' && id !== 'no-list');
+  const reorderableTabIds = visibleTabs.filter((id) => id !== 'my-day' && id !== 'all');
+  const isRenameMode = listsPanelMode === 'rename';
+  const isOrderMode = listsPanelMode === 'order';
 
   const updateIndicator = useCallback(() => {
     const tabsNode = tabsRef.current;
@@ -261,6 +268,38 @@ export function ListTabs() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [openMenu]);
 
+  useEffect(() => {
+    if (!isRenameMode) {
+      setFocusedEditableId(null);
+      setEditingNames({});
+      return;
+    }
+
+    setEditingNames(
+      Object.fromEntries(
+        renameableTabIds.map((id) => [id, getLabel(id)]),
+      ),
+    );
+    setFocusedEditableId((current) => current ?? renameableTabIds[0] ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRenameMode, demoLists]);
+
+  useEffect(() => {
+    if (!focusedEditableId || !isRenameMode) {
+      return;
+    }
+
+    const input = renameInputRefs.current[focusedEditableId];
+    if (!input) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      input.focus();
+      input.select();
+    });
+  }, [focusedEditableId, isRenameMode]);
+
   useLayoutEffect(() => {
     const node = fixedActionsRef.current;
     if (!node) {
@@ -355,6 +394,10 @@ export function ListTabs() {
   }
 
   function handleTabsPointerDown(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (isOrderMode) {
+      return;
+    }
+
     if (event.button !== 0) {
       return;
     }
@@ -380,6 +423,10 @@ export function ListTabs() {
   }
 
   function handleTabsPointerMove(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (isOrderMode) {
+      return;
+    }
+
     const tabsNode = tabsRef.current;
     const dragState = dragStateRef.current;
 
@@ -408,6 +455,10 @@ export function ListTabs() {
   }
 
   function handleTabsPointerUp(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (isOrderMode) {
+      return;
+    }
+
     if (dragStateRef.current.pointerId !== event.pointerId) {
       return;
     }
@@ -416,6 +467,10 @@ export function ListTabs() {
   }
 
   function handleTabsPointerCancel(event: ReactPointerEvent<HTMLDivElement>): void {
+    if (isOrderMode) {
+      return;
+    }
+
     if (dragStateRef.current.pointerId !== event.pointerId) {
       return;
     }
@@ -434,6 +489,43 @@ export function ListTabs() {
     setNewName('');
   }
 
+  function setPanelMode(nextMode: ListsPanelMode): void {
+    setListsPanelMode((currentMode) => {
+      if (currentMode === 'rename' && nextMode !== 'rename') {
+        renameableTabIds.forEach((id) => {
+          const nextValue = editingNames[id] ?? getLabel(id);
+          renameDemoList(id, nextValue);
+        });
+      }
+
+      return nextMode;
+    });
+    if (nextMode !== 'rename') {
+      setFocusedEditableId(null);
+    }
+  }
+
+  function finishRenameMode(): void {
+    renameableTabIds.forEach((id) => {
+      const nextValue = editingNames[id] ?? getLabel(id);
+      renameDemoList(id, nextValue);
+    });
+    setPanelMode('default');
+    setFocusedEditableId(null);
+  }
+
+  function handleRenameInputCommit(listId: string): void {
+    const nextValue = editingNames[listId] ?? getLabel(listId);
+    const renamed = renameDemoList(listId, nextValue);
+
+    if (!renamed) {
+      setEditingNames((current) => ({
+        ...current,
+        [listId]: getLabel(listId),
+      }));
+    }
+  }
+
   function submitNewList(): void {
     const createdOrExistingListId = addDemoList(newName);
 
@@ -447,6 +539,17 @@ export function ListTabs() {
   }
 
   function handleTabClick(id: string): void {
+    if (isRenameMode) {
+      if (renameableTabIds.includes(id)) {
+        setFocusedEditableId(id);
+      }
+      return;
+    }
+
+    if (isOrderMode) {
+      return;
+    }
+
     if (id === 'my-day') {
       setActiveList('__my_day__');
       if (isMyDaySaved) {
@@ -492,7 +595,7 @@ export function ListTabs() {
 
       <div className={styles.tabsViewport} style={tabsViewportStyle}>
         <div
-          className={`${styles.tabs} ${isTabsDragging ? styles.tabsDragging : ''}`}
+          className={`${styles.tabs} ${isTabsDragging ? styles.tabsDragging : ''} ${isOrderMode ? styles.tabsOrderMode : ''}`}
           ref={tabsRef}
           onPointerDown={handleTabsPointerDown}
           onPointerMove={handleTabsPointerMove}
@@ -510,6 +613,10 @@ export function ListTabs() {
 
           {visibleTabs.map((id) => {
             const isActive = currentActiveTab === id;
+            const isEditable = renameableTabIds.includes(id);
+            const isReorderable = reorderableTabIds.includes(id);
+            const showModeActive = isRenameMode && isEditable;
+            const isDragSource = draggedListId === id;
 
             return (
               <div
@@ -517,11 +624,46 @@ export function ListTabs() {
                 ref={(node) => {
                   tabRefs.current[id] = node;
                 }}
-                className={`${styles.tab} ${isActive ? styles.active : ''}`}
+                className={`${styles.tab} ${isActive || showModeActive ? styles.active : ''} ${isOrderMode && isReorderable ? styles.tabOrderable : ''} ${isDragSource ? styles.tabDragging : ''}`}
+                draggable={isOrderMode && isReorderable}
+                onDragStart={(event) => {
+                  if (!isOrderMode || !isReorderable) {
+                    return;
+                  }
+
+                  setDraggedListId(id);
+                  event.dataTransfer.effectAllowed = 'move';
+                  event.dataTransfer.setData('text/plain', id);
+                }}
+                onDragOver={(event) => {
+                  if (!isOrderMode || !isReorderable || !draggedListId || draggedListId === id) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = 'move';
+                }}
+                onDrop={(event) => {
+                  if (!isOrderMode || !isReorderable) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  const sourceId = event.dataTransfer.getData('text/plain') || draggedListId;
+                  if (sourceId) {
+                    const targetRect = event.currentTarget.getBoundingClientRect();
+                    const placement = event.clientX > targetRect.left + targetRect.width / 2 ? 'after' : 'before';
+                    reorderDemoLists(sourceId, id, placement);
+                  }
+                  setDraggedListId(null);
+                }}
+                onDragEnd={() => {
+                  setDraggedListId(null);
+                }}
               >
                 <button
                   type="button"
-                  className={styles.tabMain}
+                  className={`${styles.tabMain} ${showModeActive ? styles.tabMainEditable : ''} ${isOrderMode && isReorderable ? styles.tabMainOrderable : ''}`}
                   onClick={() => {
                     if (suppressTabClickRef.current) {
                       return;
@@ -530,7 +672,51 @@ export function ListTabs() {
                     handleTabClick(id);
                   }}
                 >
-                  <span>{getLabel(id)}</span>
+                  {isRenameMode && isEditable ? (
+                    <input
+                      ref={(node) => {
+                        renameInputRefs.current[id] = node;
+                      }}
+                      className={styles.renameInput}
+                      value={editingNames[id] ?? getLabel(id)}
+                      onChange={(event) => {
+                        setEditingNames((current) => ({
+                          ...current,
+                          [id]: event.target.value,
+                        }));
+                      }}
+                      onFocus={() => setFocusedEditableId(id)}
+                      onClick={(event) => event.stopPropagation()}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onBlur={() => {
+                        handleRenameInputCommit(id);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          handleRenameInputCommit(id);
+                          const currentIndex = renameableTabIds.indexOf(id);
+                          const nextId = renameableTabIds[currentIndex + 1] ?? null;
+                          if (nextId) {
+                            setFocusedEditableId(nextId);
+                          } else {
+                            finishRenameMode();
+                          }
+                        }
+
+                        if (event.key === 'Escape') {
+                          event.preventDefault();
+                          setEditingNames((current) => ({
+                            ...current,
+                            [id]: getLabel(id),
+                          }));
+                          setPanelMode('default');
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span>{getLabel(id)}</span>
+                  )}
                   {id === 'no-list' && noListCount > 0 && <span className={styles.badge}>{noListCount}</span>}
                   {id === 'temp' && isTempListVisible && !isTempListSaved && (
                     <span
@@ -580,6 +766,7 @@ export function ListTabs() {
           className={styles.plusBtn}
           aria-label="Добавить список"
           onClick={() => {
+            setPanelMode('default');
             setNewName('');
             setAdding(true);
           }}
@@ -590,17 +777,23 @@ export function ListTabs() {
         <DropdownMenu
           items={[
             {
-              id: 'new-list',
-              label: 'Новый список',
+              id: 'rename-list',
+              label: isRenameMode ? 'Завершить переименование' : 'Переименовать',
               onSelect: () => {
-                setNewName('');
-                setAdding(true);
+                if (isRenameMode) {
+                  finishRenameMode();
+                  return;
+                }
+
+                setPanelMode('rename');
               },
             },
             {
-              id: 'rename-list',
-              label: 'Переименовать',
-              onSelect: () => undefined,
+              id: 'order-lists',
+              label: isOrderMode ? 'Завершить порядок' : 'Порядок',
+              onSelect: () => {
+                setPanelMode(isOrderMode ? 'default' : 'order');
+              },
             },
             {
               id: 'delete-list',
