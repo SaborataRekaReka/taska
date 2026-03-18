@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import clockIcon from '../assests/clock.svg';
 import editIcon from '../assests/edit_2.svg';
@@ -32,6 +32,8 @@ interface ReorderDragSession {
   currentClientX: number;
   startScrollLeft: number;
   currentScrollLeft: number;
+  pointerOffsetX: number;
+  dragTranslateX: number;
   hasMoved: boolean;
 }
 
@@ -418,11 +420,63 @@ export function ListTabs() {
     return () => {
       reorderDragRef.current = null;
       document.body.style.removeProperty('user-select');
+      document.body.style.removeProperty('cursor');
       if (suppressClickTimeoutRef.current !== null) {
         window.clearTimeout(suppressClickTimeoutRef.current);
       }
     };
   }, []);
+
+
+  useEffect(() => {
+    const session = reorderDragRef.current;
+
+    if (!session) {
+      document.body.style.removeProperty('user-select');
+      document.body.style.removeProperty('cursor');
+      return;
+    }
+
+    function handleWindowPointerMove(event: PointerEvent): void {
+      if (reorderDragRef.current?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      moveDraggedList(event.clientX, event.pointerId);
+    }
+
+    function handleWindowPointerUp(event: PointerEvent): void {
+      if (reorderDragRef.current?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      finishReorderDrag(true);
+    }
+
+    function handleWindowPointerCancel(event: PointerEvent): void {
+      if (reorderDragRef.current?.pointerId !== event.pointerId) {
+        return;
+      }
+
+      finishReorderDrag(false);
+    }
+
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'grabbing';
+
+    window.addEventListener('pointermove', handleWindowPointerMove, { passive: false });
+    window.addEventListener('pointerup', handleWindowPointerUp);
+    window.addEventListener('pointercancel', handleWindowPointerCancel);
+
+    return () => {
+      document.body.style.removeProperty('user-select');
+      document.body.style.removeProperty('cursor');
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener('pointerup', handleWindowPointerUp);
+      window.removeEventListener('pointercancel', handleWindowPointerCancel);
+    };
+  }, [reorderDrag]);
 
   useEffect(() => {
     function handleWindowPointerEnd(): void {
@@ -712,7 +766,7 @@ export function ListTabs() {
     setFocusedEditableId((current) => (current === session.listId ? null : current));
   }
 
-  function moveDraggedList(clientX: number, pointerId: number): void {
+  const moveDraggedList = useCallback((clientX: number, pointerId: number): void => {
     const session = reorderDragRef.current;
     const tabsNode = tabsRef.current;
 
@@ -766,10 +820,16 @@ export function ListTabs() {
     targetOrder.splice(insertIndex, 0, session.listId);
 
     const hasMoved = Math.abs(clientX - session.startClientX) > 2 || tabsNode.scrollLeft !== session.startScrollLeft;
+    const draggedNode = tabRefs.current[session.listId];
+    const nextTranslateX = draggedNode
+      ? clientX - session.pointerOffsetX - draggedNode.getBoundingClientRect().left
+      : session.dragTranslateX;
+
     const nextSession: ReorderDragSession = {
       ...session,
       currentClientX: clientX,
       currentScrollLeft: tabsNode.scrollLeft,
+      dragTranslateX: nextTranslateX,
       hasMoved: session.hasMoved || hasMoved,
     };
 
@@ -781,7 +841,7 @@ export function ListTabs() {
       setReorderPreviewIds(targetOrder);
       animateReorderShift(firstLeftById, session.listId);
     }
-  }
+  }, [animateReorderShift, reorderableTabIds]);
 
   function startListReorderDrag(event: ReactPointerEvent<HTMLElement>, listId: string): void {
     if (!isRenameMode || !reorderableTabIds.includes(listId) || event.button !== 0) {
@@ -796,8 +856,10 @@ export function ListTabs() {
     event.preventDefault();
     event.stopPropagation();
 
-    const target = event.currentTarget;
-    target.setPointerCapture(event.pointerId);
+    const tabNode = tabRefs.current[listId];
+    const pointerOffsetX = tabNode
+      ? event.clientX - tabNode.getBoundingClientRect().left
+      : 0;
 
     const nextSession: ReorderDragSession = {
       listId,
@@ -806,6 +868,8 @@ export function ListTabs() {
       currentClientX: event.clientX,
       startScrollLeft: tabsNode.scrollLeft,
       currentScrollLeft: tabsNode.scrollLeft,
+      pointerOffsetX,
+      dragTranslateX: 0,
       hasMoved: false,
     };
 
@@ -908,7 +972,7 @@ export function ListTabs() {
             const isEditingThisTab = showModeActive && focusedEditableId === id;
             const isDragSource = showModeActive && reorderDrag?.listId === id;
             const dragOffsetX = isDragSource
-              ? reorderDrag.currentClientX - reorderDrag.startClientX + (reorderDrag.currentScrollLeft - reorderDrag.startScrollLeft)
+              ? reorderDrag.dragTranslateX
               : 0;
             const tabInlineStyle = isDragSource
               ? { transform: `translate3d(${dragOffsetX}px, 0, 0)` }
@@ -949,27 +1013,6 @@ export function ListTabs() {
                         event.preventDefault();
                         event.stopPropagation();
                         moveDraggedList(event.clientX, event.pointerId);
-                      }}
-                      onPointerUp={(event) => {
-                        if (reorderDragRef.current?.pointerId !== event.pointerId) {
-                          return;
-                        }
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        finishReorderDrag(true);
-                      }}
-                      onPointerCancel={(event) => {
-                        if (reorderDragRef.current?.pointerId !== event.pointerId) {
-                          return;
-                        }
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        finishReorderDrag(false);
-                      }}
-                      onLostPointerCapture={() => {
-                        finishReorderDrag(true);
                       }}
                     >
                       <span className={styles.dragHandleGlyph} aria-hidden>
