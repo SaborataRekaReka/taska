@@ -1,6 +1,7 @@
 .bar {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 10px;
   width: 100%;
   min-width: 0;
@@ -8,10 +9,17 @@
   z-index: 30;
 }
 
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
 .tabsViewport {
   min-width: 0;
-  flex: 0 1 auto;
-  max-width: calc(100% - var(--fixed-actions-width, 0px) - 10px);
+  flex: 1 1 auto;
   overflow: hidden;
   mask-image: linear-gradient(to right, black 0%, black 88%, transparent 100%);
 }
@@ -25,20 +33,19 @@
   overflow-y: hidden;
   scrollbar-width: none;
   padding: 0 2px;
-  cursor: grab;
-  touch-action: pan-y;
 }
 
 .tabs::-webkit-scrollbar {
   display: none;
 }
 
-.tabsDragging {
-  cursor: grabbing;
+.tabsDraggable {
+  cursor: grab;
+  touch-action: pan-y;
 }
 
-.tabsOrderMode {
-  cursor: default;
+.tabsDragging {
+  cursor: grabbing;
 }
 
 .activeIndicator {
@@ -61,19 +68,16 @@
   transition: none;
 }
 
+.activeIndicatorHidden {
+  opacity: 0;
+}
+
 .tab {
   position: relative;
   z-index: 1;
   border-radius: 55px;
   color: #000000;
-}
-
-.tabOrderable {
-  cursor: grab;
-}
-
-.tabDragging {
-  opacity: 0.52;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .tabMain {
@@ -92,22 +96,76 @@
   white-space: nowrap;
 }
 
-.tabMainEditable {
-  min-width: 124px;
-  justify-content: flex-start;
+.tabMainRenameMode {
+  background: #ffffff;
 }
 
-.tabMainOrderable {
-  cursor: inherit;
+.tabMainReorderable {
+  padding-left: 12px;
 }
 
 .active .tabMain {
   background: transparent;
 }
 
+.active .tabMainRenameMode {
+  background: #ffffff;
+}
+
+.tabDragSource {
+  z-index: 6;
+  transition: none;
+  will-change: transform;
+}
+
+.tabMainDragSource {
+  box-shadow:
+    0 16px 28px rgba(15, 23, 42, 0.2),
+    0 3px 8px rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+}
+
+.dragHandle {
+  width: 20px;
+  height: 30px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: rgba(17, 24, 39, 0.5);
+  background: rgba(17, 24, 39, 0.06);
+  flex-shrink: 0;
+  user-select: none;
+  touch-action: none;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+  background: rgba(17, 24, 39, 0.14);
+}
+
+.dragHandle:hover {
+  color: rgba(17, 24, 39, 0.78);
+  background: rgba(17, 24, 39, 0.1);
+}
+
+.dragHandle:focus-visible {
+  outline: 2px solid rgba(17, 24, 39, 0.25);
+  outline-offset: 1px;
+}
+
+.dragHandleGlyph {
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
 .renameInput {
-  width: 100%;
-  min-width: 88px;
+  width: auto;
+  min-width: 1ch;
+  max-width: 100%;
   border: none;
   background: transparent;
   color: #111827;
@@ -115,6 +173,7 @@
   line-height: inherit;
   padding: 0;
   outline: none;
+  field-sizing: content;
 }
 
 .renameInput::selection {
@@ -135,13 +194,11 @@
 }
 
 .fixedActions {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
-  position: sticky;
-  right: 0;
-  z-index: 35;
+  z-index: 20;
 }
 
 .plusBtn {
@@ -158,16 +215,156 @@
   line-height: 1;
 }
 
-.panelMenuTrigger {
+.actionBtn {
   width: 24px;
   height: 24px;
-  min-width: 24px;
-  color: #111;
   border-radius: 999px;
+  border: none;
+  background: #000;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.panelMenuTrigger:hover {
-  background: rgba(255, 255, 255, 0.35);
+.actionBtnActive {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.actionIcon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.filtersRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.searchWrap {
+  order: 3;
+  min-width: 0;
+}
+
+.searchInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchInlineOpen {
+  z-index: 37;
+}
+
+.searchTriggerIcon {
+  color: inherit;
+  flex-shrink: 0;
+  display: block;
+}
+
+.searchRail {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 37px;
+  padding: 0 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 55px;
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(17, 24, 39, 0.58);
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition:
+    max-width 0.24s ease,
+    opacity 0.16s ease,
+    transform 0.24s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.searchInlineOpen .searchRail {
+  max-width: 340px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.searchRail:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(17, 24, 39, 0.86);
+}
+
+.searchRail:focus-within {
+  color: #111827;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(20, 20, 20, 0.14);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.52);
+}
+
+.searchInput {
+  width: 180px;
+  min-width: 120px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.searchInput:focus {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(17, 24, 39, 0.42);
+}
+
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-results-button,
+.searchInput::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.kbd {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: rgba(17, 24, 39, 0.58);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  padding: 3px 6px;
+}
+
+.clearBtn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(17, 24, 39, 0.1);
+  color: rgba(17, 24, 39, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .filterWrap {
@@ -204,6 +401,31 @@
   background: rgba(255, 255, 255, 0.44);
 }
 
+.priorityInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priorityRail {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition: max-width 0.24s ease, opacity 0.16s ease, transform 0.24s ease;
+}
+
+.priorityInlineOpen .priorityRail {
+  max-width: 280px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
 .iconBtnOpen {
   box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.2);
 }
@@ -217,16 +439,6 @@
 
 .priorityDotStrong {
   border-color: transparent;
-}
-
-.priorityItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.priorityMenu {
-  z-index: 120;
 }
 
 .priorityMenuItem {
@@ -264,21 +476,7 @@
 }
 
 .menu.priorityMenu {
-  top: calc(100% + 10px);
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  min-width: 45px;
-  width: 45px;
-  padding: 6px 4px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  display: none;
 }
 
 .menuItem {

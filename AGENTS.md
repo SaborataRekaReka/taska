@@ -4,6 +4,9 @@
 
 ---
 
+Логин: breneize@yanedx.ru
+Пароль: 131313qqq
+
 ## 1) Быстрый старт в новой сессии
 
 При старте любой задачи агент **обязан**:
@@ -245,6 +248,7 @@ curl http://localhost:3000/openapi.json
 
 - TypeScript strict, no-any
 - ESM imports (`.js` расширения в TypeScript import paths)
+- Encoding policy: all text/code files must be UTF-8. For PowerShell file writes, never use `Set-Content` without explicit `-Encoding utf8`.
 - Маленькие функции с говорящими именами
 - DTO через `class-validator` на backend
 - Без try/catch вокруг import
