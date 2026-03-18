@@ -6,7 +6,7 @@ import { EnergyBars } from './EnergyBars';
 import { MoodSelector } from './MoodSelector';
 import { GradientBlob } from '../GradientBackground';
 import { computeDayProfile } from './computeDayProfile';
-import { profileToColors } from '../../lib/profileColors';
+import { profileToColors, energyToSpread } from '../../lib/profileColors';
 import { useUiStore } from '../../stores/ui';
 import aiStarsIcon from '../../assests/ai_stars.svg';
 import type { DayProfile, DayTask, MoodLevel } from './types';
@@ -86,7 +86,8 @@ export function MyDayModal({
     [effectiveTasks, mood, energy, wishes],
   );
 
-  const [c0, c1] = useMemo(() => profileToColors(profile, mood, energy), [profile, mood, energy]);
+  const [c0, c1] = useMemo(() => profileToColors(profile, mood), [profile, mood]);
+  const blobSpread = useMemo(() => energyToSpread(energy), [energy]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -192,7 +193,7 @@ export function MyDayModal({
                   type="button"
                   className={styles.primaryAction}
                   onClick={() => {
-                    setDayColors([c0, c1]);
+                    setDayColors([c0, c1], energy);
                     onCreateMyDay?.(profile);
                   }}
                 >
@@ -203,7 +204,7 @@ export function MyDayModal({
             </section>
 
             <section className={styles.rightColumn}>
-              <GradientBlob c0={c0} c1={c1} size={360} scale={1.3} />
+              <GradientBlob c0={c0} c1={c1} size={360} scale={1.3} spread={blobSpread} />
               <DayProfileRadar profile={profile} />
             </section>
           </motion.div>

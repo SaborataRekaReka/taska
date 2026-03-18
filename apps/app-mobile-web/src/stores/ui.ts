@@ -13,6 +13,7 @@ interface UiState {
   isMyDayModalOpen: boolean;
   isMyDaySaved: boolean;
   dayColors: [string, string] | null;
+  dayEnergy: number;
   searchQuery: string;
   filterStatus: string | null;
   filterPriority: string | null;
@@ -37,11 +38,12 @@ interface UiState {
   openMyDayModal: () => void;
   closeMyDayModal: () => void;
   setMyDaySaved: (saved: boolean) => void;
-  setDayColors: (colors: [string, string]) => void;
+  setDayColors: (colors: [string, string], energy?: number) => void;
   triggerTempListFromAi: () => void;
   saveTempList: () => void;
   addDemoList: (name: string) => string | null;
   renameDemoList: (listId: string, name: string) => boolean;
+  deleteDemoList: (listId: string) => void;
   reorderDemoLists: (sourceId: string, targetId: string, placement?: 'before' | 'after') => void;
   addDemoTask: (title: string) => void;
   updateDemoTask: (taskId: string, patch: Partial<Task>) => void;
@@ -55,6 +57,7 @@ export const useUiStore = create<UiState>()((set) => ({
   isMyDayModalOpen: CURRENT_DEMO_STATE === 'balanceModalOpen',
   isMyDaySaved: false,
   dayColors: null,
+  dayEnergy: 11,
   searchQuery: '',
   filterStatus: null,
   filterPriority: null,
@@ -79,7 +82,7 @@ export const useUiStore = create<UiState>()((set) => ({
   openMyDayModal: () => set({ isMyDayModalOpen: true }),
   closeMyDayModal: () => set({ isMyDayModalOpen: false }),
   setMyDaySaved: (saved) => set({ isMyDaySaved: saved }),
-  setDayColors: (colors) => set({ dayColors: colors }),
+  setDayColors: (colors, energy = 11) => set({ dayColors: colors, dayEnergy: energy }),
   triggerTempListFromAi: () => set({
     demoState: 'tempAiList',
     isTempListVisible: true,
@@ -173,6 +176,17 @@ export const useUiStore = create<UiState>()((set) => ({
 
     return renamed;
   },
+  deleteDemoList: (listId) => set((state) => {
+    const protectedIds = ['no-list', 'temp'];
+    if (protectedIds.includes(listId)) {
+      return state;
+    }
+
+    return {
+      demoLists: state.demoLists.filter((list) => list.id !== listId),
+      activeListId: state.activeListId === listId ? null : state.activeListId,
+    };
+  }),
   reorderDemoLists: (sourceId, targetId, placement = 'before') => set((state) => {
     if (sourceId === targetId) {
       return state;

@@ -37,12 +37,6 @@ interface ReorderDragSession {
   hasMoved: boolean;
 }
 
-interface IndicatorStyle {
-  left: number;
-  width: number;
-  visible: boolean;
-}
-
 interface TabDragState {
   active: boolean;
   pointerId: number | null;
@@ -52,25 +46,18 @@ interface TabDragState {
   captured: boolean;
 }
 
-const HIDDEN_INDICATOR: IndicatorStyle = {
-  left: 0,
-  width: 0,
-  visible: false,
-};
-
 export function ListTabs() {
   const demoState = useUiStore((s) => s.demoState);
   const demoLists = useUiStore((s) => s.demoLists);
   const activeListId = useUiStore((s) => s.activeListId);
-  const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const isTempListVisible = useUiStore((s) => s.isTempListVisible);
   const isTempListSaved = useUiStore((s) => s.isTempListSaved);
-  const openMyDayModal = useUiStore((s) => s.openMyDayModal);
   const closeMyDayModal = useUiStore((s) => s.closeMyDayModal);
   const setActiveList = useUiStore((s) => s.setActiveList);
   const addDemoList = useUiStore((s) => s.addDemoList);
   const saveTempList = useUiStore((s) => s.saveTempList);
   const renameDemoList = useUiStore((s) => s.renameDemoList);
+  const deleteDemoList = useUiStore((s) => s.deleteDemoList);
   const reorderDemoLists = useUiStore((s) => s.reorderDemoLists);
   const filterUrgency = useUiStore((s) => s.filterUrgency);
   const setFilterUrgency = useUiStore((s) => s.setFilterUrgency);
@@ -83,20 +70,19 @@ export function ListTabs() {
   const [newName, setNewName] = useState('');
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [indicatorStyle, setIndicatorStyle] = useState<IndicatorStyle>(HIDDEN_INDICATOR);
-  const [isIndicatorAnimated, setIsIndicatorAnimated] = useState(false);
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
   const [isTabsDragging, setIsTabsDragging] = useState(false);
   const [listsPanelMode, setListsPanelMode] = useState<ListsPanelMode>('default');
   const [editingNames, setEditingNames] = useState<Record<string, string>>({});
   const [focusedEditableId, setFocusedEditableId] = useState<string | null>(null);
   const [reorderPreviewIds, setReorderPreviewIds] = useState<string[] | null>(null);
-  const [reorderDrag, setReorderDrag] = useState<ReorderDragSession | null>(null);
+  const [draggedListId, setDraggedListId] = useState<string | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const hasPrimedIndicatorRef = useRef(false);
   const dragStateRef = useRef<TabDragState>({
     active: false,
     pointerId: null,
@@ -154,62 +140,26 @@ export function ListTabs() {
         : id
     ));
   }, [isRenameMode, reorderPreviewIds, reorderableTabIds, visibleTabs]);
-  const shortcutLabel = useMemo(
-    () => (navigator.platform.toLowerCase().includes('mac') ? '⌘K' : 'Ctrl K'),
-    [],
-  );
-
-  const updateIndicator = useCallback(() => {
-    const tabsNode = tabsRef.current;
-    const activeId = currentActiveTab ?? renderedTabs[0] ?? null;
-
-    if (!tabsNode || !activeId) {
-      setIndicatorStyle(HIDDEN_INDICATOR);
-      return;
-    }
-
-    const activeNode = tabRefs.current[activeId];
-
-    if (!activeNode) {
-      setIndicatorStyle(HIDDEN_INDICATOR);
-      return;
-    }
-
-    const tabsRect = tabsNode.getBoundingClientRect();
-    const activeRect = activeNode.getBoundingClientRect();
-
-    setIndicatorStyle({
-      left: activeRect.left - tabsRect.left + tabsNode.scrollLeft,
-      width: activeRect.width,
-      visible: true,
-    });
-
-    if (!hasPrimedIndicatorRef.current) {
-      hasPrimedIndicatorRef.current = true;
-      requestAnimationFrame(() => {
-        setIsIndicatorAnimated(true);
-      });
-    }
-  }, [currentActiveTab, renderedTabs]);
-
   const updateTabsOverflow = useCallback(() => {
     const tabsNode = tabsRef.current;
     if (!tabsNode) {
       setIsTabsOverflowing(false);
+      setCanScrollLeft(false);
+      setCanScrollRight(false);
       return;
     }
 
     const hasOverflow = tabsNode.scrollWidth > tabsNode.clientWidth + 1;
     setIsTabsOverflowing(hasOverflow);
+    setCanScrollLeft(tabsNode.scrollLeft > 1);
+    setCanScrollRight(tabsNode.scrollLeft < tabsNode.scrollWidth - tabsNode.clientWidth - 1);
   }, []);
 
   useLayoutEffect(() => {
     let nestedFrameId = 0;
     const frameId = requestAnimationFrame(() => {
-      updateIndicator();
       updateTabsOverflow();
       nestedFrameId = requestAnimationFrame(() => {
-        updateIndicator();
         updateTabsOverflow();
       });
     });
@@ -218,11 +168,10 @@ export function ListTabs() {
       cancelAnimationFrame(frameId);
       cancelAnimationFrame(nestedFrameId);
     };
-  }, [updateIndicator, updateTabsOverflow, adding, renderedTabs.length]);
+  }, [updateTabsOverflow, adding, renderedTabs.length]);
 
   useEffect(() => {
     function onResize() {
-      updateIndicator();
       updateTabsOverflow();
     }
 
@@ -231,7 +180,7 @@ export function ListTabs() {
     return () => {
       window.removeEventListener('resize', onResize);
     };
-  }, [updateIndicator, updateTabsOverflow]);
+  }, [updateTabsOverflow]);
 
   useEffect(() => {
     const tabsNode = tabsRef.current;
@@ -241,13 +190,13 @@ export function ListTabs() {
     }
 
     function onScroll() {
-      updateIndicator();
+      updateTabsOverflow();
     }
 
     tabsNode.addEventListener('scroll', onScroll);
 
     return () => tabsNode.removeEventListener('scroll', onScroll);
-  }, [updateIndicator]);
+  }, [updateTabsOverflow]);
 
   useEffect(() => {
     if (typeof ResizeObserver === 'undefined') {
@@ -255,59 +204,19 @@ export function ListTabs() {
     }
 
     const tabsNode = tabsRef.current;
-    const activeId = currentActiveTab ?? renderedTabs[0] ?? null;
-    const activeNode = activeId ? tabRefs.current[activeId] : null;
 
     if (!tabsNode) {
       return;
     }
 
     const observer = new ResizeObserver(() => {
-      updateIndicator();
       updateTabsOverflow();
     });
 
     observer.observe(tabsNode);
-    if (activeNode) {
-      observer.observe(activeNode);
-    }
 
     return () => observer.disconnect();
-  }, [currentActiveTab, renderedTabs, updateIndicator, updateTabsOverflow]);
-
-  useEffect(() => {
-    if (!('fonts' in document)) {
-      return;
-    }
-
-    const fonts = document.fonts;
-    let disposed = false;
-
-    const remeasure = () => {
-      if (disposed) {
-        return;
-      }
-
-      requestAnimationFrame(() => {
-        updateIndicator();
-        updateTabsOverflow();
-      });
-    };
-
-    const onFontsUpdated = () => {
-      remeasure();
-    };
-
-    fonts.addEventListener('loadingdone', onFontsUpdated);
-    fonts.addEventListener('loadingerror', onFontsUpdated);
-    fonts.ready.then(remeasure).catch(() => undefined);
-
-    return () => {
-      disposed = true;
-      fonts.removeEventListener('loadingdone', onFontsUpdated);
-      fonts.removeEventListener('loadingerror', onFontsUpdated);
-    };
-  }, [updateIndicator, updateTabsOverflow]);
+  }, [updateTabsOverflow]);
 
   useEffect(() => {
     if (!openMenu) {
@@ -350,10 +259,6 @@ export function ListTabs() {
   }, [query, setSearch]);
 
   useEffect(() => {
-    reorderDragRef.current = reorderDrag;
-  }, [reorderDrag]);
-
-  useEffect(() => {
     reorderPreviewRef.current = reorderPreviewIds;
   }, [reorderPreviewIds]);
 
@@ -383,7 +288,7 @@ export function ListTabs() {
     }
 
     setReorderPreviewIds(null);
-    setReorderDrag(null);
+    setDraggedListId(null);
     reorderDragRef.current = null;
     reorderPreviewRef.current = null;
   }, [isRenameMode]);
@@ -428,10 +333,8 @@ export function ListTabs() {
   }, []);
 
 
-  useEffect(() => {
-    const session = reorderDragRef.current;
-
-    if (!session) {
+  useLayoutEffect(() => {
+    if (!draggedListId) {
       document.body.style.removeProperty('user-select');
       document.body.style.removeProperty('cursor');
       return;
@@ -476,7 +379,31 @@ export function ListTabs() {
       window.removeEventListener('pointerup', handleWindowPointerUp);
       window.removeEventListener('pointercancel', handleWindowPointerCancel);
     };
-  }, [reorderDrag]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draggedListId]);
+
+  useLayoutEffect(() => {
+    const session = reorderDragRef.current;
+    const tabsNode = tabsRef.current;
+    if (!session || !draggedListId || !tabsNode) {
+      return;
+    }
+
+    const draggedNode = tabRefs.current[session.listId];
+    if (!draggedNode) {
+      return;
+    }
+
+    draggedNode.style.transform = '';
+    const naturalLeft = draggedNode.getBoundingClientRect().left;
+    const desiredLeft = session.currentClientX - session.pointerOffsetX;
+    const newTranslateX = desiredLeft - naturalLeft;
+
+    draggedNode.style.transform = `translate3d(${newTranslateX}px, 0, 0)`;
+    session.startClientX = session.currentClientX - newTranslateX;
+    session.startScrollLeft = tabsNode.scrollLeft;
+    session.dragTranslateX = newTranslateX;
+  }, [reorderPreviewIds, draggedListId]);
 
   useEffect(() => {
     function handleWindowPointerEnd(): void {
@@ -671,9 +598,9 @@ export function ListTabs() {
     }
   }
 
-  function animateReorderShift(firstLeftById: Map<string, number>, draggedId: string): void {
+  function animateReorderShift(firstLeftById: Map<string, number>, draggedId: string, orderIds: string[]): void {
     requestAnimationFrame(() => {
-      renderedReorderableTabIds.forEach((id) => {
+      orderIds.forEach((id) => {
         if (id === draggedId) {
           return;
         }
@@ -743,6 +670,11 @@ export function ListTabs() {
       return;
     }
 
+    const draggedNode = tabRefs.current[session.listId];
+    if (draggedNode) {
+      draggedNode.style.transform = '';
+    }
+
     if (applyResult && session.hasMoved && preview?.length) {
       commitReorder(preview);
     }
@@ -761,12 +693,12 @@ export function ListTabs() {
 
     reorderDragRef.current = null;
     reorderPreviewRef.current = null;
-    setReorderDrag(null);
+    setDraggedListId(null);
     setReorderPreviewIds(null);
     setFocusedEditableId((current) => (current === session.listId ? null : current));
   }
 
-  const moveDraggedList = useCallback((clientX: number, pointerId: number): void => {
+  function moveDraggedList(clientX: number, pointerId: number): void {
     const session = reorderDragRef.current;
     const tabsNode = tabsRef.current;
 
@@ -820,12 +752,10 @@ export function ListTabs() {
     targetOrder.splice(insertIndex, 0, session.listId);
 
     const hasMoved = Math.abs(clientX - session.startClientX) > 2 || tabsNode.scrollLeft !== session.startScrollLeft;
+    const nextTranslateX = (clientX - session.startClientX) + (tabsNode.scrollLeft - session.startScrollLeft);
     const draggedNode = tabRefs.current[session.listId];
-    const nextTranslateX = draggedNode
-      ? clientX - session.pointerOffsetX - draggedNode.getBoundingClientRect().left
-      : session.dragTranslateX;
 
-    const nextSession: ReorderDragSession = {
+    reorderDragRef.current = {
       ...session,
       currentClientX: clientX,
       currentScrollLeft: tabsNode.scrollLeft,
@@ -833,15 +763,16 @@ export function ListTabs() {
       hasMoved: session.hasMoved || hasMoved,
     };
 
-    reorderDragRef.current = nextSession;
-    setReorderDrag(nextSession);
+    if (draggedNode) {
+      draggedNode.style.transform = `translate3d(${nextTranslateX}px, 0, 0)`;
+    }
 
     if (!targetOrder.every((id, index) => id === nextOrder[index])) {
       reorderPreviewRef.current = targetOrder;
       setReorderPreviewIds(targetOrder);
-      animateReorderShift(firstLeftById, session.listId);
+      animateReorderShift(firstLeftById, session.listId, targetOrder);
     }
-  }, [animateReorderShift, reorderableTabIds]);
+  }
 
   function startListReorderDrag(event: ReactPointerEvent<HTMLElement>, listId: string): void {
     if (!isRenameMode || !reorderableTabIds.includes(listId) || event.button !== 0) {
@@ -874,11 +805,20 @@ export function ListTabs() {
     };
 
     reorderDragRef.current = nextSession;
-    setReorderDrag(nextSession);
+    setDraggedListId(listId);
     const nextPreviewIds = reorderPreviewRef.current ?? reorderableTabIds;
     reorderPreviewRef.current = nextPreviewIds;
     setReorderPreviewIds(nextPreviewIds);
     setFocusedEditableId((current) => (current === listId ? null : current));
+  }
+
+  function scrollTabs(direction: 'left' | 'right'): void {
+    const tabsNode = tabsRef.current;
+    if (!tabsNode) {
+      return;
+    }
+
+    tabsNode.scrollBy({ left: direction === 'left' ? -150 : 150, behavior: 'smooth' });
   }
 
   function submitNewList(): void {
@@ -907,11 +847,7 @@ export function ListTabs() {
 
     if (id === 'my-day') {
       setActiveList('__my_day__');
-      if (isMyDaySaved) {
-        closeMyDayModal();
-      } else {
-        openMyDayModal();
-      }
+      closeMyDayModal();
       return;
     }
 
@@ -946,6 +882,19 @@ export function ListTabs() {
       )}
 
       <div className={styles.topRow}>
+        <div className={styles.tabsViewportWrap}>
+        {isRenameMode && isTabsOverflowing && canScrollLeft && (
+          <button
+            type="button"
+            className={`${styles.scrollArrow} ${styles.scrollArrowLeft}`}
+            onClick={() => scrollTabs('left')}
+            aria-label="Прокрутить влево"
+          >
+            <svg className={styles.scrollArrowIcon} viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M9 2L4.5 7L9 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
         <div className={styles.tabsViewport}>
         <div
           className={`${styles.tabs} ${isTabsOverflowing && !isRenameMode ? styles.tabsDraggable : ''} ${isTabsDragging ? styles.tabsDragging : ''}`}
@@ -955,28 +904,13 @@ export function ListTabs() {
           onPointerUp={handleTabsPointerUp}
           onPointerCancel={handleTabsPointerCancel}
         >
-          <span
-            className={`${styles.activeIndicator} ${indicatorStyle.visible ? styles.activeIndicatorVisible : ''} ${!isIndicatorAnimated ? styles.activeIndicatorNoTransition : ''} ${reorderDrag ? styles.activeIndicatorHidden : ''}`}
-            style={{
-              left: `${indicatorStyle.left}px`,
-              width: `${indicatorStyle.width}px`,
-            }}
-            aria-hidden
-          />
-
           {renderedTabs.map((id) => {
             const isActive = currentActiveTab === id;
             const isEditable = renameableTabIds.includes(id);
             const isReorderable = renderedReorderableTabIds.includes(id);
             const showModeActive = isRenameMode && isEditable;
             const isEditingThisTab = showModeActive && focusedEditableId === id;
-            const isDragSource = showModeActive && reorderDrag?.listId === id;
-            const dragOffsetX = isDragSource
-              ? reorderDrag.dragTranslateX
-              : 0;
-            const tabInlineStyle = isDragSource
-              ? { transform: `translate3d(${dragOffsetX}px, 0, 0)` }
-              : undefined;
+            const isDragSource = showModeActive && draggedListId === id;
 
             return (
               <div
@@ -985,11 +919,10 @@ export function ListTabs() {
                   tabRefs.current[id] = node;
                 }}
                 className={`${styles.tab} ${isActive ? styles.active : ''} ${isDragSource ? styles.tabDragSource : ''}`}
-                style={tabInlineStyle}
               >
                 <button
                   type="button"
-                  className={`${styles.tabMain} ${showModeActive ? styles.tabMainRenameMode : ''} ${showModeActive && isReorderable ? styles.tabMainReorderable : ''} ${isDragSource ? styles.tabMainDragSource : ''}`}
+                  className={`${styles.tabMain} ${showModeActive ? `${styles.tabMainRenameMode} ${styles.tabMainRenameEnter}` : ''} ${showModeActive && isReorderable ? styles.tabMainReorderable : ''} ${isDragSource ? styles.tabMainDragSource : ''}`}
                   onClick={() => {
                     if (suppressTabClickRef.current) {
                       return;
@@ -998,21 +931,16 @@ export function ListTabs() {
                     handleTabClick(id);
                   }}
                 >
-                  {showModeActive && isReorderable && !isEditingThisTab && (
+                  {showModeActive && isReorderable && (
                     <span
                       className={styles.dragHandle}
                       aria-hidden
                       title="Перетаскивайте, чтобы изменить порядок"
                       onClick={(event) => event.stopPropagation()}
-                      onPointerDown={(event) => startListReorderDrag(event, id)}
-                      onPointerMove={(event) => {
-                        if (reorderDragRef.current?.pointerId !== event.pointerId) {
-                          return;
+                      onPointerDown={(event) => {
+                        if (!isEditingThisTab) {
+                          startListReorderDrag(event, id);
                         }
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        moveDraggedList(event.clientX, event.pointerId);
                       }}
                     >
                       <span className={styles.dragHandleGlyph} aria-hidden>
@@ -1076,37 +1004,84 @@ export function ListTabs() {
                     </span>
                   )}
                 </button>
+                {showModeActive && !isDragSource && (
+                  <button
+                    type="button"
+                    className={styles.deleteBtn}
+                    aria-label={`Удалить список ${getLabel(id)}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteDemoList(id);
+                    }}
+                  >
+                    <svg className={styles.deleteBtnIcon} viewBox="0 0 10 10" fill="none" aria-hidden>
+                      <path d="M1.5 1.5L8.5 8.5M8.5 1.5L1.5 8.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                )}
               </div>
             );
           })}
 
           {adding && (
-            <input
-              className={styles.addInput}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  closeAddInput();
-                }
+            <span className={styles.addInputWrap}>
+              <input
+                className={styles.addInput}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    closeAddInput();
+                  }
 
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  submitNewList();
-                }
-              }}
-              onBlur={closeAddInput}
-              placeholder="Название..."
-              autoFocus
-            />
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitNewList();
+                  }
+                }}
+                onBlur={() => {
+                  if (newName.trim()) {
+                    submitNewList();
+                  } else {
+                    closeAddInput();
+                  }
+                }}
+                placeholder="Название..."
+                autoFocus
+              />
+              <button
+                type="button"
+                className={styles.addConfirmBtn}
+                aria-label="Создать список"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={submitNewList}
+              >
+                <svg className={styles.addConfirmBtnIcon} viewBox="0 0 14 14" fill="none" aria-hidden>
+                  <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </span>
           )}
         </div>
+      </div>
+        {isRenameMode && isTabsOverflowing && canScrollRight && (
+          <button
+            type="button"
+            className={`${styles.scrollArrow} ${styles.scrollArrowRight}`}
+            onClick={() => scrollTabs('right')}
+            aria-label="Прокрутить вправо"
+          >
+            <svg className={styles.scrollArrowIcon} viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M5 2L9.5 7L5 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className={styles.fixedActions}>
         <button
           type="button"
-          className={styles.plusBtn}
+          className={`${styles.plusBtn} ${isRenameMode ? styles.plusBtnHidden : ''}`}
           aria-label="Добавить список"
           onClick={() => {
             setPanelMode('default');
@@ -1134,7 +1109,13 @@ export function ListTabs() {
             setPanelMode('rename');
           }}
         >
-          <img src={editIcon} className={styles.actionIcon} alt="" aria-hidden />
+          {isRenameMode ? (
+            <svg className={styles.actionBtnCheckIcon} viewBox="0 0 14 14" fill="none" aria-hidden>
+              <path d="M2.5 7.5L5.5 10.5L11.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <img src={editIcon} className={styles.actionIcon} alt="" aria-hidden />
+          )}
         </button>
       </div>
       </div>
@@ -1191,14 +1172,14 @@ export function ListTabs() {
                     searchInputRef.current?.blur();
                   }
                 }}
-                placeholder="Search"
-                aria-label="Search tasks"
+                placeholder="Поиск"
+                aria-label="Поиск задач"
               />
-              {query ? (
+              {query && (
                 <button
                   type="button"
                   className={styles.clearBtn}
-                  aria-label="Clear search"
+                  aria-label="Очистить"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => {
                     setSearch('');
@@ -1208,45 +1189,45 @@ export function ListTabs() {
                 >
                   ×
                 </button>
-              ) : (
-                <span className={styles.kbd}>{shortcutLabel}</span>
               )}
             </div>
           </div>
         </div>
         <div className={styles.filterWrap}>
-          <button
-            type="button"
-            className={`${styles.iconBtn} ${openMenu === 'urgency' ? styles.iconBtnOpen : ''}`}
-            onClick={() => {
-              setIsSearchOpen(false);
-              setOpenMenu((prev) => (prev === 'urgency' ? null : 'urgency'));
-            }}
-            aria-haspopup="menu"
-            aria-expanded={openMenu === 'urgency'}
-            aria-label="Фильтр по срочности"
-          >
-            <img src={clockIcon} className={styles.urgencyIcon} alt="" aria-hidden />
-          </button>
+          <div className={`${styles.urgencyInline} ${openMenu === 'urgency' || filterUrgency ? styles.urgencyInlineOpen : ''}`}>
+            <button
+              type="button"
+              className={`${styles.iconBtn} ${openMenu === 'urgency' || filterUrgency ? styles.iconBtnOpen : ''}`}
+              onClick={() => {
+                setIsSearchOpen(false);
+                setOpenMenu((prev) => (prev === 'urgency' ? null : 'urgency'));
+              }}
+              aria-expanded={openMenu === 'urgency' || !!filterUrgency}
+              aria-label="Фильтр по срочности"
+            >
+              <img src={clockIcon} className={styles.urgencyIcon} alt="" aria-hidden />
+            </button>
 
-          {openMenu === 'urgency' && (
-            <div className={styles.menu} role="menu">
-              {URGENCY_OPTIONS.map((option) => (
+            <div className={styles.urgencyRail} role="menu" aria-label="Срочность">
+              {URGENCY_OPTIONS.filter((o) => o.id !== null).map((option) => (
                 <button
-                  key={option.id ?? 'all'}
+                  key={option.id}
                   type="button"
-                  className={styles.menuItem}
+                  className={`${styles.urgencyOption} ${filterUrgency === option.id ? styles.urgencyOptionSelected : ''}`}
                   onClick={() => {
-                    setFilterUrgency(option.id);
-                    setOpenMenu(null);
+                    if (filterUrgency === option.id) {
+                      setFilterUrgency(null);
+                      setOpenMenu(null);
+                    } else {
+                      setFilterUrgency(option.id);
+                    }
                   }}
                 >
-                  <span>{option.label}</span>
-                  {filterUrgency === option.id && <span className={styles.check}>✓</span>}
+                  {option.label}
                 </button>
               ))}
             </div>
-          )}
+          </div>
         </div>
 
         <div className={styles.filterWrap}>
@@ -1263,8 +1244,8 @@ export function ListTabs() {
               aria-label="Priority filter"
             >
               <span
-                className={`${styles.priorityDot} ${styles.priorityDotStrong}`}
-                style={{ background: priorityOption.color }}
+                className={`${styles.priorityDot} ${filterPriority ? '' : styles.priorityDotDefault}`}
+                style={filterPriority ? { background: priorityOption.color } : undefined}
               />
             </button>
 
@@ -1282,7 +1263,7 @@ export function ListTabs() {
                   }}
                 >
                   <span
-                    className={`${styles.priorityDot} ${styles.priorityDotStrong}`}
+                    className={styles.priorityDot}
                     style={{ background: option.color }}
                   />
                 </button>

@@ -22,62 +22,56 @@ function withAlpha(color: string, alpha: number): string {
 }
 
 /**
- * Maps mood, energy, and DayProfile into a color pair [c0, c1].
+ * Maps mood and DayProfile into a vibrant color pair [c0, c1].
  *
- * Mood drives the overall warmth/coolness:
- *   1 (very bad) → desaturated cool grey-blue
- *   3 (neutral)  → balanced purple/teal
- *   5 (great)    → vibrant warm gold/coral
+ * Color-mood mapping based on Valdez & Mehrabian (1994), Kaya & Epps (2004):
+ *   1 (very bad)  → Deep blue (220°) — sadness, withdrawal
+ *   2 (low)       → Blue-violet (255°) — melancholy, introspection
+ *   3 (calm)      → Violet-purple (285°) — neutral, balanced
+ *   4 (good)      → Rose-magenta (335°) — warmth, positive affect
+ *   5 (great)     → Coral-gold (25°) — joy, high-arousal positive
  *
- * Energy drives saturation and lightness:
- *   low energy  → muted, pastel
- *   high energy → vivid, saturated
+ * Energy does NOT affect color — it controls blob scale (size of colored area).
+ * Colors are always vibrant with no grey/muddy tones.
  *
- * Profile axes add nuance:
- *   urgency  → pushes c0 toward reds/oranges
- *   importance → pushes c0 toward magentas
- *   load     → darkens slightly
+ * c1 is offset ~100° from c0 for a complementary vibrant pair.
  */
 export function profileToColors(
   profile: DayProfile,
   mood: MoodLevel = 3,
-  energy: number = 11,
 ): [string, string] {
-  const moodNorm = (mood - 1) / 4;          // 0..1
-  const energyNorm = Math.min(energy, 20) / 20; // 0..1
+  const moodNorm = (mood - 1) / 4;
   const urg = profile.urgency / 100;
   const imp = profile.importance / 100;
-  const lod = profile.load / 100;
 
-  // --- c0: primary blob color ---
-  // Mood shifts the entire hue range:
-  //   bad mood (0)  → cool blue-grey (220)
-  //   neutral (0.5) → purple-magenta (280-310)
-  //   great (1)     → warm coral-gold (30-50)
-  const moodHueBase = lerp(220, 50, moodNorm);
-  // Urgency pushes toward red/orange regardless of mood
-  const urgencyPush = urg * lerp(0, -40, urg);
-  // Importance pushes toward magenta/purple
-  const importancePush = imp * lerp(0, 30, imp);
-  const c0Hue = moodHueBase + urgencyPush + importancePush;
+  // Mood hue path: 220 → 255 → 285 → 335 → 385 (=25°)
+  // Using a cubic easing through the color wheel
+  const moodHueBase = moodNorm < 0.5
+    ? lerp(220, 285, moodNorm * 2)
+    : lerp(285, 385, (moodNorm - 0.5) * 2);
+  const urgencyPush = urg * -30;
+  const importancePush = imp * 20;
+  const c0Hue = (moodHueBase + urgencyPush + importancePush) % 360;
 
-  // Energy drives saturation
-  const c0Sat = lerp(32, 76, energyNorm);
-  // Load darkens slightly
-  const c0Light = lerp(68, 56, lod * 0.6 + (1 - energyNorm) * 0.4);
+  const c0Sat = lerp(55, 72, moodNorm);
+  const c0Light = lerp(72, 66, imp * 0.3 + urg * 0.2);
 
-  // --- c1: secondary blob color ---
-  // Complementary to c0 but shifted by mood
-  //   bad mood  → desaturated slate (200-230)
-  //   neutral   → teal/mint (170-190)
-  //   great     → warm peach/yellow (40-70)
-  const c1HueBase = lerp(210, 60, moodNorm);
-  const c1Hue = c1HueBase + imp * 15 - urg * 10;
-
-  const c1Sat = lerp(28, 68, energyNorm);
-  const c1Light = lerp(74, 60, lod * 0.5);
+  const hueOffset = lerp(105, 95, moodNorm) + imp * 8 - urg * 6;
+  const c1Hue = (c0Hue + hueOffset) % 360;
+  const c1Sat = lerp(50, 70, moodNorm);
+  const c1Light = lerp(76, 68, urg * 0.3);
 
   return [hsl(c0Hue, c0Sat, c0Light), hsl(c1Hue, c1Sat, c1Light)];
+}
+
+/**
+ * Converts energy (1-20) to gradient spread (mid stop offset).
+ * Low energy → c0 is tiny dot inside c1 (spread=0.12).
+ * High energy → c0 fills center richly (spread=0.55).
+ */
+export function energyToSpread(energy: number): number {
+  const norm = Math.min(energy, 20) / 20;
+  return lerp(0.12, 0.55, norm);
 }
 
 /**

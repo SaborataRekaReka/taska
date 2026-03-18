@@ -3,10 +3,12 @@ import { Header } from '../components/Header';
 import { HeroPanel } from '../components/HeroPanel';
 import { ListTabs } from '../components/ListTabs';
 import { TaskList } from '../components/TaskList';
+import { MyDayEmptyState } from '../components/MyDayEmptyState';
 import { DayCreatedActions } from '../components/DayCreatedActions';
 import { EditTaskModal } from '../components/EditTaskModal';
 import { MyDayModal } from '../components/my-day/MyDayModal';
-import { dayColorsToBackground } from '../lib/profileColors';
+import { GradientBlob } from '../components/GradientBackground';
+import { energyToSpread } from '../lib/profileColors';
 import type { DayTask } from '../components/my-day/types';
 import { useUiStore } from '../stores/ui';
 import styles from './MainPage.module.css';
@@ -43,9 +45,14 @@ export function MainPage() {
   const openMyDayModal = useUiStore((s) => s.openMyDayModal);
   const closeMyDayModal = useUiStore((s) => s.closeMyDayModal);
   const setMyDaySaved = useUiStore((s) => s.setMyDaySaved);
+  const activeListId = useUiStore((s) => s.activeListId);
+  const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const dayColors = useUiStore((s) => s.dayColors);
+  const dayEnergy = useUiStore((s) => s.dayEnergy);
   const demoTasks = useUiStore((s) => s.demoTasks);
 
+  const isMyDayActive = activeListId === '__my_day__';
+  const showMyDayEmptyState = isMyDayActive && !isMyDaySaved;
   const isDayCreated = demoState === 'dayCreated';
   const showLegacyBalance = demoState === 'balanceModalOpen';
   const showMyDayModal = isMyDayModalOpen || showLegacyBalance;
@@ -110,10 +117,17 @@ export function MainPage() {
   return (
     <div className={`${styles.page} ${isDayCreated && !hasDayColors ? styles.emotional : ''}`}>
       {dayColors && (
-        <div
-          className={styles.dayBg}
-          style={{ background: dayColorsToBackground(dayColors) }}
-        />
+        <div className={styles.dayBg}>
+          <GradientBlob
+            c0={dayColors[0]}
+            c1={dayColors[1]}
+            size={800}
+            scale={2.2}
+            spread={energyToSpread(dayEnergy)}
+            interactive={false}
+            id="page-blob"
+          />
+        </div>
       )}
       {isDayCreated && !hasDayColors && <div className={styles.emotionalBloom} />}
       <Header />
@@ -128,7 +142,11 @@ export function MainPage() {
             onSave={handleSaveMyDay}
           />
         )}
-        <TaskList />
+        {showMyDayEmptyState ? (
+          <MyDayEmptyState onSetup={openMyDayModal} />
+        ) : (
+          <TaskList />
+        )}
       </main>
       <MyDayModal
         isOpen={showMyDayModal}

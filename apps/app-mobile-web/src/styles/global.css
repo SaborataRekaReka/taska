@@ -64,6 +64,10 @@
   --side-padding: 80px;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html, body, #root {
   height: 100%;
   font-family: var(--font);

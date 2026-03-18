@@ -19,7 +19,3 @@
   height: 100%;
   overflow: visible;
 }
-
-.svg circle {
-  filter: blur(18px) url(#blob-distort) url(#blob-grain);
-}
