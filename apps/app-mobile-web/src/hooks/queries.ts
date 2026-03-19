@@ -16,6 +16,7 @@ export function useTasks() {
   const search = useUiStore((s) => s.searchQuery);
   const status = useUiStore((s) => s.filterStatus);
   const priority = useUiStore((s) => s.filterPriority);
+  const urgency = useUiStore((s) => s.filterUrgency);
 
   const params = new URLSearchParams();
   if (activeListId === '__no_list__') params.set('noList', 'true');
@@ -24,10 +25,11 @@ export function useTasks() {
   if (search) params.set('search', search);
   if (status) params.set('status', status);
   if (priority) params.set('priority', priority);
+  if (urgency) params.set('urgency', urgency);
 
   const qs = params.toString();
   return useQuery({
-    queryKey: ['tasks', activeListId, search, status, priority],
+    queryKey: ['tasks', activeListId, search, status, priority, urgency],
     queryFn: () => api.get<Task[]>(`/tasks${qs ? `?${qs}` : ''}`),
   });
 }
@@ -84,11 +86,62 @@ export function useCreateList() {
   });
 }
 
+export function useUpdateList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api.patch<List>(`/lists/${id}`, { name }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lists'] }); qc.invalidateQueries({ queryKey: ['tasks'] }); },
+  });
+}
+
 export function useDeleteList() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/lists/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['lists'] }); qc.invalidateQueries({ queryKey: ['tasks'] }); },
+  });
+}
+
+export function useReorderLists() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderedIds: string[]) =>
+      api.patch<List[]>('/lists/reorder', { orderedIds }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['lists'] }),
+  });
+}
+
+export function useDeleteSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, id }: { taskId: string; id: string }) =>
+      api.delete(`/tasks/${taskId}/subtasks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+  });
+}
+
+interface UserPreferences {
+  dayColors: [string, string] | null;
+  dayEnergy: number;
+  dayMood: number;
+  dayWishes: string[] | null;
+  isMyDaySaved: boolean;
+}
+
+export function usePreferences() {
+  return useQuery({
+    queryKey: ['preferences'],
+    queryFn: () => api.get<UserPreferences>('/users/me/preferences'),
+  });
+}
+
+export function useUpdatePreferences() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<UserPreferences>) =>
+      api.patch<UserPreferences>('/users/me/preferences', data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['preferences'] }),
   });
 }
 

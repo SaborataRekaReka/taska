@@ -7,5 +7,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
+  "ts-node": {
+    "swc": true,
+    "esm": true
+  },
   "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }

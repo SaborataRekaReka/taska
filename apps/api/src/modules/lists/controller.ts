@@ -4,7 +4,7 @@ import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/auth.guard.js';
 import { CurrentUserId } from '../../core/user.decorator.js';
 import { ListsService } from './lists.service.js';
-import { CreateListDto, UpdateListDto } from './dto.js';
+import { CreateListDto, UpdateListDto, ReorderListsDto } from './dto.js';
 
 @ApiTags('lists')
 @Controller('lists')
@@ -23,6 +23,12 @@ export class ListsController {
   @ApiOperation({ summary: 'Create a new list' })
   create(@CurrentUserId() userId: string, @Body() dto: CreateListDto) {
     return this.listsService.create(userId, dto.name);
+  }
+
+  @Patch('reorder')
+  @ApiOperation({ summary: 'Reorder lists' })
+  reorder(@CurrentUserId() userId: string, @Body() dto: ReorderListsDto) {
+    return this.listsService.reorder(userId, dto.orderedIds);
   }
 
   @Patch(':id')

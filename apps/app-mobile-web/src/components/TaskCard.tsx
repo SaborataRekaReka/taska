@@ -4,6 +4,7 @@ import subtasksIcon from '../assests/subtasks.svg';
 import listIcon from '../assests/list.svg';
 import aiFlashIcon from '../assests/ai_flash.svg';
 import plusMenuIcon from '../assests/plus.svg';
+import { useUpdateTask, useCreateSubtask, useUpdateSubtask } from '../hooks/queries';
 import { EditableText } from './EditableText';
 import { DropdownMenu } from './DropdownMenu';
 import { TaskChipMenu, type TaskChipMenuOption } from './TaskChipMenu';
@@ -25,7 +26,7 @@ interface TaskCardProps {
   onToggleCompleted?: (taskId: string, nextCompleted: boolean) => void;
   onOpenAssistant?: (taskId: string) => void;
   onUpdateDeadline?: (taskId: string, nextDeadline: string | null) => void;
-  availableLists?: { id: string; name: string }[];
+  availableLists?: { id: string; name: string; isDefault?: boolean }[];
   onUpdateList?: (taskId: string, nextListId: string | null) => void;
   onUpdatePriority?: (taskId: string, nextPriority: TaskPriority) => void;
 }
@@ -40,6 +41,10 @@ export function TaskCard({
   onUpdateList,
   onUpdatePriority,
 }: TaskCardProps) {
+  const updateTaskMut = useUpdateTask();
+  const createSubtaskMut = useCreateSubtask();
+  const updateSubtaskMut = useUpdateSubtask();
+
   const [localTitle, setLocalTitle] = useState(task.title);
   const [localSubtasks, setLocalSubtasks] = useState<Subtask[]>(task.subtasks);
   const [localTaskCompleted, setLocalTaskCompleted] = useState(task.status === 'DONE');
@@ -58,7 +63,7 @@ export function TaskCard({
     ];
 
     for (const list of availableLists ?? []) {
-      if (list.id === 'no-list') {
+      if (list.isDefault) {
         continue;
       }
 
@@ -132,9 +137,15 @@ export function TaskCard({
       setLocalSubtasks((prev) => prev.filter((s) => s.id !== id));
       return;
     }
+    const trimmed = newTitle.trim();
     setLocalSubtasks((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, title: newTitle.trim() || s.title } : s))
+      prev.map((s) => (s.id === id ? { ...s, title: trimmed || s.title } : s))
     );
+    if (isDraft && trimmed) {
+      createSubtaskMut.mutate({ taskId: task.id, title: trimmed });
+    } else if (!isDraft && trimmed) {
+      updateSubtaskMut.mutate({ taskId: task.id, id, title: trimmed });
+    }
   }
 
   function toggleTaskCompleted() {
@@ -149,16 +160,14 @@ export function TaskCard({
   }
 
   function toggleSubtaskCompleted(id: string) {
+    if (id.startsWith('draft-')) return;
+    const subtask = localSubtasks.find((s) => s.id === id);
+    if (!subtask) return;
+    const nextStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
     setLocalSubtasks((prev) =>
-      prev.map((subtask) => {
-        if (subtask.id !== id) {
-          return subtask;
-        }
-
-        const nextStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
-        return { ...subtask, status: nextStatus };
-      })
+      prev.map((s) => (s.id === id ? { ...s, status: nextStatus } : s))
     );
+    updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
   }
 
   function handleOpenAssistant() {
@@ -186,7 +195,7 @@ export function TaskCard({
       return false;
     }
 
-    return Boolean(target.closest('button, [contenteditable="true"]'));
+    return Boolean(target.closest('button, [contenteditable="true"], [data-dropdown-menu]'));
   }
 
   return (
@@ -223,7 +232,12 @@ export function TaskCard({
         <div className={styles.content}>
           <EditableText
             value={localTitle}
-            onChange={setLocalTitle}
+            onChange={(val) => {
+              setLocalTitle(val);
+              if (val.trim() && val !== task.title) {
+                updateTaskMut.mutate({ id: task.id, title: val });
+              }
+            }}
             className={styles.title}
             multiline
           />

@@ -64,8 +64,23 @@ model User {
   subtasks       Subtask[]
   historyEvents  History[]
   aiOperations   AiOperation[]
+  preferences    UserPreferences?
 
   @@index([provider, providerUserId])
+}
+
+model UserPreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  dayColors     String?
+  dayEnergy     Int      @default(11)
+  dayMood       Int      @default(3)
+  dayWishes     String?
+  isMyDaySaved  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model List {
@@ -73,6 +88,7 @@ model List {
   userId      String
   name        String
   isDefault   Boolean   @default(false)
+  order       Int       @default(0)
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

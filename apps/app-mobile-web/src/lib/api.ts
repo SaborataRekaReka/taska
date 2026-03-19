@@ -5,9 +5,11 @@ const BASE = '';
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(init?.headers as Record<string, string>),
   };
+  if (init?.body) {
+    headers['Content-Type'] = 'application/json';
+  }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

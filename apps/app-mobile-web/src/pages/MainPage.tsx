@@ -4,43 +4,28 @@ import { HeroPanel } from '../components/HeroPanel';
 import { ListTabs } from '../components/ListTabs';
 import { TaskList } from '../components/TaskList';
 import { MyDayEmptyState } from '../components/MyDayEmptyState';
-import { DayCreatedActions } from '../components/DayCreatedActions';
 import { EditTaskModal } from '../components/EditTaskModal';
 import { MyDayModal } from '../components/my-day/MyDayModal';
 import { GradientBlob } from '../components/GradientBackground';
 import { energyToSpread } from '../lib/profileColors';
+import { useTasks } from '../hooks/queries';
 import type { DayTask } from '../components/my-day/types';
 import { useUiStore } from '../stores/ui';
 import styles from './MainPage.module.css';
 
 function mapPriority(priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): DayTask['priority'] {
-  if (priority === 'LOW') {
-    return 'low';
-  }
-
-  if (priority === 'MEDIUM') {
-    return 'medium';
-  }
-
+  if (priority === 'LOW') return 'low';
+  if (priority === 'MEDIUM') return 'medium';
   return 'high';
 }
 
 function mapEffort(priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): DayTask['effort'] {
-  if (priority === 'LOW') {
-    return 'low';
-  }
-
-  if (priority === 'MEDIUM') {
-    return 'medium';
-  }
-
+  if (priority === 'LOW') return 'low';
+  if (priority === 'MEDIUM') return 'medium';
   return 'high';
 }
 
 export function MainPage() {
-  const demoState = useUiStore((s) => s.demoState);
-  const setDemoState = useUiStore((s) => s.setDemoState);
-  const setActiveList = useUiStore((s) => s.setActiveList);
   const isMyDayModalOpen = useUiStore((s) => s.isMyDayModalOpen);
   const openMyDayModal = useUiStore((s) => s.openMyDayModal);
   const closeMyDayModal = useUiStore((s) => s.closeMyDayModal);
@@ -49,22 +34,18 @@ export function MainPage() {
   const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
   const dayColors = useUiStore((s) => s.dayColors);
   const dayEnergy = useUiStore((s) => s.dayEnergy);
-  const demoTasks = useUiStore((s) => s.demoTasks);
+
+  const { data: allTasks = [] } = useTasks();
 
   const isMyDayActive = activeListId === '__my_day__';
   const showMyDayEmptyState = isMyDayActive && !isMyDaySaved;
-  const isDayCreated = demoState === 'dayCreated';
-  const showLegacyBalance = demoState === 'balanceModalOpen';
-  const showMyDayModal = isMyDayModalOpen || showLegacyBalance;
   const selectedTaskId = useUiStore((s) => s.selectedTaskId);
   const showEditModal = selectedTaskId !== null;
-  const hasDayColors = dayColors !== null;
 
   const modalTasks = useMemo<DayTask[]>(
-    () => demoTasks.map((task, index) => {
+    () => allTasks.map((task, index) => {
       const normalizedPriority = mapPriority(task.priority);
       const title = task.title.toLowerCase();
-
       const estimatedMinutes = (() => {
         const base = normalizedPriority === 'high' ? 120 : normalizedPriority === 'medium' ? 75 : 40;
         return base + task.subtasks.length * 18 + index * 6;
@@ -87,35 +68,20 @@ export function MainPage() {
         ),
       };
     }),
-    [demoTasks],
+    [allTasks],
   );
 
   function handleCloseMyDayModal(): void {
     closeMyDayModal();
-    if (showLegacyBalance) {
-      setDemoState('workListHover');
-    }
   }
 
   function handleCreateMyDay(): void {
-    setDemoState('dayCreated');
-    setMyDaySaved(false);
-    closeMyDayModal();
-  }
-
-  function handleEditBalance(): void {
-    openMyDayModal();
-  }
-
-  function handleSaveMyDay(): void {
     setMyDaySaved(true);
-    setActiveList('__my_day__');
-    setDemoState('workListHover');
     closeMyDayModal();
   }
 
   return (
-    <div className={`${styles.page} ${isDayCreated && !hasDayColors ? styles.emotional : ''}`}>
+    <div className={styles.page}>
       {dayColors && (
         <div className={styles.dayBg}>
           <GradientBlob
@@ -129,19 +95,12 @@ export function MainPage() {
           />
         </div>
       )}
-      {isDayCreated && !hasDayColors && <div className={styles.emotionalBloom} />}
       <Header />
       <main className={styles.main}>
         <HeroPanel />
         <div className={styles.tabRow}>
           <ListTabs />
         </div>
-        {isDayCreated && (
-          <DayCreatedActions
-            onEditBalance={handleEditBalance}
-            onSave={handleSaveMyDay}
-          />
-        )}
         {showMyDayEmptyState ? (
           <MyDayEmptyState onSetup={openMyDayModal} />
         ) : (
@@ -149,7 +108,7 @@ export function MainPage() {
         )}
       </main>
       <MyDayModal
-        isOpen={showMyDayModal}
+        isOpen={isMyDayModalOpen}
         onClose={handleCloseMyDayModal}
         tasks={modalTasks}
         onCreateMyDay={handleCreateMyDay}

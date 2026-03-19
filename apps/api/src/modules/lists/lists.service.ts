@@ -13,9 +13,20 @@ export class ListsService {
   async findAll(userId: string) {
     return this.prisma.list.findMany({
       where: { userId, deletedAt: null },
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       include: { _count: { select: { tasks: { where: { deletedAt: null } } } } },
     });
+  }
+
+  async reorder(userId: string, orderedIds: string[]) {
+    const updates = orderedIds.map((id, index) =>
+      this.prisma.list.updateMany({
+        where: { id, userId, deletedAt: null },
+        data: { order: index },
+      }),
+    );
+    await this.prisma.$transaction(updates);
+    return this.findAll(userId);
   }
 
   async create(userId: string, name: string) {

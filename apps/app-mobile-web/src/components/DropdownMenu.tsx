@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './DropdownMenu.module.css';
 
@@ -101,11 +101,19 @@ export function DropdownMenu({
   }, [isOpen, items.length, updatePosition]);
 
   return (
-    <div className={styles.root}>
+    <div
+      className={styles.root}
+      data-dropdown-menu
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       <button
         ref={triggerRef}
         type="button"
         className={`${styles.trigger} ${triggerLabel ? styles.triggerWithLabel : ''} ${isOpen ? styles.triggerOpen : ''} ${triggerClassName ?? ''}`.trim()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
           setIsOpen((prev) => !prev);
@@ -125,7 +133,12 @@ export function DropdownMenu({
 
       {isOpen &&
         createPortal(
-          <div className={styles.backdrop} onClick={() => setIsOpen(false)}>
+          <div
+            className={styles.backdrop}
+            onClick={() => setIsOpen(false)}
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+          >
             <div
               id={menuId}
               ref={menuRef}
@@ -145,7 +158,10 @@ export function DropdownMenu({
                   role="menuitem"
                   className={`${styles.item} ${item.danger ? styles.danger : ''}`.trim()}
                   disabled={item.disabled}
-                  onClick={() => {
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (item.disabled) {
                       return;
                     }

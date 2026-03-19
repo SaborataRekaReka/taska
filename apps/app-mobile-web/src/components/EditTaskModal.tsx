@@ -42,7 +42,6 @@ interface EditTaskModalProps {
 export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const selectedTaskId = useUiStore((s) => s.selectedTaskId);
   const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
-  const demoTasks = useUiStore((s) => s.demoTasks);
   const { data: tasks } = useTasks();
   const updateTask = useUpdateTask();
   const selectedTask = useMemo(
@@ -56,9 +55,9 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
         return apiTask;
       }
 
-      return demoTasks.find((task) => task.id === selectedTaskId) ?? null;
+      return null;
     },
-    [demoTasks, selectedTaskId, tasks],
+    [selectedTaskId, tasks],
   );
   const [cachedTask, setCachedTask] = useState<typeof selectedTask>(null);
   const [activeTab, setActiveTab] = useState<'visual' | 'editor'>('visual');
@@ -78,6 +77,17 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   }, [selectedTask]);
 
   useEffect(() => {
+    if (!selectedTaskId) {
+      return;
+    }
+
+    setAssistantPrompt('');
+    setActiveTab('visual');
+    setAutosaveState('idle');
+    setAutosaveError(null);
+  }, [selectedTaskId]);
+
+  useEffect(() => {
     if (!selectedTask) {
       return;
     }
@@ -88,10 +98,6 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
 
     setMarkdownValue(initialMarkdown);
     setLastSavedMarkdown(initialMarkdown);
-    setAssistantPrompt('');
-    setActiveTab('visual');
-    setAutosaveState('idle');
-    setAutosaveError(null);
   }, [selectedTask]);
 
   useEffect(() => {

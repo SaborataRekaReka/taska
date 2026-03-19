@@ -92,6 +92,10 @@ export class UnifiedErrorFilter implements ExceptionFilter {
     request.requestId = requestId;
     reply.header('x-request-id', requestId);
 
+    if (!(exception instanceof HttpException)) {
+      console.error('[api] unhandled error:', exception);
+    }
+
     const normalized: NormalizedError =
       exception instanceof HttpException
         ? normalizeHttpException(exception)

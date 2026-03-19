@@ -23,6 +23,7 @@ export class TasksController {
       dueToday: query.dueToday === 'true',
       noList: query.noList === 'true',
       search: query.search,
+      urgency: query.urgency as 'OVERDUE' | 'TODAY' | 'NEXT_24_HOURS' | undefined,
     });
   }
 

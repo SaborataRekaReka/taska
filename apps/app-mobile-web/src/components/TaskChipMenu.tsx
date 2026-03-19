@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './TaskChipMenu.module.css';
 
 export interface TaskChipMenuOption {
@@ -76,7 +76,12 @@ export function TaskChipMenu({
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label={ariaLabel}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen((prev) => !prev);
+        }}
       >
         {iconSrc && <img src={iconSrc} alt="" className={styles.icon} />}
         {showColorDot && (
@@ -94,7 +99,12 @@ export function TaskChipMenu({
             type="button"
             className={styles.dismissLayer}
             aria-label="Close dropdown menu"
-            onClick={() => setIsOpen(false)}
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(false);
+            }}
           />
 
           <div className={styles.menu} role="menu" aria-label={ariaLabel}>
@@ -107,7 +117,10 @@ export function TaskChipMenu({
                   role="menuitemradio"
                   aria-checked={isSelected}
                   className={`${styles.menuItem} ${isSelected ? styles.menuItemActive : ''}`}
-                  onClick={() => {
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onChange(option.value);
                     setIsOpen(false);
                   }}

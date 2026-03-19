@@ -96,4 +96,9 @@ export class TaskQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ enum: ['OVERDUE', 'TODAY', 'NEXT_24_HOURS'], description: 'Filter by urgency' })
+  @IsOptional()
+  @IsString()
+  urgency?: string;
 }

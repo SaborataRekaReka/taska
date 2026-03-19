@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCreateTask } from '../hooks/queries';
 import { useUiStore } from '../stores/ui';
 import sendIcon from '../assests/send.svg';
 import styles from './HeroPanel.module.css';
@@ -14,8 +15,8 @@ const CHIPS = [
 const CHIPS_FADE_MS = 180;
 
 export function HeroPanel() {
-  const triggerTempListFromAi = useUiStore((s) => s.triggerTempListFromAi);
-  const addDemoTask = useUiStore((s) => s.addDemoTask);
+  const createTask = useCreateTask();
+  const activeListId = useUiStore((s) => s.activeListId);
   const [value, setValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -81,18 +82,12 @@ export function HeroPanel() {
       return;
     }
 
-    addDemoTask(trimmed);
-
-    const normalized = trimmed.toLowerCase();
-    const shouldCreateTempList = normalized.includes('сроч') || normalized.includes('urgent');
-
-    if (shouldCreateTempList) {
-      triggerTempListFromAi();
-    }
+    const listId = activeListId && !activeListId.startsWith('__') ? activeListId : undefined;
+    createTask.mutate({ title: trimmed, listId });
 
     setValue('');
     setIsExpanded(false);
-  }, [addDemoTask, triggerTempListFromAi, value]);
+  }, [activeListId, createTask, value]);
 
   const panelClass = [
     styles.panel,

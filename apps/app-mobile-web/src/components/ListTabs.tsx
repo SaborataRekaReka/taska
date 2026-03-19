@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import clockIcon from '../assests/clock.svg';
 import editIcon from '../assests/edit_2.svg';
+import refreshIcon from '../assests/refresh.svg';
+import { useLists, useCreateList, useUpdateList, useDeleteList, useReorderLists } from '../hooks/queries';
 import { useUiStore } from '../stores/ui';
 import styles from './ListTabs.module.css';
 
@@ -47,20 +49,19 @@ interface TabDragState {
 }
 
 export function ListTabs() {
-  const demoState = useUiStore((s) => s.demoState);
-  const demoLists = useUiStore((s) => s.demoLists);
+  const { data: apiLists = [] } = useLists();
+  const createList = useCreateList();
+  const updateList = useUpdateList();
+  const deleteListMut = useDeleteList();
+  const reorderListsMut = useReorderLists();
+
   const activeListId = useUiStore((s) => s.activeListId);
-  const isTempListVisible = useUiStore((s) => s.isTempListVisible);
-  const isTempListSaved = useUiStore((s) => s.isTempListSaved);
   const closeMyDayModal = useUiStore((s) => s.closeMyDayModal);
   const setActiveList = useUiStore((s) => s.setActiveList);
-  const addDemoList = useUiStore((s) => s.addDemoList);
-  const saveTempList = useUiStore((s) => s.saveTempList);
-  const renameDemoList = useUiStore((s) => s.renameDemoList);
-  const deleteDemoList = useUiStore((s) => s.deleteDemoList);
-  const reorderDemoLists = useUiStore((s) => s.reorderDemoLists);
   const filterUrgency = useUiStore((s) => s.filterUrgency);
   const setFilterUrgency = useUiStore((s) => s.setFilterUrgency);
+  const filterStatus = useUiStore((s) => s.filterStatus);
+  const setFilterStatus = useUiStore((s) => s.setFilterStatus);
   const filterPriority = useUiStore((s) => s.filterPriority);
   const setFilterPriority = useUiStore((s) => s.setFilterPriority);
   const query = useUiStore((s) => s.searchQuery);
@@ -98,14 +99,14 @@ export function ListTabs() {
   const reorderDragRef = useRef<ReorderDragSession | null>(null);
   const reorderPreviewRef = useRef<string[] | null>(null);
 
-  const isBalance = demoState === 'balanceModalOpen' || demoState === 'dayCreated';
+  const noListEntry = apiLists.find((l) => l.isDefault && l.name === 'Без списка');
+
   const tabFromStore = (() => {
     if (activeListId === '__my_day__') {
       return 'my-day';
     }
-
-    if (activeListId === '__no_list__') {
-      return 'no-list';
+    if (activeListId === '__no_list__' && noListEntry) {
+      return noListEntry.id;
     }
 
     return activeListId;
@@ -113,16 +114,15 @@ export function ListTabs() {
 
   const currentActiveTab = tabFromStore ?? 'all';
 
-  const noListCount = demoLists.find((l) => l.id === 'no-list')?._count.tasks ?? 0;
-  const orderedListTabIds = demoLists
-    .map((list) => list.id)
-    .filter((id) => (isTempListVisible ? true : id !== 'temp'));
-  const tabOrder = [...META_TAB_ORDER, ...orderedListTabIds];
+  const orderedListTabIds = useMemo(() => apiLists.map((list) => list.id), [apiLists]);
+  const defaultListIds = useMemo(() => new Set(apiLists.filter((l) => l.isDefault).map((l) => l.id)), [apiLists]);
+  const tabOrder = useMemo(() => [...META_TAB_ORDER, ...orderedListTabIds], [orderedListTabIds]);
 
-  const visibleTabs = isBalance
-    ? tabOrder.filter((id) => id !== 'no-list')
-    : tabOrder;
-  const renameableTabIds = visibleTabs.filter((id) => id !== 'my-day' && id !== 'all' && id !== 'no-list');
+  const visibleTabs = tabOrder;
+  const renameableTabIds = useMemo(
+    () => visibleTabs.filter((id) => id !== 'my-day' && id !== 'all' && !defaultListIds.has(id)),
+    [visibleTabs, defaultListIds],
+  );
   const reorderableTabIds = renameableTabIds;
   const isRenameMode = listsPanelMode === 'rename';
   const renderedReorderableTabIds = reorderPreviewIds ?? reorderableTabIds;
@@ -280,7 +280,7 @@ export function ListTabs() {
         : null
     ));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRenameMode, demoLists]);
+  }, [isRenameMode, apiLists]);
 
   useEffect(() => {
     if (isRenameMode) {
@@ -552,7 +552,7 @@ export function ListTabs() {
   function getLabel(id: string): string {
     if (id === 'my-day') return 'Мой день';
     if (id === 'all') return 'Все';
-    return demoLists.find((l) => l.id === id)?.name ?? id;
+    return apiLists.find((l) => l.id === id)?.name ?? id;
   }
 
   function closeAddInput(): void {
@@ -565,7 +565,9 @@ export function ListTabs() {
       if (currentMode === 'rename' && nextMode !== 'rename') {
         renameableTabIds.forEach((id) => {
           const nextValue = editingNames[id] ?? getLabel(id);
-          renameDemoList(id, nextValue);
+          if (nextValue !== getLabel(id)) {
+            updateList.mutate({ id, name: nextValue });
+          }
         });
       }
 
@@ -580,17 +582,19 @@ export function ListTabs() {
     finishReorderDrag(true);
     renameableTabIds.forEach((id) => {
       const nextValue = editingNames[id] ?? getLabel(id);
-      renameDemoList(id, nextValue);
+      if (nextValue !== getLabel(id)) {
+        updateList.mutate({ id, name: nextValue });
+      }
     });
     setPanelMode('default');
     setFocusedEditableId(null);
   }
 
   function handleRenameInputCommit(listId: string): void {
-    const nextValue = editingNames[listId] ?? getLabel(listId);
-    const renamed = renameDemoList(listId, nextValue);
-
-    if (!renamed) {
+    const nextValue = (editingNames[listId] ?? getLabel(listId)).trim();
+    if (nextValue && nextValue !== getLabel(listId)) {
+      updateList.mutate({ id: listId, name: nextValue });
+    } else {
       setEditingNames((current) => ({
         ...current,
         [listId]: getLabel(listId),
@@ -641,25 +645,7 @@ export function ListTabs() {
       return;
     }
 
-    const workingOrder = [...currentOrder];
-
-    finalOrder.forEach((desiredId, desiredIndex) => {
-      const currentIndex = workingOrder.indexOf(desiredId);
-
-      if (currentIndex === -1 || currentIndex === desiredIndex) {
-        return;
-      }
-
-      const targetId = workingOrder[desiredIndex];
-      if (!targetId) {
-        return;
-      }
-
-      reorderDemoLists(desiredId, targetId, 'before');
-
-      workingOrder.splice(currentIndex, 1);
-      workingOrder.splice(desiredIndex, 0, desiredId);
-    });
+    reorderListsMut.mutate(finalOrder);
   }
 
   function finishReorderDrag(applyResult: boolean): void {
@@ -822,14 +808,17 @@ export function ListTabs() {
   }
 
   function submitNewList(): void {
-    const createdOrExistingListId = addDemoList(newName);
-
-    if (!createdOrExistingListId) {
+    const trimmed = newName.trim();
+    if (!trimmed) {
       return;
     }
 
-    setActiveList(createdOrExistingListId);
-    closeMyDayModal();
+    createList.mutate(trimmed, {
+      onSuccess: (list) => {
+        setActiveList(list.id);
+        closeMyDayModal();
+      },
+    });
     closeAddInput();
   }
 
@@ -857,12 +846,14 @@ export function ListTabs() {
       return;
     }
 
-    if (id === 'no-list') {
+    const list = apiLists.find((l) => l.id === id);
+    if (list?.isDefault && list.name === 'Без списка') {
       setActiveList('__no_list__');
-    } else {
-      setActiveList(id);
+      closeMyDayModal();
+      return;
     }
 
+    setActiveList(id);
     closeMyDayModal();
   }
 
@@ -988,21 +979,6 @@ export function ListTabs() {
                   ) : (
                     <span>{getLabel(id)}</span>
                   )}
-                  {id === 'no-list' && noListCount > 0 && <span className={styles.badge}>{noListCount}</span>}
-                  {id === 'temp' && isTempListVisible && !isTempListSaved && (
-                    <span
-                      className={styles.chevron}
-                      role="button"
-                      aria-label="Сохранить временный список"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        saveTempList();
-                      }}
-                    >
-                      &#x2713;
-                    </span>
-                  )}
                 </button>
                 {showModeActive && !isDragSource && (
                   <button
@@ -1011,7 +987,7 @@ export function ListTabs() {
                     aria-label={`Удалить список ${getLabel(id)}`}
                     onClick={(event) => {
                       event.stopPropagation();
-                      deleteDemoList(id);
+                      deleteListMut.mutate(id);
                     }}
                   >
                     <svg className={styles.deleteBtnIcon} viewBox="0 0 10 10" fill="none" aria-hidden>
@@ -1192,6 +1168,24 @@ export function ListTabs() {
               )}
             </div>
           </div>
+          {(query || filterUrgency || filterPriority || filterStatus) && (
+            <button
+              type="button"
+              className={styles.resetBtn}
+              aria-label="Сбросить все фильтры"
+              title="Сбросить все фильтры"
+              onClick={() => {
+                setSearch('');
+                setFilterUrgency(null);
+                setFilterPriority(null);
+                setFilterStatus(null);
+                setOpenMenu(null);
+                setIsSearchOpen(false);
+              }}
+            >
+              <img src={refreshIcon} className={styles.resetIcon} alt="" aria-hidden />
+            </button>
+          )}
         </div>
         <div className={styles.filterWrap}>
           <div className={`${styles.urgencyInline} ${openMenu === 'urgency' || filterUrgency ? styles.urgencyInlineOpen : ''}`}>

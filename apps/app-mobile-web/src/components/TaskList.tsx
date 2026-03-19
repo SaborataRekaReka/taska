@@ -1,171 +1,52 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { isTaskInSmartList } from '../lib/smartLists';
 import type { TaskPriority } from '../lib/types';
+import { useTasks, useUpdateTask, useLists } from '../hooks/queries';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
 import styles from './TaskList.module.css';
 
-function isDueToday(deadline: string | null): boolean {
-  if (!deadline) {
-    return false;
-  }
-
-  const due = new Date(deadline);
-  const now = new Date();
-
-  return (
-    due.getFullYear() === now.getFullYear()
-    && due.getMonth() === now.getMonth()
-    && due.getDate() === now.getDate()
-  );
-}
-
 export function TaskList() {
-  const activeListId = useUiStore((s) => s.activeListId);
-  const isMyDaySaved = useUiStore((s) => s.isMyDaySaved);
-  const activeSmartListId = useUiStore((s) => s.activeSmartListId);
-  const demoLists = useUiStore((s) => s.demoLists);
-  const isTempListVisible = useUiStore((s) => s.isTempListVisible);
-  const searchQuery = useUiStore((s) => s.searchQuery.trim().toLowerCase());
-  const filterPriority = useUiStore((s) => s.filterPriority);
-  const filterUrgency = useUiStore((s) => s.filterUrgency);
   const openTaskAssistantModal = useUiStore((s) => s.openTaskAssistantModal);
-  const demoTasks = useUiStore((s) => s.demoTasks);
-  const updateDemoTask = useUiStore((s) => s.updateDemoTask);
-  const [completedTaskIds, setCompletedTaskIds] = useState<Record<string, boolean>>({});
+  const { data: tasks = [] } = useTasks();
+  const { data: lists = [] } = useLists();
+  const updateTask = useUpdateTask();
 
   const availableTaskLists = useMemo(
-    () => demoLists
-      .filter((list) => list.id !== 'no-list')
-      .filter((list) => list.id !== 'temp' || isTempListVisible)
-      .map((list) => ({ id: list.id, name: list.name })),
-    [demoLists, isTempListVisible],
-  );
-
-  const listNameById = useMemo(
-    () => new Map(availableTaskLists.map((list) => [list.id, list.name])),
-    [availableTaskLists],
-  );
-
-  const listScopedTasks = useMemo(
-    () => demoTasks.filter((task) => {
-      if (activeSmartListId) {
-        return isTaskInSmartList(task, activeSmartListId);
-      }
-
-      if (activeListId === '__no_list__') {
-        return task.listId === null;
-      }
-
-      if (activeListId === '__my_day__') {
-        return isMyDaySaved ? true : isDueToday(task.deadline);
-      }
-
-      if (activeListId) {
-        return task.listId === activeListId;
-      }
-
-      return true;
-    }),
-    [activeListId, activeSmartListId, demoTasks, isMyDaySaved],
-  );
-
-  const filteredTasks = useMemo(
-    () => listScopedTasks.filter((task) => {
-      if (filterPriority && task.priority !== filterPriority) {
-        return false;
-      }
-
-      if (filterUrgency) {
-        if (!task.deadline) {
-          return false;
-        }
-
-        const dueAt = new Date(task.deadline).getTime();
-        const now = Date.now();
-        const endOfToday = new Date();
-        endOfToday.setHours(23, 59, 59, 999);
-
-        if (filterUrgency === 'OVERDUE' && !(dueAt < now)) {
-          return false;
-        }
-
-        if (filterUrgency === 'TODAY' && !(dueAt >= now && dueAt <= endOfToday.getTime())) {
-          return false;
-        }
-
-        if (filterUrgency === 'NEXT_24_HOURS' && !(dueAt >= now && dueAt <= now + (24 * 60 * 60 * 1000))) {
-          return false;
-        }
-      }
-
-      if (!searchQuery) {
-        return true;
-      }
-
-      const normalizedTitle = task.title.toLowerCase();
-      const normalizedListName = task.list?.name.toLowerCase() ?? '';
-      const matchesTitle = normalizedTitle.includes(searchQuery);
-      const matchesList = normalizedListName.includes(searchQuery);
-      const matchesSubtasks = task.subtasks.some((subtask) =>
-        subtask.title.toLowerCase().includes(searchQuery)
-      );
-
-      return matchesTitle || matchesList || matchesSubtasks;
-    }),
-    [filterPriority, filterUrgency, listScopedTasks, searchQuery],
+    () => lists.map((list) => ({ id: list.id, name: list.name, isDefault: list.isDefault })),
+    [lists],
   );
 
   const sortedTasks = useMemo(
-    () => filteredTasks
+    () => [...tasks]
       .map((task, index) => ({
         task,
         index,
-        isCompleted: completedTaskIds[task.id] ?? task.status === 'DONE',
+        isCompleted: task.status === 'DONE',
       }))
       .sort((a, b) => {
         if (a.isCompleted === b.isCompleted) {
           return a.index - b.index;
         }
-
         return a.isCompleted ? 1 : -1;
       }),
-    [completedTaskIds, filteredTasks],
+    [tasks],
   );
 
   function handleToggleTaskCompleted(taskId: string, nextCompleted: boolean) {
-    setCompletedTaskIds((prev) => ({
-      ...prev,
-      [taskId]: nextCompleted,
-    }));
+    updateTask.mutate({ id: taskId, status: nextCompleted ? 'DONE' : 'TODO' });
   }
 
   function handleUpdateTaskDeadline(taskId: string, nextDeadline: string | null): void {
-    updateDemoTask(taskId, { deadline: nextDeadline });
+    updateTask.mutate({ id: taskId, deadline: nextDeadline });
   }
 
   function handleUpdateTaskList(taskId: string, nextListId: string | null): void {
-    if (!nextListId) {
-      updateDemoTask(taskId, {
-        listId: null,
-        list: null,
-      });
-      return;
-    }
-
-    const nextListName = listNameById.get(nextListId);
-    updateDemoTask(taskId, {
-      listId: nextListId,
-      list: {
-        id: nextListId,
-        name: nextListName ?? 'Список',
-      },
-    });
+    updateTask.mutate({ id: taskId, listId: nextListId });
   }
 
   function handleUpdateTaskPriority(taskId: string, nextPriority: TaskPriority): void {
-    updateDemoTask(taskId, { priority: nextPriority });
+    updateTask.mutate({ id: taskId, priority: nextPriority });
   }
 
   return (
@@ -190,7 +71,7 @@ export function TaskList() {
         </motion.div>
       ))}
       {sortedTasks.length === 0 && (
-        <div className={styles.empty}>{'Ничего не найдено'}</div>
+        <div className={styles.empty}>Задач пока нет</div>
       )}
     </div>
   );

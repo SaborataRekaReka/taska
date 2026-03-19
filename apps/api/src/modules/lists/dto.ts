@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, MinLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, IsOptional, IsArray } from 'class-validator';
 
 export class CreateListDto {
   @ApiProperty({ example: 'Учёба' })
@@ -14,4 +14,11 @@ export class UpdateListDto {
   @IsString()
   @MinLength(1)
   name?: string;
+}
+
+export class ReorderListsDto {
+  @ApiProperty({ example: ['cuid1', 'cuid2', 'cuid3'] })
+  @IsArray()
+  @IsString({ each: true })
+  orderedIds!: string[];
 }

@@ -124,7 +124,12 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
         className={`${styles.trigger} ${isOpen ? styles.triggerActive : ''}`}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onMouseDown={(e) => e.stopPropagation()}
+        onMouseUp={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen((prev) => !prev);
+        }}
       >
         <img src={clockIcon} alt="" className={styles.icon} />
         <span>{formatDeadlineLabel(value)}</span>
@@ -136,7 +141,12 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
             type="button"
             className={styles.dismissLayer}
             aria-label="Закрыть календарь"
-            onClick={() => setIsOpen(false)}
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(false);
+            }}
           />
 
           <div className={styles.popover} role="dialog" aria-label="Выбор дедлайна">
@@ -145,7 +155,11 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
                 type="button"
                 className={styles.navButton}
                 aria-label="Предыдущий месяц"
-                onClick={() => setViewDate(new Date(currentYear, currentMonth - 1, 1))}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewDate(new Date(currentYear, currentMonth - 1, 1));
+                }}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M9.75 3.5L5.25 8L9.75 12.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
@@ -158,7 +172,11 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
                 type="button"
                 className={styles.navButton}
                 aria-label="Следующий месяц"
-                onClick={() => setViewDate(new Date(currentYear, currentMonth + 1, 1))}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setViewDate(new Date(currentYear, currentMonth + 1, 1));
+                }}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M6.25 3.5L10.75 8L6.25 12.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
@@ -187,7 +205,9 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
                     key={`${currentYear}-${currentMonth}-${day}`}
                     type="button"
                     className={`${styles.dayButton} ${isSelected ? styles.dayButtonSelected : ''} ${isToday ? styles.dayButtonToday : ''}`}
-                    onClick={() => {
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
                       onChange(toStableIsoDate(currentYear, currentMonth, day));
                       setIsOpen(false);
                     }}
@@ -202,7 +222,9 @@ export function TaskDeadlinePicker({ value, onChange }: TaskDeadlinePickerProps)
               <button
                 type="button"
                 className={styles.clearButton}
-                onClick={() => {
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
                   onChange(null);
                   setIsOpen(false);
                 }}

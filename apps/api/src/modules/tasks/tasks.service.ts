@@ -11,6 +11,7 @@ interface TaskFilters {
   dueToday?: boolean | undefined;
   noList?: boolean | undefined;
   search?: string | undefined;
+  urgency?: 'OVERDUE' | 'TODAY' | 'NEXT_24_HOURS' | undefined;
 }
 
 @Injectable()
@@ -41,6 +42,22 @@ export class TasksService {
       const end = new Date();
       end.setHours(23, 59, 59, 999);
       where.deadline = { gte: start, lte: end };
+    }
+    if (filters.urgency) {
+      const now = new Date();
+      if (filters.urgency === 'OVERDUE') {
+        where.deadline = { lt: now };
+        where.status = { not: 'DONE' };
+      } else if (filters.urgency === 'TODAY') {
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        const end = new Date();
+        end.setHours(23, 59, 59, 999);
+        where.deadline = { gte: start, lte: end };
+      } else if (filters.urgency === 'NEXT_24_HOURS') {
+        const end = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        where.deadline = { gte: now, lte: end };
+      }
     }
     if (filters.search) {
       where.title = { contains: filters.search, mode: 'insensitive' };
