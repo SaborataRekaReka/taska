@@ -36,11 +36,12 @@
 | C4 | ✅ DONE | History service + read API |
 | D5 | ✅ DONE | "Мой день" modal (premium UI + profile radar + Framer Motion) |
 | D6 | ✅ DONE | Task AI modal: visual/editor tabs, markdown edit mode, assistant prompt input |
+| E1 | ✅ DONE | AI safe-mode backend foundation: OpenAI planning + confirm/execute/undo + stored AI operations |
 
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
-| E | AI Assistant safe-mode |
+| E2 | Frontend AI chat + proposal cards |
 | F | Polishing, документация |
 
 ### Текущее состояние модулей
@@ -50,7 +51,7 @@
 - **tasks**: полный CRUD + 6 фильтров + includes subtasks/list
 - **subtasks**: полный CRUD через /tasks/:taskId/subtasks + ownership
 - **history**: append-only запись + read API с фильтрами
-- **ai-assistant**: заглушка (только /health)
+- **ai-assistant**: safe-mode foundation — `/ai/plan`, `/ai/operations/:id`, `/confirm`, `/execute`, `/undo`, `/revise`, OpenAI-backed structured planning
 
 ### Frontend (apps/app-mobile-web) — React + Vite
 - **Auth**: Landing/Login/Register/Google callback pages с auth guard routing
@@ -92,7 +93,7 @@ TASKA 2.0/
 │   │           ├── tasks/      # Задачи (STUB)
 │   │           ├── subtasks/   # Подзадачи (STUB)
 │   │           ├── history/    # История изменений (STUB)
-│   │           └── ai-assistant/ # AI-ассистент (STUB)
+│   │           └── ai-assistant/ # AI safe-mode orchestration + OpenAI planning
 │   └── app-mobile-web/         # React + Vite web frontend
 │       ├── src/
 │       │   ├── components/     # Header, TaskCard, ListTabs, AiPromptBar, MyDayModal (my-day/*), etc.
@@ -215,12 +216,14 @@ curl http://localhost:3000/openapi.json
 ### History (`/history`) — ✅ IMPLEMENTED
 - `GET /history?entityType=&entityId=&limit=` — лог изменений (Bearer)
 
-### AI Assistant (`/ai`) — ⏳ PLANNED
-- `POST /ai/chat` — free-form запрос
-- `POST /ai/plan` — сформировать план изменений
+### AI Assistant (`/ai`) — 🟡 FOUNDATION IMPLEMENTED
+- `POST /ai/plan` — сформировать структурированный safe-mode план изменений через OpenAI
+- `POST /ai/operations/:id/revise` — пересобрать/отредактировать pending-план до подтверждения
+- `GET /ai/operations/:id` — получить сохраненный preview/execution/undo payload
 - `POST /ai/operations/:id/confirm` — подтвердить план
-- `POST /ai/operations/:id/execute` — применить подтвержденный план
+- `POST /ai/operations/:id/execute` — применить подтвержденный план backend-сервисами
 - `POST /ai/operations/:id/undo` — откатить последнюю AI-операцию
+- `POST /ai/chat` — conversational endpoint (ещё не реализован)
 
 ---
 
