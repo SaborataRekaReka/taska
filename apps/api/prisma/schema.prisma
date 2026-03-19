@@ -49,6 +49,11 @@ enum AiOperationStatus {
   FAILED
 }
 
+enum AiOperationScope {
+  GLOBAL
+  TASK
+}
+
 model User {
   id             String          @id @default(cuid())
   email          String          @unique
@@ -157,17 +162,26 @@ model History {
 }
 
 model AiOperation {
-  id             String            @id @default(cuid())
-  userId         String
-  operationType  String
-  prompt         String
-  planPayload    Json
-  status         AiOperationStatus @default(PLANNED)
-  executedAt     DateTime?
-  undoneAt       DateTime?
-  createdAt      DateTime          @default(now())
+  id               String            @id @default(cuid())
+  userId           String
+  taskId           String?
+  scope            AiOperationScope  @default(GLOBAL)
+  operationType    String
+  model            String?
+  prompt           String
+  planPayload      Json
+  executionPayload Json?
+  undoPayload      Json?
+  status           AiOperationStatus @default(PLANNED)
+  approvedAt       DateTime?
+  executedAt       DateTime?
+  undoneAt         DateTime?
+  failedAt         DateTime?
+  errorMessage     String?
+  createdAt        DateTime          @default(now())
 
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status, createdAt])
+  @@index([taskId, createdAt])
 }
