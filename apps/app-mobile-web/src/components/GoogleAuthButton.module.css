@@ -3,29 +3,39 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  border-radius: var(--radius-md);
-  padding: 14px;
+  gap: 10px;
+  min-height: 52px;
+  border-radius: 999px;
+  padding: 0 16px;
   background: #ffffff;
-  color: #202124;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  font-size: 15px;
-  font-weight: 600;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .button:hover {
-  transform: translateY(-1px);
+  background: #f8f9fa;
+  border-color: #d2d6dc;
+}
+
+.button:focus-visible {
+  outline: none;
+  border-color: #c2c7cd;
+  box-shadow: 0 0 0 2px rgba(60, 64, 67, 0.15);
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
+  width: 18px;
+  height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4285f4, #34a853, #fbbc05, #ea4335);
-  color: #fff;
-  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.icon svg {
+  display: block;
 }

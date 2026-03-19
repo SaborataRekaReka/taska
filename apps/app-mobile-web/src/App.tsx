@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
-  if (!user) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -31,12 +31,13 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<AuthLandingPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/auth" element={<AuthLandingPage />} />
           <Route path="/login" element={<GuestGuard><LoginPage /></GuestGuard>} />
           <Route path="/register" element={<GuestGuard><RegisterPage /></GuestGuard>} />
-          <Route path="/auth/google/callback" element={<GuestGuard><GoogleAuthCallbackPage /></GuestGuard>} />
+          <Route path="/oauth/google/callback" element={<GuestGuard><GoogleAuthCallbackPage /></GuestGuard>} />
           <Route path="/app" element={<AuthGuard><MainPage /></AuthGuard>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
