@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-16 | **Стадия:** B1+C1-C4 + D0-D6 завершены, frontend в UX-итерации
+> **Последнее обновление:** 2026-03-19 | **Стадия:** B2+C1-C4 + D0-D6 завершены, Google OAuth добавлен
 
 ---
 
@@ -60,7 +60,7 @@
 |-----------|--------|------|
 | React | 19 | UI runtime |
 | Vite | 6 | Dev server / build |
-| React Router DOM | 7 | Роутинг |
+| React Router DOM | 7 | Роутинг, auth landing и callback flow |
 | Zustand | 5+ | Клиентский state |
 | TanStack Query | 5+ | Серверный state, кэш, invalidation |
 | CSS Modules | — | Pixel-perfect стили и токены |
@@ -73,6 +73,7 @@
 - Реальный поиск по title/list/subtasks + UX-хоткеи (`Ctrl/Cmd+K`, `Esc`, clear).
 - Модалка "Мой день": bottom-sheet открытие, Mood/Energy/Wishes controls, computeDayProfile и diamond-radar визуализация профиля дня.
 - Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и поле промпта для диалога с ассистентом.
+- Public auth landing + Google callback page для web OAuth-входа.
 
 ### Shared packages
 | Пакет | Роль |
@@ -95,8 +96,8 @@
                        ▼
 ┌─────────────────────────────────────────────────────┐
 │               NestJS API (Fastify)                   │
-│  ┌──────┐ ┌───────┐ ┌───────┐ ┌──────┐ ┌────────┐  │
-│  │ auth │ │ users │ │ lists │ │tasks │ │subtasks│  │
+│  ┌───────────────┐ ┌───────┐ ┌───────┐ ┌──────┐ ┌────────┐  │
+│  │ auth + google │ │ users │ │ lists │ │tasks │ │subtasks│  │
 │  └──────┘ └───────┘ └───────┘ └──────┘ └────────┘  │
 │  ┌─────────┐ ┌──────────────────┐                   │
 │  │ history │ │  ai-assistant    │                   │
@@ -126,7 +127,7 @@
 
 ### User
 ```
-id, email, passwordHash?, displayName?, provider (LOCAL|GOOGLE), providerUserId?, createdAt, updatedAt
+id, email, passwordHash?, displayName?, provider (LOCAL|GOOGLE), providerUserId?, avatarUrl?, givenName?, familyName?, emailVerified, createdAt, updatedAt
 ```
 Связи: lists[], tasks[], subtasks[], historyEvents[], aiOperations[]
 
@@ -190,6 +191,8 @@ id, userId, operationType, prompt, planPayload (JSON), status (PLANNED|CONFIRMED
 |--------|------|------|--------|
 | POST | `/auth/register` | — | ✅ done |
 | POST | `/auth/login` | — | ✅ done |
+| GET | `/auth/google/start` | — | ✅ done |
+| GET | `/auth/google/callback` | — | ✅ done |
 | POST | `/auth/refresh` | — | ✅ done |
 | POST | `/auth/logout` | Bearer | ✅ done |
 | GET | `/auth/me` | Bearer | ✅ done |
@@ -198,7 +201,7 @@ Register/Login response:
 ```json
 {
   "data": {
-    "user": { "id": "...", "email": "...", "displayName": "..." },
+    "user": { "id": "...", "email": "...", "displayName": "...", "avatarUrl": "...", "provider": "GOOGLE" },
     "accessToken": "...",
     "refreshToken": "..."
   }
@@ -363,7 +366,7 @@ UI action
 
 1. Single-user → multi-user (архитектурно готово через `userId` на всех сущностях)
 2. Redis для session store и rate-limit
-3. Google OAuth
+3. Улучшение Google OAuth: state signing + one-time auth bridge вместо query tokens
 4. AI-pipeline в отдельный сервис при нагрузке
 5. Feature flags для рискованных фич
 6. Метрики, SLO, алерты

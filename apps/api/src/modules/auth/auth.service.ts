@@ -4,6 +4,17 @@ import jwt from 'jsonwebtoken';
 
 import { PrismaService } from '../../core/prisma.service.js';
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string | null;
+  provider: 'LOCAL' | 'GOOGLE';
+  avatarUrl: string | null;
+  givenName: string | null;
+  familyName: string | null;
+  emailVerified: boolean;
+}
+
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
@@ -46,21 +57,27 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await this.prisma.user.create({
-      data: { email, passwordHash, displayName: displayName ?? null, provider: 'LOCAL' },
+      data: {
+        email,
+        passwordHash,
+        displayName: displayName ?? null,
+        provider: 'LOCAL',
+        emailVerified: false,
+      },
     });
 
-    const defaultListNames = ['Работа', 'Личное', 'Без списка'];
-    for (const name of defaultListNames) {
-      await this.prisma.list.create({
-        data: { userId: user.id, name, isDefault: true },
-      });
-    }
+    await this.createDefaultLists(user.id);
 
-    const tokens = this.generateTokens(user.id, user.email);
-    return {
-      user: { id: user.id, email: user.email, displayName: user.displayName },
-      ...tokens,
-    };
+    return this.buildAuthResponse({
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      provider: user.provider,
+      avatarUrl: user.avatarUrl,
+      givenName: user.givenName,
+      familyName: user.familyName,
+      emailVerified: user.emailVerified,
+    });
   }
 
   async login(email: string, password: string) {
@@ -74,10 +91,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user.id, user.email);
+    return this.buildAuthResponse({
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      provider: user.provider,
+      avatarUrl: user.avatarUrl,
+      givenName: user.givenName,
+      familyName: user.familyName,
+      emailVerified: user.emailVerified,
+    });
+  }
+
+  createTokenPair(user: Pick<AuthUser, 'id' | 'email'>): TokenPair {
+    return this.generateTokens(user.id, user.email);
+  }
+
+  buildAuthResponse(user: AuthUser) {
     return {
-      user: { id: user.id, email: user.email, displayName: user.displayName },
-      ...tokens,
+      user,
+      ...this.generateTokens(user.id, user.email),
     };
   }
 
@@ -104,12 +137,29 @@ export class AuthService {
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, displayName: true, provider: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        provider: true,
+        avatarUrl: true,
+        givenName: true,
+        familyName: true,
+        emailVerified: true,
+        createdAt: true,
+      },
     });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
     return user;
+  }
+
+  private async createDefaultLists(userId: string): Promise<void> {
+    const defaultListNames = ['Работа', 'Личное', 'Без списка'];
+    await Promise.all(defaultListNames.map((name, index) => this.prisma.list.create({
+      data: { userId, name, isDefault: true, order: index },
+    })));
   }
 
   static verifyAccessToken(token: string): JwtPayload {

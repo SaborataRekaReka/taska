@@ -1,9 +1,9 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../core/auth.guard.js';
-import { CurrentUserId } from '../../core/user.decorator.js';
 import { PrismaService } from '../../core/prisma.service.js';
+import { CurrentUserId } from '../../core/user.decorator.js';
 
 @ApiTags('users')
 @Controller('users')
@@ -17,7 +17,17 @@ export class UsersController {
   async getProfile(@CurrentUserId() userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, displayName: true, provider: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        provider: true,
+        avatarUrl: true,
+        givenName: true,
+        familyName: true,
+        emailVerified: true,
+        createdAt: true,
+      },
     });
   }
 
