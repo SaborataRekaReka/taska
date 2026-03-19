@@ -37,6 +37,11 @@
 | D5 | ✅ DONE | "Мой день" modal (premium UI + profile radar + Framer Motion) |
 | D6 | ✅ DONE | Task AI modal: visual/editor tabs, markdown edit mode, assistant prompt input |
 | E1 | ✅ DONE | AI safe-mode backend foundation: OpenAI planning + confirm/execute/undo + stored AI operations |
+| E2 | ✅ DONE | Frontend AI chat + proposal cards on main screen and task modal |
+
+### Не начатые этапы
+| Этап | Описание |
+|------|----------|
 
 ### Не начатые этапы
 | Этап | Описание |
@@ -61,6 +66,10 @@
 - **TaskEditModal**: полная форма редактирования (title, desc, priority, status, deadline, list, subtasks)
 - **State**: Zustand (auth, UI) + TanStack Query (server data)
 - **API client**: fetch wrapper с JWT auto-refresh при 401
+- **AI chat UX (2026-03-19)**:
+  - Главный hero panel теперь работает как global AI chat с локальной лентой сообщений и proposal cards.
+  - Каждое AI-предложение можно открыть как MD draft, пересобрать через revise, одобрить и применить либо отклонить/откатить.
+  - Task AI modal получил отдельную чат-панель по конкретной задаче с тем же safe-mode workflow.
 - **UX updates (2026-03-15)**:
   - Hero input с мягкой анимацией collapsed/expanded.
   - Реальный search input: hotkey `Ctrl/Cmd+K`, `Esc`, clear `×`, фильтрация списка.

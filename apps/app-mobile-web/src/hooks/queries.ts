@@ -1,6 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { List, Task, AuthResponse } from '../lib/types';
+import type {
+  AiExecutionResponse,
+  AiOperationDetail,
+  AiPlanResponse,
+  AiUndoResponse,
+  AuthResponse,
+  List,
+  Task,
+} from '../lib/types';
 import { useAuthStore } from '../stores/auth';
 import { useUiStore } from '../stores/ui';
 
@@ -39,7 +47,10 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: (data: { title: string; listId?: string; priority?: string; deadline?: string }) =>
       api.post<Task>('/tasks', data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['tasks'] }); qc.invalidateQueries({ queryKey: ['lists'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['lists'] });
+    },
   });
 }
 
@@ -48,7 +59,10 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string; title?: string; status?: string; priority?: string; deadline?: string | null; listId?: string | null; description?: string }) =>
       api.patch<Task>(`/tasks/${id}`, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['tasks'] }); qc.invalidateQueries({ queryKey: ['lists'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['lists'] });
+    },
   });
 }
 
@@ -56,7 +70,10 @@ export function useDeleteTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete<Task>(`/tasks/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['tasks'] }); qc.invalidateQueries({ queryKey: ['lists'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['lists'] });
+    },
   });
 }
 
@@ -91,7 +108,10 @@ export function useUpdateList() {
   return useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       api.patch<List>(`/lists/${id}`, { name }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lists'] }); qc.invalidateQueries({ queryKey: ['tasks'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['lists'] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
   });
 }
 
@@ -99,7 +119,10 @@ export function useDeleteList() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/lists/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['lists'] }); qc.invalidateQueries({ queryKey: ['tasks'] }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['lists'] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
   });
 }
 
@@ -142,6 +165,67 @@ export function useUpdatePreferences() {
     mutationFn: (data: Partial<UserPreferences>) =>
       api.patch<UserPreferences>('/users/me/preferences', data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['preferences'] }),
+  });
+}
+
+export function useCreateAiPlan() {
+  return useMutation({
+    mutationFn: (data: {
+      prompt: string;
+      scope?: 'GLOBAL' | 'TASK';
+      taskId?: string;
+      context?: {
+        listIds?: string[];
+        taskIds?: string[];
+        search?: string;
+        limit?: number;
+      };
+    }) => api.post<AiPlanResponse>('/ai/plan', data),
+  });
+}
+
+export function useReviseAiPlan() {
+  return useMutation({
+    mutationFn: ({ operationId, revisionPrompt }: { operationId: string; revisionPrompt: string }) =>
+      api.post<AiPlanResponse>(`/ai/operations/${operationId}/revise`, { revisionPrompt }),
+  });
+}
+
+export function useConfirmAiOperation() {
+  return useMutation({
+    mutationFn: ({ operationId, note }: { operationId: string; note?: string }) =>
+      api.post<{ operationId: string; status: string; approvedAt: string | null }>(`/ai/operations/${operationId}/confirm`, note ? { note } : undefined),
+  });
+}
+
+export function useExecuteAiOperation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (operationId: string) => api.post<AiExecutionResponse>(`/ai/operations/${operationId}/execute`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['lists'] });
+    },
+  });
+}
+
+export function useUndoAiOperation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ operationId, reason }: { operationId: string; reason?: string }) =>
+      api.post<AiUndoResponse>(`/ai/operations/${operationId}/undo`, reason ? { reason } : undefined),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['lists'] });
+    },
+  });
+}
+
+export function useAiOperation(operationId: string | null) {
+  return useQuery({
+    queryKey: ['ai-operation', operationId],
+    queryFn: () => api.get<AiOperationDetail>(`/ai/operations/${operationId}`),
+    enabled: Boolean(operationId),
   });
 }
 

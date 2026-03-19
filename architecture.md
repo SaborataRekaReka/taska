@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-19 | **Стадия:** B2+C1-C4 + D0-D6 завершены, E1 safe-mode AI foundation реализован
+> **Последнее обновление:** 2026-03-19 | **Стадия:** B2+C1-C4 + D0-D6 завершены, E1-E2 AI safe-mode foundation + frontend chat реализованы
 
 ---
 
@@ -67,12 +67,12 @@
 
 ### Frontend UX-срез (актуально)
 - Pixel-perfect desktop layout (base 1440), собственные дизайн-токены и градиентный фон.
-- Hero panel с анимированным сворачиванием/раскрытием и интерактивными AI-чипами.
+- Hero panel с анимированным сворачиванием/раскрытием, локальной AI chat-лентой и proposal cards safe-mode.
 - Списки и карточки задач с inline-editing текста (задачи/подзадачи).
 - Добавление подзадач через контекстный `+` в карточке, автофокус и Enter-flow.
 - Реальный поиск по title/list/subtasks + UX-хоткеи (`Ctrl/Cmd+K`, `Esc`, clear).
 - Модалка "Мой день": bottom-sheet открытие, Mood/Energy/Wishes controls, computeDayProfile и diamond-radar визуализация профиля дня.
-- Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и поле промпта для диалога с ассистентом.
+- Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и отдельная chat/prompt панель по конкретной задаче.
 - Public auth landing + Google callback page для web OAuth-входа.
 
 ### Shared packages
