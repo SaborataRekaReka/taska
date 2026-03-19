@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+  useConfirmAiOperation,
+  useCreateAiPlan,
+  useExecuteAiOperation,
+  useReviseAiPlan,
+  useTasks,
+  useUndoAiOperation,
+  useUpdateTask,
+} from '../hooks/queries';
+import type { AiPlanResponse } from '../lib/types';
 import { useUiStore } from '../stores/ui';
-import { useTasks, useUpdateTask } from '../hooks/queries';
 import { TaskCard } from './TaskCard';
+import { AiProposalCard } from './AiProposalCard';
 import { AiToolChips } from './AiToolChips';
 import sendIcon from '../assests/send.svg';
 import styles from './EditTaskModal.module.css';
@@ -35,8 +45,24 @@ function extractTitleFromMarkdown(markdown: string, fallbackTitle: string): stri
 
 type AutosaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
 
+type ChatMessage =
+  | { id: string; role: 'user'; content: string }
+  | {
+      id: string;
+      role: 'assistant';
+      content: string;
+      proposal?: AiPlanResponse;
+      status?: 'DRAFT' | 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED' | 'REJECTED';
+      busyLabel?: string | null;
+      executionCount?: number;
+    };
+
 interface EditTaskModalProps {
   isOpen: boolean;
+}
+
+function nextMessageId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export function EditTaskModal({ isOpen }: EditTaskModalProps) {
@@ -44,6 +70,11 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
   const { data: tasks } = useTasks();
   const updateTask = useUpdateTask();
+  const createPlan = useCreateAiPlan();
+  const revisePlan = useReviseAiPlan();
+  const confirmOperation = useConfirmAiOperation();
+  const executeOperation = useExecuteAiOperation();
+  const undoOperation = useUndoAiOperation();
   const selectedTask = useMemo(
     () => {
       if (!selectedTaskId) {
@@ -66,6 +97,7 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const [assistantPrompt, setAssistantPrompt] = useState('');
   const [autosaveState, setAutosaveState] = useState<AutosaveState>('idle');
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const taskForView = selectedTask ?? cachedTask;
 
   useEffect(() => {
@@ -82,6 +114,7 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
     }
 
     setAssistantPrompt('');
+    setMessages([]);
     setActiveTab('visual');
     setAutosaveState('idle');
     setAutosaveError(null);
@@ -157,10 +190,111 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
     } catch (error) {
       const message = error instanceof Error
         ? error.message
-        : '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f';
+        : 'Не удалось сохранить изменения';
       setAutosaveState('error');
       setAutosaveError(message);
     }
+  }
+
+  async function submitAssistantPrompt(): Promise<void> {
+    const trimmed = assistantPrompt.trim();
+    if (!trimmed || !taskForView) {
+      return;
+    }
+
+    setMessages((current) => [...current, { id: nextMessageId('task-user'), role: 'user', content: trimmed }]);
+    setAssistantPrompt('');
+
+    try {
+      const proposal = await createPlan.mutateAsync({
+        prompt: `${trimmed}\n\nCurrent markdown:\n${markdownValue}`,
+        scope: 'TASK',
+        taskId: taskForView.id,
+        context: { taskIds: [taskForView.id], limit: 1 },
+      });
+
+      setMessages((current) => [
+        ...current,
+        {
+          id: nextMessageId('task-assistant'),
+          role: 'assistant',
+          content: proposal.assistantMessage,
+          proposal,
+          status: proposal.status,
+        },
+      ]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось получить AI-план.';
+      setMessages((current) => [
+        ...current,
+        { id: nextMessageId('task-error'), role: 'assistant', content: message, status: 'FAILED' },
+      ]);
+    }
+  }
+
+  async function handleApprove(messageId: string, proposal: AiPlanResponse): Promise<void> {
+    setMessages((current) => current.map((message) => (
+      message.id === messageId ? { ...message, busyLabel: 'Подтверждаем и применяем…' } : message
+    )));
+
+    try {
+      await confirmOperation.mutateAsync({ operationId: proposal.operationId });
+      const execution = await executeOperation.mutateAsync(proposal.operationId);
+      setMessages((current) => current.map((message) => (
+        message.id === messageId
+          ? { ...message, status: execution.status, executionCount: execution.results.length, busyLabel: null }
+          : message
+      )));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось применить AI-план.';
+      setMessages((current) => current.map((item) => (
+        item.id === messageId ? { ...item, status: 'FAILED', busyLabel: message } : item
+      )));
+    }
+  }
+
+  async function handleRevise(messageId: string, proposal: AiPlanResponse, revisionPrompt: string): Promise<void> {
+    setMessages((current) => current.map((message) => (
+      message.id === messageId ? { ...message, busyLabel: 'Пересобираем план…' } : message
+    )));
+
+    try {
+      const revised = await revisePlan.mutateAsync({ operationId: proposal.operationId, revisionPrompt });
+      setMessages((current) => current.map((message) => (
+        message.id === messageId
+          ? { ...message, proposal: revised, content: revised.assistantMessage, status: revised.status, busyLabel: null }
+          : message
+      )));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось обновить план.';
+      setMessages((current) => current.map((item) => (
+        item.id === messageId ? { ...item, status: 'FAILED', busyLabel: message } : item
+      )));
+    }
+  }
+
+  async function handleUndo(messageId: string, proposal: AiPlanResponse): Promise<void> {
+    setMessages((current) => current.map((message) => (
+      message.id === messageId ? { ...message, busyLabel: 'Откатываем…' } : message
+    )));
+
+    try {
+      const result = await undoOperation.mutateAsync({ operationId: proposal.operationId });
+      setMessages((current) => current.map((message) => (
+        message.id === messageId ? { ...message, status: result.status, busyLabel: null } : message
+      )));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось откатить изменения.';
+      setMessages((current) => current.map((item) => (
+        item.id === messageId ? { ...item, status: 'FAILED', busyLabel: message } : item
+      )));
+    }
+  }
+
+  function handleReject(messageId: string): void {
+    setMessages((current) => current.map((message) => (
+      message.id === messageId ? { ...message, status: 'REJECTED', busyLabel: null } : message
+    )));
   }
 
   const autosaveLabel = (() => {
@@ -202,13 +336,13 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                   className={`${styles.tab} ${activeTab === 'visual' ? styles.tabActive : ''}`}
                   onClick={() => setActiveTab('visual')}
                 >
-                  {'\u0412\u0438\u0437\u0443\u0430\u043b\u044c\u043d\u043e'}
+                  Визуально
                 </button>
                 <button
                   className={`${styles.tab} ${activeTab === 'editor' ? styles.tabActive : ''}`}
                   onClick={() => setActiveTab('editor')}
                 >
-                  {'\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440'}
+                  Редактор
                 </button>
               </div>
               <button className={styles.closeBtn} onClick={closeTaskAssistantModal}>
@@ -219,51 +353,95 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
             </div>
 
             <div className={styles.body}>
-              {activeTab === 'visual' ? (
-                <div className={styles.visualContent}>
-                  <div className={styles.contentPanel}>
-                    <div className={styles.taskPreview}>
-                      <TaskCard task={taskForView} />
+              <div className={styles.workspace}>
+                <div className={styles.leftPane}>
+                  {activeTab === 'visual' ? (
+                    <div className={styles.visualContent}>
+                      <div className={styles.contentPanel}>
+                        <div className={styles.taskPreview}>
+                          <TaskCard task={taskForView} />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.editorContent}>
-                  <div className={styles.contentPanel}>
-                    <div className={styles.editorArea}>
-                      <textarea
-                        className={styles.editorInput}
-                        value={markdownValue}
-                        onChange={(e) => {
-                          const nextValue = e.target.value;
-                          setMarkdownValue(nextValue);
-                          setAutosaveError(null);
-                          setAutosaveState(nextValue === lastSavedMarkdown ? 'saved' : 'dirty');
-                        }}
-                        onBlur={handleEditorBlur}
-                      />
-                      <span
-                        className={`${styles.savedLabel} ${autosaveState === 'error' ? styles.savedLabelError : ''}`}
-                        title={autosaveError ?? undefined}
-                      >
-                        {autosaveLabel}
-                      </span>
+                  ) : (
+                    <div className={styles.editorContent}>
+                      <div className={styles.contentPanel}>
+                        <div className={styles.editorArea}>
+                          <textarea
+                            className={styles.editorInput}
+                            value={markdownValue}
+                            onChange={(e) => {
+                              const nextValue = e.target.value;
+                              setMarkdownValue(nextValue);
+                              setAutosaveError(null);
+                              setAutosaveState(nextValue === lastSavedMarkdown ? 'saved' : 'dirty');
+                            }}
+                            onBlur={() => void handleEditorBlur()}
+                          />
+                          <span
+                            className={`${styles.savedLabel} ${autosaveState === 'error' ? styles.savedLabelError : ''}`}
+                            title={autosaveError ?? undefined}
+                          >
+                            {autosaveLabel}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              )}
+
+                <aside className={styles.chatPane}>
+                  <div className={styles.chatHeader}>
+                    <p className={styles.chatEyebrow}>Task AI</p>
+                    <h3 className={styles.chatTitle}>Контекстная работа по этой задаче</h3>
+                  </div>
+                  <div className={styles.chatMessages}>
+                    {messages.length === 0 ? (
+                      <div className={styles.chatEmptyState}>
+                        Спроси AI про эту задачу: разбить на подзадачи, переписать markdown или предложить безопасный план изменений.
+                      </div>
+                    ) : null}
+                    {messages.map((message) => (
+                      <div key={message.id} className={`${styles.chatRow} ${message.role === 'user' ? styles.chatRowUser : styles.chatRowAssistant}`}>
+                        <div className={`${styles.chatBubble} ${message.role === 'user' ? styles.chatBubbleUser : styles.chatBubbleAssistant}`}>
+                          <p>{message.content}</p>
+                        </div>
+                        {message.role === 'assistant' && message.proposal ? (
+                          <AiProposalCard
+                            proposal={message.proposal}
+                            status={message.status ?? 'DRAFT'}
+                            busyLabel={message.busyLabel}
+                            executionCount={message.executionCount}
+                            canUndo={message.status === 'EXECUTED'}
+                            onApprove={() => void handleApprove(message.id, message.proposal!)}
+                            onReject={() => handleReject(message.id)}
+                            onRevise={(revisionPrompt) => void handleRevise(message.id, message.proposal!, revisionPrompt)}
+                            onUndo={message.status === 'EXECUTED' ? () => void handleUndo(message.id, message.proposal!) : undefined}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </aside>
+              </div>
             </div>
 
             <div className={styles.footer}>
-              <AiToolChips />
+              <AiToolChips onSelectPrompt={(prompt) => setAssistantPrompt(prompt)} />
               <div className={styles.footerInput}>
                 <input
                   className={styles.inputField}
-                  placeholder={'\u0427\u0442\u043e \u0431\u044b \u0432\u044b \u0445\u043e\u0442\u0435\u043b\u0438 \u0441\u0434\u0435\u043b\u0430\u0442\u044c?'}
+                  placeholder="Что бы вы хотели сделать?"
                   value={assistantPrompt}
                   onChange={(e) => setAssistantPrompt(e.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      void submitAssistantPrompt();
+                    }
+                  }}
                 />
-                <button className={styles.sendBtn} type="button" aria-label="Send">
+                <button className={styles.sendBtn} type="button" aria-label="Send" onClick={() => void submitAssistantPrompt()}>
                   <img src={sendIcon} alt="" className={styles.sendIcon} />
                 </button>
               </div>

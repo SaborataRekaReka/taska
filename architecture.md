@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-19 | **Стадия:** B2+C1-C4 + D0-D6 завершены, Google OAuth добавлен
+> **Последнее обновление:** 2026-03-19 | **Стадия:** B2+C1-C4 + D0-D6 завершены, E1-E2 AI safe-mode foundation + frontend chat реализованы
 
 ---
 
@@ -67,12 +67,12 @@
 
 ### Frontend UX-срез (актуально)
 - Pixel-perfect desktop layout (base 1440), собственные дизайн-токены и градиентный фон.
-- Hero panel с анимированным сворачиванием/раскрытием и интерактивными AI-чипами.
+- Hero panel с анимированным сворачиванием/раскрытием, локальной AI chat-лентой и proposal cards safe-mode.
 - Списки и карточки задач с inline-editing текста (задачи/подзадачи).
 - Добавление подзадач через контекстный `+` в карточке, автофокус и Enter-flow.
 - Реальный поиск по title/list/subtasks + UX-хоткеи (`Ctrl/Cmd+K`, `Esc`, clear).
 - Модалка "Мой день": bottom-sheet открытие, Mood/Energy/Wishes controls, computeDayProfile и diamond-radar визуализация профиля дня.
-- Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и поле промпта для диалога с ассистентом.
+- Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и отдельная chat/prompt панель по конкретной задаче.
 - Public auth landing + Google callback page для web OAuth-входа.
 
 ### Shared packages
@@ -117,7 +117,8 @@
                      ▼                     ▼
              ┌─────────────┐     ┌──────────────────┐
              │  OpenAI API │     │  Google OAuth     │
-             │  (LLM)      │     │  (планируется)    │
+             │ (Responses + │     │  (implemented)    │
+             │ JSON schema) │     │                  │
              └─────────────┘     └──────────────────┘
 ```
 
@@ -157,7 +158,7 @@ id, userId, entityType (LIST|TASK|SUBTASK|AI_OPERATION), entityId, actionType (C
 
 ### AiOperation
 ```
-id, userId, operationType, prompt, planPayload (JSON), status (PLANNED|CONFIRMED|EXECUTED|UNDONE|FAILED), executedAt?, undoneAt?, createdAt
+id, userId, taskId?, scope (GLOBAL|TASK), operationType, model?, prompt, planPayload (JSON), executionPayload?, undoPayload?, status (PLANNED|CONFIRMED|EXECUTED|UNDONE|FAILED), approvedAt?, executedAt?, undoneAt?, failedAt?, errorMessage?, createdAt
 ```
 
 ---
@@ -236,11 +237,13 @@ Register/Login response:
 #### AI Assistant
 | Method | Path | Описание | Статус |
 |--------|------|----------|--------|
-| POST | `/ai/chat` | Free-form запрос, текстовый ответ или план | ⏳ planned |
-| POST | `/ai/plan` | Структурированный план изменений (без мутаций) | ⏳ planned |
-| POST | `/ai/operations/:id/confirm` | Подтвердить план | ⏳ planned |
-| POST | `/ai/operations/:id/execute` | Применить транзакционно | ⏳ planned |
-| POST | `/ai/operations/:id/undo` | Откатить AI-операцию | ⏳ planned |
+| POST | `/ai/chat` | Free-form чатовый endpoint | ⏳ planned |
+| POST | `/ai/plan` | Структурированный план изменений через OpenAI без мутаций | ✅ foundation |
+| POST | `/ai/operations/:id/revise` | Ревизия pending-плана до confirm | ✅ foundation |
+| GET | `/ai/operations/:id` | Детали AI-операции, preview/execution/undo payload | ✅ foundation |
+| POST | `/ai/operations/:id/confirm` | Подтвердить план | ✅ foundation |
+| POST | `/ai/operations/:id/execute` | Применить детерминированно backend-сервисами | ✅ foundation |
+| POST | `/ai/operations/:id/undo` | Откатить AI-операцию | ✅ foundation |
 
 #### Statistics (для "Мой день")
 | Method | Path | Статус |
@@ -268,13 +271,14 @@ UI action
 ### 7.2 AI safe-mode поток
 ```
 1. Пользователь вводит запрос в AI prompt bar
-2. POST /ai/plan → возвращает { operationId, preview: [...изменения...] }
-3. UI показывает preview (Visual/Editor view)
-4. Пользователь нажимает "Подтвердить"
-5. POST /ai/operations/:id/confirm → статус CONFIRMED
-6. POST /ai/operations/:id/execute → транзакционно применяет изменения, пишет History
-7. UI показывает результат + кнопку "Отменить"
-8. (опц.) POST /ai/operations/:id/undo → откатывает через History snapshots
+2. POST /ai/plan → OpenAI возвращает structured preview и сохраняется AiOperation(status=PLANNED)
+3. UI показывает preview как proposal card в global chat или task modal
+4. Пользователь редактирует план в MD (опц.) через POST /ai/operations/:id/revise
+5. Пользователь нажимает "Одобрить и применить"
+6. POST /ai/operations/:id/confirm → статус CONFIRMED
+7. POST /ai/operations/:id/execute → backend детерминированно применяет изменения через services и пишет History
+8. UI показывает applied-state + кнопку "Undo"
+9. (опц.) POST /ai/operations/:id/undo → откатывает через сохраненный undoPayload
 ```
 
 ### 7.3 "Мой день" поток
@@ -322,7 +326,7 @@ UI action
 1. **API контракты** — breaking changes ломают frontend
 2. **Prisma schema** — нужна новая миграция, seed нужно актуализировать
 3. **Auth middleware** — ошибка = уязвимость или lock-out
-4. **AI execute flow** — должен быть строго транзакционным
+4. **AI execute flow** — план формируется через OpenAI, но применяется только backend-кодом после confirm
 5. **History** — нельзя менять существующие записи
 
 ---
@@ -338,7 +342,7 @@ UI action
 | tasks | ✅ | ✅ | ✅ | ✅ | ✅ |
 | subtasks | ✅ | ✅ | ✅ | — | ✅ |
 | history | ✅ | ✅ | ✅ | ✅ | — |
-| ai-assistant | ✅ | ⏳ | ⏳ | — | ⏳ |
+| ai-assistant | ✅ | ✅ | 🟡 safe-mode foundation | — | ✅ |
 
 ### Infrastructure
 | Компонент | Статус |
