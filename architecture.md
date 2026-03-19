@@ -272,12 +272,12 @@ UI action
 ```
 1. Пользователь вводит запрос в AI prompt bar
 2. POST /ai/plan → OpenAI возвращает structured preview и сохраняется AiOperation(status=PLANNED)
-3. UI показывает preview как proposal card в global chat или task modal
-4. Пользователь редактирует план в MD (опц.) через POST /ai/operations/:id/revise
-5. Пользователь нажимает "Одобрить и применить"
+3. UI показывает preview (карточка / Visual / Editor view)
+4. Пользователь редактирует план (опц.) через POST /ai/operations/:id/revise
+5. Пользователь нажимает "Подтвердить"
 6. POST /ai/operations/:id/confirm → статус CONFIRMED
 7. POST /ai/operations/:id/execute → backend детерминированно применяет изменения через services и пишет History
-8. UI показывает applied-state + кнопку "Undo"
+8. UI показывает результат + кнопку "Отменить"
 9. (опц.) POST /ai/operations/:id/undo → откатывает через сохраненный undoPayload
 ```
 
