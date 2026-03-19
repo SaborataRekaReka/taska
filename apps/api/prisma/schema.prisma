@@ -50,14 +50,18 @@ enum AiOperationStatus {
 }
 
 model User {
-  id             String      @id @default(cuid())
-  email          String      @unique
+  id             String          @id @default(cuid())
+  email          String          @unique
   passwordHash   String?
   displayName    String?
-  provider       AuthProvider @default(LOCAL)
+  provider       AuthProvider    @default(LOCAL)
   providerUserId String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  avatarUrl      String?
+  givenName      String?
+  familyName     String?
+  emailVerified  Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   lists          List[]
   tasks          Task[]
@@ -66,7 +70,7 @@ model User {
   aiOperations   AiOperation[]
   preferences    UserPreferences?
 
-  @@index([provider, providerUserId])
+  @@unique([provider, providerUserId])
 }
 
 model UserPreferences {

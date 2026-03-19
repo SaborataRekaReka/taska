@@ -11,7 +11,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers['Content-Type'] = 'application/json';
   }
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const res = await fetch(`${BASE}${path}`, { ...init, headers });
@@ -19,7 +19,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 401 && token) {
     const refreshed = await tryRefresh();
     if (refreshed) {
-      headers['Authorization'] = `Bearer ${useAuthStore.getState().accessToken}`;
+      headers.Authorization = `Bearer ${useAuthStore.getState().accessToken}`;
       const retry = await fetch(`${BASE}${path}`, { ...init, headers });
       return handleResponse<T>(retry);
     }
@@ -38,7 +38,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
   }
   const data = body.data;
   if (data && typeof data === 'object' && 'value' in data) {
-    return (data.value as T);
+    return data.value as T;
   }
   return data as T;
 }
@@ -59,6 +59,11 @@ async function tryRefresh(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export function getGoogleAuthStartUrl(): string {
+  const callbackUrl = `${window.location.origin}/auth/google/callback`;
+  return `/auth/google/start?returnTo=${encodeURIComponent(callbackUrl)}`;
 }
 
 export class ApiError extends Error {

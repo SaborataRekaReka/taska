@@ -57,23 +57,28 @@ export function GradientBlob({
     }
 
     function handleLeave() {
-      const g = gradRef.current;
-      if (!g) return;
+      const gradient = gradRef.current;
+      if (!gradient) return;
 
-      const startFx = parseFloat(g.getAttribute('fx') ?? String(DEFAULT_FX));
-      const startFy = parseFloat(g.getAttribute('fy') ?? String(DEFAULT_FY));
+      const startFx = parseFloat(gradient.getAttribute('fx') ?? String(DEFAULT_FX));
+      const startFy = parseFloat(gradient.getAttribute('fy') ?? String(DEFAULT_FY));
       let progress = 0;
 
       function step() {
+        const currentGradient = gradRef.current;
+        if (!currentGradient) {
+          return;
+        }
+
         progress += 0.05;
         if (progress >= 1) {
-          g.setAttribute('fx', String(DEFAULT_FX));
-          g.setAttribute('fy', String(DEFAULT_FY));
+          currentGradient.setAttribute('fx', String(DEFAULT_FX));
+          currentGradient.setAttribute('fy', String(DEFAULT_FY));
           return;
         }
         const t = 1 - (1 - progress) ** 3;
-        g.setAttribute('fx', String(rnd(startFx + (DEFAULT_FX - startFx) * t)));
-        g.setAttribute('fy', String(rnd(startFy + (DEFAULT_FY - startFy) * t)));
+        currentGradient.setAttribute('fx', String(rnd(startFx + (DEFAULT_FX - startFx) * t)));
+        currentGradient.setAttribute('fy', String(rnd(startFy + (DEFAULT_FY - startFy) * t)));
         resetFrameRef.current = requestAnimationFrame(step);
       }
 

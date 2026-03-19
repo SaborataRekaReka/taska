@@ -4,7 +4,7 @@
 
 ---
 
-## Текущая стадия: D4 ✅ — Frontend рабочий, подключен к API
+## Текущая стадия: B2 + D6 ✅ — Frontend и Google OAuth подключены к API
 
 | Этап | Статус | Описание |
 |------|--------|----------|
@@ -12,6 +12,7 @@
 | A2 | ✅ | Prisma schema, миграции, seed |
 | A3 | ✅ | Docker Compose (postgres + redis + api) |
 | B1 (Auth) | ✅ | Register, login, refresh, logout, me + JWT guard |
+| B2 (Google OAuth) | ✅ | Standard Google sign-in, avatar/profile sync, frontend callback flow |
 | C1 (Lists) | ✅ | CRUD + ownership + soft-delete + history |
 | C2 (Tasks) | ✅ | CRUD + 6 фильтров + history |
 | C3 (Subtasks) | ✅ | CRUD + ownership + history |
@@ -61,12 +62,21 @@ pnpm --filter @taska/api run db:migrate
 pnpm --filter @taska/api run db:seed
 ```
 
-### 5. Запустить API
+### 5. Настроить Google OAuth для локального теста
+1. Открой Google Cloud Console → APIs & Services → Credentials.
+2. Создай **OAuth Client ID** типа **Web application**.
+3. Добавь Authorized redirect URIs:
+   - `http://localhost:3000/auth/google/callback`
+   - `http://localhost:5173/auth/google/callback`
+4. Заполни в `.env` значения `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `GOOGLE_FRONTEND_CALLBACK_URL`.
+
+### 6. Запустить API и frontend
 ```bash
 pnpm --filter @taska/api run dev
+pnpm --filter @taska/web run dev
 ```
 
-API доступен на `http://localhost:3000`
+API доступен на `http://localhost:3000`, frontend — на `http://localhost:5173`.
 
 ---
 
@@ -84,6 +94,8 @@ API доступен на `http://localhost:3000`
 |----------|----------|
 | `POST /auth/register` | Регистрация (email + password) |
 | `POST /auth/login` | Вход |
+| `GET /auth/google/start` | Старт Google OAuth redirect flow |
+| `GET /auth/google/callback` | Backend callback, обмен code на профиль Google и редирект во frontend |
 | `POST /auth/refresh` | Обновить access token |
 | `POST /auth/logout` | Выход (Bearer) |
 | `GET /auth/me` | Профиль текущего пользователя (Bearer) |
@@ -211,7 +223,12 @@ docker compose down
 |-----------|----------|--------|
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://taska:taska@localhost:5432/taska` |
 | `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
-| `JWT_SECRET` | Секрет для JWT | `change-me-in-production` |
+| `JWT_ACCESS_SECRET` | Секрет access token | `change_me_access` |
+| `JWT_REFRESH_SECRET` | Секрет refresh token | `change_me_refresh` |
+| `GOOGLE_CLIENT_ID` | OAuth Client ID из Google Cloud | `123...apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | OAuth Client Secret | `GOCSPX-...` |
+| `GOOGLE_REDIRECT_URI` | Backend callback URL | `http://localhost:3000/auth/google/callback` |
+| `GOOGLE_FRONTEND_CALLBACK_URL` | Frontend callback URL | `http://localhost:5173/auth/google/callback` |
 | `OPENAI_API_KEY` | Ключ OpenAI (для AI-функций) | `sk-...` |
 | `PORT` | Порт API | `3000` |
 

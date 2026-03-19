@@ -1,10 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   displayName: string | null;
+  provider: 'LOCAL' | 'GOOGLE';
+  avatarUrl: string | null;
+  givenName: string | null;
+  familyName: string | null;
+  emailVerified: boolean;
 }
 
 interface AuthState {

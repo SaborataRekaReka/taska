@@ -1,16 +1,30 @@
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+export type AuthProvider = 'LOCAL' | 'GOOGLE';
 
 export interface User {
   id: string;
   email: string;
   displayName: string | null;
-  provider: string;
+  provider: AuthProvider;
+  avatarUrl: string | null;
+  givenName: string | null;
+  familyName: string | null;
+  emailVerified: boolean;
   createdAt: string;
 }
 
 export interface AuthResponse {
-  user: { id: string; email: string; displayName: string | null };
+  user: {
+    id: string;
+    email: string;
+    displayName: string | null;
+    provider: AuthProvider;
+    avatarUrl: string | null;
+    givenName: string | null;
+    familyName: string | null;
+    emailVerified: boolean;
+  };
   accessToken: string;
   refreshToken: string;
 }

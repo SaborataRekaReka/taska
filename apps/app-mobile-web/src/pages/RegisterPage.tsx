@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+
+import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import { useRegister } from '../hooks/queries';
 import styles from './Auth.module.css';
 
@@ -19,6 +21,8 @@ export function RegisterPage() {
       <form className={styles.card} onSubmit={handleSubmit}>
         <h1 className={styles.logo}>TASKA</h1>
         <p className={styles.subtitle}>Создайте аккаунт</p>
+        <GoogleAuthButton label="Зарегистрироваться через Google" />
+        <div className={styles.separator}><span>или</span></div>
 
         <input
           className={styles.input}

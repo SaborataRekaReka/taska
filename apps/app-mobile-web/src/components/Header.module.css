@@ -75,3 +75,39 @@
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--border);
 }
+
+
+.profileMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.profileName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.profileProvider {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.avatarImage,
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(95, 76, 255, 0.95), rgba(176, 116, 255, 0.9));
+  color: white;
+  font-weight: 700;
+}

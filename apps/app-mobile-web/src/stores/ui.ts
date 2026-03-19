@@ -14,6 +14,7 @@ interface UiState {
   editingTaskId: string | null;
   selectedTaskId: string | null;
 
+  setDemoState: (state: string) => void;
   setActiveList: (id: string | null) => void;
   setSearch: (q: string) => void;
   setFilterStatus: (s: string | null) => void;
@@ -43,6 +44,7 @@ export const useUiStore = create<UiState>()((set) => ({
   editingTaskId: null,
   selectedTaskId: null,
 
+  setDemoState: () => undefined,
   setActiveList: (id) => set({ activeListId: id }),
   setSearch: (q) => set({ searchQuery: q }),
   setFilterStatus: (s) => set({ filterStatus: s }),

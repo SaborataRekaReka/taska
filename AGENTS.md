@@ -20,7 +20,7 @@
 
 ---
 
-## 2) Текущее состояние проекта (обновлено: 2026-03-15)
+## 2) Текущее состояние проекта (обновлено: 2026-03-19)
 
 ### Выполненные этапы
 | Этап | Статус | Описание |
@@ -29,6 +29,7 @@
 | A2 | ✅ DONE | Prisma schema v1, миграция 0001_init, seed |
 | A3 | ✅ DONE | Docker Compose (postgres, redis, api) |
 | B1 | ✅ DONE | Auth — register, login, refresh, logout, me + JwtAuthGuard |
+| B2 | ✅ DONE | Google OAuth: standard code flow, avatar/profile sync, frontend callback |
 | C1 | ✅ DONE | Lists CRUD + ownership + soft-delete + history |
 | C2 | ✅ DONE | Tasks CRUD + filters (listId, status, priority, dueToday, search) + history |
 | C3 | ✅ DONE | Subtasks CRUD + ownership check + history |
@@ -39,12 +40,11 @@
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
-| B2 | Google OAuth |
 | E | AI Assistant safe-mode |
 | F | Polishing, документация |
 
 ### Текущее состояние модулей
-- **auth**: register, login, refresh, logout, me — полностью рабочий
+- **auth**: register, login, refresh, logout, me, google start/callback — полностью рабочий
 - **users**: GET /users/me — профиль текущего пользователя
 - **lists**: полный CRUD + ownership + soft-delete + запрет удаления дефолтных
 - **tasks**: полный CRUD + 6 фильтров + includes subtasks/list
@@ -53,7 +53,7 @@
 - **ai-assistant**: заглушка (только /health)
 
 ### Frontend (apps/app-mobile-web) — React + Vite
-- **Auth**: Login/Register pages с auth guard routing
+- **Auth**: Landing/Login/Register/Google callback pages с auth guard routing
 - **Main layout**: Header, AI Prompt bar, ListTabs, Search + Filter toolbar
 - **TaskList + TaskCard**: полный рендер задач с subtasks, meta, priority icons
 - **Quick add**: floating + button → inline input (Enter/Esc)
@@ -86,7 +86,7 @@ TASKA 2.0/
 │   │       ├── app.module.ts   # Корневой модуль (регистрирует все модули)
 │   │       ├── core/           # Инфраструктура: request-id, error filter, response envelope
 │   │       └── modules/
-│   │           ├── auth/       # Аутентификация (STUB)
+│   │           ├── auth/       # Аутентификация + Google OAuth
 │   │           ├── users/      # Профиль пользователя (STUB)
 │   │           ├── lists/      # Списки задач (STUB)
 │   │           ├── tasks/      # Задачи (STUB)
@@ -187,6 +187,8 @@ curl http://localhost:3000/openapi.json
 ### Auth (`/auth`) — ✅ IMPLEMENTED
 - `POST /auth/register` — email, password → user + tokens
 - `POST /auth/login` — email, password → tokens
+- `GET /auth/google/start` — redirect в Google OAuth
+- `GET /auth/google/callback` — code exchange + redirect во frontend callback
 - `POST /auth/refresh` — refreshToken → новые tokens
 - `POST /auth/logout` — инвалидировать refresh token (Bearer)
 - `GET /auth/me` — текущий пользователь (Bearer)
