@@ -27,7 +27,6 @@ interface TaskPreviewItem {
   previewKey: string;
   operationIndexes: number[];
   operationKeys: string[];
-  taskOperationIndex?: number;
   isDeletePlanned: boolean;
   task: Task;
 }
@@ -297,9 +296,6 @@ export function AiProposalCard({
 
       if (isTaskOperation && operation.type !== 'DELETE_TASK') {
         previewItem.task = applyTaskOperationPatch(previewItem.task, operation.task, listById);
-        if (previewItem.taskOperationIndex === undefined) {
-          previewItem.taskOperationIndex = index;
-        }
       }
 
       if (isSubtaskOperation) {
@@ -325,35 +321,60 @@ export function AiProposalCard({
     [draftOperations, proposal.operations],
   );
 
-  function updateTaskPatch(operationIndex: number, updates: TaskPatchUpdates): void {
-    setDraftOperations((current) => current.map((operation, index) => {
-      if (index !== operationIndex) {
-        return operation;
+  function applyTaskPatchToOperation(operation: AiPlanOperation, updates: TaskPatchUpdates): AiPlanOperation {
+    if (operation.type !== 'CREATE_TASK' && operation.type !== 'UPDATE_TASK') {
+      return operation;
+    }
+
+    const nextTaskPatch: NonNullable<AiPlanOperation['task']> = { ...(operation.task ?? {}) };
+
+    if (updates.title !== undefined) nextTaskPatch.title = updates.title;
+    if (updates.priority !== undefined) nextTaskPatch.priority = updates.priority;
+    if (updates.status !== undefined) nextTaskPatch.status = updates.status;
+    if (updates.listId !== undefined) nextTaskPatch.listId = updates.listId;
+    if (updates.deadline !== undefined) nextTaskPatch.deadline = updates.deadline ?? null;
+
+    return {
+      ...operation,
+      task: nextTaskPatch,
+    };
+  }
+
+  function upsertTaskPatch(item: TaskPreviewItem, updates: TaskPatchUpdates): void {
+    setDraftOperations((current) => {
+      const existingIndex = item.operationKeys
+        .map((operationKey) => current.findIndex((operation) => operation.key === operationKey))
+        .find((index) => (
+          index >= 0
+          && (current[index].type === 'CREATE_TASK' || current[index].type === 'UPDATE_TASK')
+        ));
+
+      if (existingIndex !== undefined) {
+        return current.map((operation, index) => (
+          index === existingIndex ? applyTaskPatchToOperation(operation, updates) : operation
+        ));
       }
 
-      if (operation.type !== 'CREATE_TASK' && operation.type !== 'UPDATE_TASK') {
-        return operation;
+      const targetTaskId = item.task.id;
+      if (!targetTaskId || targetTaskId.startsWith('proposal-')) {
+        return current;
       }
 
-      const nextTaskPatch: NonNullable<AiPlanOperation['task']> = { ...(operation.task ?? {}) };
-
-      if (updates.title !== undefined) nextTaskPatch.title = updates.title;
-      if (updates.priority !== undefined) nextTaskPatch.priority = updates.priority;
-      if (updates.status !== undefined) nextTaskPatch.status = updates.status;
-      if (updates.listId !== undefined) nextTaskPatch.listId = updates.listId;
-      if (updates.deadline !== undefined) {
-        if (updates.deadline) {
-          nextTaskPatch.deadline = updates.deadline;
-        } else {
-          delete nextTaskPatch.deadline;
-        }
-      }
-
-      return {
-        ...operation,
-        task: nextTaskPatch,
+      const nextOperation: AiPlanOperation = {
+        type: 'UPDATE_TASK',
+        key: `ui_task_patch_${targetTaskId}_${Date.now()}`,
+        taskId: targetTaskId,
+        task: {
+          ...(updates.title !== undefined ? { title: updates.title } : {}),
+          ...(updates.priority !== undefined ? { priority: updates.priority } : {}),
+          ...(updates.status !== undefined ? { status: updates.status } : {}),
+          ...(updates.listId !== undefined ? { listId: updates.listId } : {}),
+          ...(updates.deadline !== undefined ? { deadline: updates.deadline ?? null } : {}),
+        },
       };
-    }));
+
+      return [...current, nextOperation];
+    });
   }
 
   function updateSubtaskOperationPatch(item: TaskPreviewItem, subtaskId: string, patch: { title?: string; status?: TaskStatus }): void {
@@ -414,34 +435,19 @@ export function AiProposalCard({
                 task={item.task}
                 isCompleted={item.task.status === 'DONE'}
                 onToggleCompleted={(_, nextCompleted) => {
-                  if (item.taskOperationIndex === undefined) {
-                    return;
-                  }
-                  updateTaskPatch(item.taskOperationIndex, { status: nextCompleted ? 'DONE' : 'TODO' });
+                  upsertTaskPatch(item, { status: nextCompleted ? 'DONE' : 'TODO' });
                 }}
                 onUpdateTitle={(_, nextTitle) => {
-                  if (item.taskOperationIndex === undefined) {
-                    return;
-                  }
-                  updateTaskPatch(item.taskOperationIndex, { title: nextTitle });
+                  upsertTaskPatch(item, { title: nextTitle });
                 }}
                 onUpdateDeadline={(_, nextDeadline) => {
-                  if (item.taskOperationIndex === undefined) {
-                    return;
-                  }
-                  updateTaskPatch(item.taskOperationIndex, { deadline: nextDeadline });
+                  upsertTaskPatch(item, { deadline: nextDeadline });
                 }}
                 onUpdateList={(_, nextListId) => {
-                  if (item.taskOperationIndex === undefined) {
-                    return;
-                  }
-                  updateTaskPatch(item.taskOperationIndex, { listId: nextListId });
+                  upsertTaskPatch(item, { listId: nextListId });
                 }}
                 onUpdatePriority={(_, nextPriority) => {
-                  if (item.taskOperationIndex === undefined) {
-                    return;
-                  }
-                  updateTaskPatch(item.taskOperationIndex, { priority: nextPriority });
+                  upsertTaskPatch(item, { priority: nextPriority });
                 }}
                 onCreateSubtask={() => undefined}
                 onUpdateSubtask={(_, subtaskId, patch) => {
@@ -470,7 +476,7 @@ export function AiProposalCard({
       ) : null}
 
       {executionCount && isExecuted ? (
-        <div className={styles.metaRow}>\u041f\u0440\u0438\u043c\u0435\u043d\u0435\u043d\u043e \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439: {executionCount}</div>
+        <div className={styles.metaRow}>Изменений: {executionCount}</div>
       ) : null}
 
       {busyLabel ? <div className={styles.busyLabel}>{busyLabel}</div> : null}
@@ -482,7 +488,7 @@ export function AiProposalCard({
           onClick={submitRevision}
           disabled={!canRebuild}
         >
-          \u041f\u0435\u0440\u0435\u0441\u043e\u0431\u0440\u0430\u0442\u044c
+          Пересобрать
         </button>
         <button
           type="button"

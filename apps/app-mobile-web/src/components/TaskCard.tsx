@@ -67,8 +67,6 @@ export function TaskCard({
   const [localPriority, setLocalPriority] = useState<TaskPriority>(task.priority);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(forceSubtasksOpen);
   const enterPressedRef = useRef(false);
-  const taskToggleStampRef = useRef(0);
-  const subtaskToggleStampRef = useRef<Record<string, number>>({});
   const canOpenAssistant = clickToOpenAssistant && typeof onOpenAssistant === 'function';
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
@@ -201,21 +199,21 @@ export function TaskCard({
   function toggleTaskCompleted() {
     const nextCompleted = !taskCompleted;
 
+    setLocalTaskCompleted(nextCompleted);
+
     if (onToggleCompleted) {
       onToggleCompleted(task.id, nextCompleted);
       return;
     }
 
-    setLocalTaskCompleted(nextCompleted);
-  }
-
-  function triggerTaskToggle() {
-    const now = Date.now();
-    if (now - taskToggleStampRef.current < 220) {
-      return;
-    }
-    taskToggleStampRef.current = now;
-    toggleTaskCompleted();
+    updateTaskMut.mutate(
+      { id: task.id, status: nextCompleted ? 'DONE' : 'TODO' },
+      {
+        onError: () => {
+          setLocalTaskCompleted(!nextCompleted);
+        },
+      },
+    );
   }
 
   function toggleSubtaskCompleted(id: string) {
@@ -231,16 +229,6 @@ export function TaskCard({
     } else {
       updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
     }
-  }
-
-  function triggerSubtaskToggle(id: string) {
-    const now = Date.now();
-    const previousStamp = subtaskToggleStampRef.current[id] ?? 0;
-    if (now - previousStamp < 220) {
-      return;
-    }
-    subtaskToggleStampRef.current[id] = now;
-    toggleSubtaskCompleted(id);
   }
 
   function handleOpenAssistant() {
@@ -298,10 +286,7 @@ export function TaskCard({
         <button
           type="button"
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onPointerDown={(e) => { e.stopPropagation(); }}
-          onMouseDown={(e) => { e.stopPropagation(); }}
-          onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
-          onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
+          onClick={(e) => { e.stopPropagation(); toggleTaskCompleted(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
           aria-pressed={taskCompleted}
         />
@@ -398,10 +383,7 @@ export function TaskCard({
                     <button
                       type="button"
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onPointerDown={(e) => { e.stopPropagation(); }}
-                      onMouseDown={(e) => { e.stopPropagation(); }}
-                      onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
-                      onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
+                      onClick={(e) => { e.stopPropagation(); toggleSubtaskCompleted(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
                       aria-pressed={isSubtaskCompleted}
                     />
