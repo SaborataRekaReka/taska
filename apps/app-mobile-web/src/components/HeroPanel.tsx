@@ -5,13 +5,12 @@ import {
   useCreateAiPlan,
   useExecuteAiOperation,
   useLists,
-  useReviseAiPlan,
   useTasks,
+  useReviseAiPlan,
   useUndoAiOperation,
 } from '../hooks/queries';
 import type { AiPlanResponse } from '../lib/types';
 import { useUiStore } from '../stores/ui';
-import sendIcon from '../assests/send.svg';
 import { AiProposalCard, type AiProposalRevisionPayload } from './AiProposalCard';
 import { AiProcessIndicator } from './AiProcessIndicator';
 import styles from './HeroPanel.module.css';
@@ -20,11 +19,9 @@ const CHIPS = [
   'Разобрать задачи',
   'Предложить план на день',
   'Найти важное',
-  'Перенести всё срочное в один список',
-  'Покажи, что можно закрыть сегодня',
+  'Забыть о задачах',
+  'Покажи статистику',
 ];
-
-const CHIPS_FADE_MS = 180;
 
 type ChatMessage =
   | { id: string; role: 'user'; content: string }
@@ -42,17 +39,26 @@ function nextMessageId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function SendArrowIcon() {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" className={styles.sendIcon}>
+      <path
+        d="M10 15.625a.781.781 0 0 1-.781-.781V7.043L6.177 10.084A.781.781 0 0 1 5.072 8.98l4.375-4.375a.782.782 0 0 1 1.106 0l4.375 4.375a.781.781 0 1 1-1.105 1.104L10.78 7.043v7.801c0 .431-.349.781-.781.781Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function HeroPanel() {
   const activeListId = useUiStore((s) => s.activeListId);
   const searchQuery = useUiStore((s) => s.searchQuery);
   const [value, setValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [chipsVisible, setChipsVisible] = useState(false);
+  const [isAiEnabled, setIsAiEnabled] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingLabel, setPendingLabel] = useState<string | null>(null);
   const createPlan = useCreateAiPlan();
   const revisePlan = useReviseAiPlan();
@@ -68,31 +74,11 @@ export function HeroPanel() {
   );
 
   useEffect(() => {
-    if (collapseTimer.current !== null) {
-      clearTimeout(collapseTimer.current);
-    }
-
-    if (isExpanded || messages.length > 0) {
-      setPanelOpen(true);
-      const id = setTimeout(() => setChipsVisible(true), 80);
-      return () => clearTimeout(id);
-    }
-
-    setChipsVisible(false);
-    collapseTimer.current = setTimeout(() => setPanelOpen(false), CHIPS_FADE_MS + 40);
-    return () => {
-      if (collapseTimer.current !== null) {
-        clearTimeout(collapseTimer.current);
-      }
-    };
-  }, [isExpanded, messages.length]);
-
-  useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
 
     el.style.height = 'auto';
-    el.style.height = `${Math.max(el.scrollHeight, 37)}px`;
+    el.style.height = `${Math.max(el.scrollHeight, 24)}px`;
   }, [value]);
 
   useEffect(() => {
@@ -133,7 +119,7 @@ export function HeroPanel() {
 
   async function submitPrompt(): Promise<void> {
     const trimmed = value.trim();
-    if (!trimmed || pendingLabel) {
+    if (!trimmed || pendingLabel || !isAiEnabled) {
       return;
     }
 
@@ -245,18 +231,30 @@ export function HeroPanel() {
     }
   }
 
-  const panelClass = [
-    styles.panel,
-    panelOpen ? styles.expanded : styles.collapsed,
-    chipsVisible ? styles.chipsShow : styles.chipsHide,
-  ].join(' ');
+  const isInteractiveDisabled = Boolean(pendingLabel) || !isAiEnabled;
 
   return (
     <div
       ref={panelRef}
-      className={panelClass}
+      className={`${styles.panel} ${messages.length > 0 || isExpanded ? styles.withHistory : ''}`.trim()}
       onMouseDown={() => setIsExpanded(true)}
     >
+      <div className={styles.topRow}>
+        <button
+          type="button"
+          className={`${styles.toggle} ${isAiEnabled ? styles.toggleOn : styles.toggleOff}`}
+          aria-label={isAiEnabled ? 'Выключить AI' : 'Включить AI'}
+          aria-pressed={isAiEnabled}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => setIsAiEnabled((current) => !current)}
+        >
+          <span className={styles.toggleTrack}>
+            <span className={styles.toggleKnob} />
+          </span>
+          <span className={styles.toggleLabel}>AI</span>
+        </button>
+      </div>
+
       {messages.length > 0 ? (
         <div className={styles.messages}>
           {messages.map((message) => (
@@ -290,13 +288,13 @@ export function HeroPanel() {
         </div>
       ) : null}
 
-      <div className={styles.inputRow}>
+      <div className={styles.searchRow}>
         <textarea
           ref={textareaRef}
           className={styles.input}
-          placeholder="Что бы вы хотели сделать?"
+          placeholder={isAiEnabled ? 'Разбей эту задачу...' : 'Включите AI, чтобы отправить запрос'}
           value={value}
-          disabled={Boolean(pendingLabel)}
+          disabled={isInteractiveDisabled}
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => setIsExpanded(true)}
           onKeyDown={(event) => {
@@ -313,22 +311,28 @@ export function HeroPanel() {
           aria-label="Отправить"
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => void submitPrompt()}
-          disabled={Boolean(pendingLabel)}
+          disabled={isInteractiveDisabled || value.trim().length === 0}
         >
-          <img src={sendIcon} alt="" className={styles.sendIcon} />
+          <SendArrowIcon />
         </button>
       </div>
+
       <div className={styles.chips}>
         {CHIPS.map((chip) => (
           <button
             key={chip}
+            type="button"
             className={styles.chip}
-            onMouseDown={(e) => e.preventDefault()}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => {
+              if (!isAiEnabled) {
+                return;
+              }
               setValue(chip);
               setIsExpanded(true);
               textareaRef.current?.focus();
             }}
+            disabled={!isAiEnabled}
           >
             {chip}
           </button>
