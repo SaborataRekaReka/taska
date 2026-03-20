@@ -73,7 +73,7 @@
 - Добавление подзадач через контекстный `+` в карточке, автофокус и Enter-flow.
 - Реальный поиск по title/list/subtasks + UX-хоткеи (`Ctrl/Cmd+K`, `Esc`, clear).
 - Модалка "Мой день": bottom-sheet открытие, Mood/Energy/Wishes controls, computeDayProfile и diamond-radar визуализация профиля дня.
-- Task AI modal: открытие по клику на карточку, вкладки Visual/Editor, редактирование задачи в markdown и отдельная chat/prompt панель по конкретной задаче.
+- Task AI modal: открытие по клику на карточку, единый одноколоночный AI-чат по задаче с встроенной task-card в ленту, без markdown/editor режима и без split-layout.
 - Public auth landing + Google callback page для web OAuth-входа.
 
 ### Shared packages

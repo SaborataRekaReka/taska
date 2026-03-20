@@ -69,7 +69,7 @@
 - **AI chat UX (2026-03-19)**:
   - Главный hero panel теперь работает как global AI chat с локальной лентой сообщений и proposal cards.
   - Каждое AI-предложение показывает task-preview в нативном UI карточки задачи; пользователь может править план прямо в этой карточке и пересобирать через revise без MD-режима.
-  - Task AI modal получил отдельную чат-панель по конкретной задаче с тем же safe-mode workflow.
+  - Task AI modal получил единый одноколоночный чат по конкретной задаче: карточка задачи встроена в ленту, MD-редактор и split-layout удалены, safe-mode workflow сохранён.
 - **AI loading UX (2026-03-20)**:
   - Во всех ключевых AI-flow добавлен единый минималистичный индикатор процесса с анимированными точками и сообщениями статуса.
   - Индикатор показывается в global AI chat, в Task AI modal и при создании "Мой день", чтобы пользователь видел, что ассистент обрабатывает запрос.
@@ -80,7 +80,7 @@
   - Inline-editing текста задачи/подзадач без смены визуального компонента.
   - Добавление подзадач через нижний `+` на карточке (автофокус + Enter chain).
   - My Day modal: bottom-sheet premium modal with mood, energy, wishes and live day profile radar.
-  - Task click opens assistant modal with Visual/Editor tabs and MD editing area + assistant input.
+  - Task click opens assistant modal as a single chat workspace with the task card embedded in the message feed and unified AI quick actions/input.
 
 ---
 
