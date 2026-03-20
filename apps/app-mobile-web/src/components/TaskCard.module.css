@@ -57,6 +57,9 @@
     background 0.18s ease;
   background: transparent;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
   z-index: 2;
   pointer-events: auto;
 }
@@ -244,6 +247,9 @@
   margin-top: 2px;
   background: transparent;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
   z-index: 2;
   pointer-events: auto;
   transition:

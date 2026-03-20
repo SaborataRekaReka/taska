@@ -220,15 +220,29 @@ export function TaskCard({
     if (id.startsWith('draft-')) return;
     const subtask = localSubtasks.find((s) => s.id === id);
     if (!subtask) return;
-    const nextStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
+
+    const previousStatus = subtask.status;
+    const nextStatus = previousStatus === 'DONE' ? 'TODO' : 'DONE';
+
     setLocalSubtasks((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: nextStatus } : s))
     );
+
     if (onUpdateSubtask) {
       onUpdateSubtask(task.id, id, { status: nextStatus });
-    } else {
-      updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
+      return;
     }
+
+    updateSubtaskMut.mutate(
+      { taskId: task.id, id, status: nextStatus },
+      {
+        onError: () => {
+          setLocalSubtasks((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, status: previousStatus } : item))
+          );
+        },
+      },
+    );
   }
 
   function handleOpenAssistant() {
@@ -256,7 +270,7 @@ export function TaskCard({
       return false;
     }
 
-    return Boolean(target.closest('button, [contenteditable="true"], [data-dropdown-menu]'));
+    return Boolean(target.closest('button, input, textarea, select, label, [contenteditable="true"], [data-dropdown-menu]'));
   }
 
   return (
@@ -283,12 +297,17 @@ export function TaskCard({
       } : undefined}
     >
       <div className={styles.row}>
-        <button
-          type="button"
+        <input
+          type="checkbox"
+          checked={taskCompleted}
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onClick={(e) => { e.stopPropagation(); toggleTaskCompleted(); }}
+          onPointerDown={(e) => { e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); }}
+          onChange={(e) => {
+            e.stopPropagation();
+            toggleTaskCompleted();
+          }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
-          aria-pressed={taskCompleted}
         />
         <div className={styles.content}>
           <EditableText
@@ -380,12 +399,17 @@ export function TaskCard({
                 <div key={sub.id}>
                   {i > 0 && <div className={styles.divider} />}
                   <div className={styles.subtaskRow}>
-                    <button
-                      type="button"
+                    <input
+                      type="checkbox"
+                      checked={isSubtaskCompleted}
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onClick={(e) => { e.stopPropagation(); toggleSubtaskCompleted(sub.id); }}
+                      onPointerDown={(e) => { e.stopPropagation(); }}
+                      onClick={(e) => { e.stopPropagation(); }}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleSubtaskCompleted(sub.id);
+                      }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
-                      aria-pressed={isSubtaskCompleted}
                     />
                     <SubtaskEditable
                       sub={sub}
