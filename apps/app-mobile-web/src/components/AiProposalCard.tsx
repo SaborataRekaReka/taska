@@ -51,14 +51,14 @@ interface AiProposalCardProps {
 }
 
 function formatOperationTitle(operation: AiPlanOperation): string {
-  if (operation.type === 'CREATE_LIST') return `ÃÂ¡ÃÂ¾ÃÂ·ÃÂ´ÃÂ°Ã‘â€šÃ‘Å’ Ã‘ÂÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº "${operation.name ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
-  if (operation.type === 'UPDATE_LIST') return `ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃÂ¸ÃÂ¼ÃÂµÃÂ½ÃÂ¾ÃÂ²ÃÂ°Ã‘â€šÃ‘Å’ Ã‘ÂÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº ÃÂ² "${operation.name ?? '...'}"`;
+  if (operation.type === 'CREATE_LIST') return `\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0441\u043f\u0438\u0441\u043e\u043a "${operation.name ?? '\u0411\u0435\u0437 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f'}"`;
+  if (operation.type === 'UPDATE_LIST') return `\u041f\u0435\u0440\u0435\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u0442\u044c \u0441\u043f\u0438\u0441\u043e\u043a \u0432 "${operation.name ?? '...'}"`;
   if (operation.type === 'DELETE_TASK') return '\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0437\u0430\u0434\u0430\u0447\u0443';
-  if (operation.type === 'CREATE_SUBTASK') return `Ãâ€ÃÂ¾ÃÂ±ÃÂ°ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ "${operation.subtask?.title ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
-  if (operation.type === 'UPDATE_SUBTASK') return `ÃÅ¾ÃÂ±ÃÂ½ÃÂ¾ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.subtaskId ?? ''}`.trim();
-  if (operation.type === 'DELETE_SUBTASK') return `ÃÂ£ÃÂ´ÃÂ°ÃÂ»ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.subtaskId ?? ''}`.trim();
-  if (operation.type === 'CREATE_TASK') return `ÃÂ¡ÃÂ¾ÃÂ·ÃÂ´ÃÂ°Ã‘â€šÃ‘Å’ ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ "${operation.task?.title ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
-  return `ÃÅ¾ÃÂ±ÃÂ½ÃÂ¾ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.taskId ?? ''}`.trim();
+  if (operation.type === 'CREATE_SUBTASK') return `\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0437\u0430\u0434\u0430\u0447\u0443 "${operation.subtask?.title ?? '\u0411\u0435\u0437 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f'}"`;
+  if (operation.type === 'UPDATE_SUBTASK') return `\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u043f\u043e\u0434\u0437\u0430\u0434\u0430\u0447\u0443 ${operation.subtaskId ?? ''}`.trim();
+  if (operation.type === 'DELETE_SUBTASK') return `\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u043f\u043e\u0434\u0437\u0430\u0434\u0430\u0447\u0443 ${operation.subtaskId ?? ''}`.trim();
+  if (operation.type === 'CREATE_TASK') return `\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0437\u0430\u0434\u0430\u0447\u0443 "${operation.task?.title ?? '\u0411\u0435\u0437 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f'}"`;
+  return `\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c \u0437\u0430\u0434\u0430\u0447\u0443 ${operation.taskId ?? ''}`.trim();
 }
 
 function buildTaskPreview(
@@ -82,7 +82,7 @@ function buildTaskPreview(
     : null;
 
   const fallbackTitle = operation.type === 'CREATE_TASK'
-    ? 'ÃÂÃÂ¾ÃÂ²ÃÂ°Ã‘Â ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡ÃÂ°'
+    ? '\u041d\u043e\u0432\u0430\u044f \u0437\u0430\u0434\u0430\u0447\u0430'
     : sourceTask?.title ?? '\u0417\u0430\u0434\u0430\u0447\u0430 (\u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 \u0432 \u043f\u043b\u0430\u043d\u0435)';
 
   return {
@@ -158,7 +158,7 @@ function applyTaskOperationPatch(
       if (nextTask.list?.id !== taskPatch.listId) {
         nextTask.list = listById.has(taskPatch.listId)
           ? { id: taskPatch.listId, name: listById.get(taskPatch.listId)! }
-          : { id: taskPatch.listId, name: 'ÃÂ¡ÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº' };
+          : { id: taskPatch.listId, name: '\u0421\u043f\u0438\u0441\u043e\u043a' };
       }
     } else {
       nextTask.list = null;
@@ -201,7 +201,7 @@ function applySubtaskOperationPatch(task: Task, operation: AiPlanOperation): Tas
     return nextTask;
   }
 
-  const fallbackTitle = patch.title ?? `ÃÅ¸ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡ÃÂ° ${subtaskId.slice(0, 8)}`;
+  const fallbackTitle = patch.title ?? `\u041f\u043e\u0434\u0437\u0430\u0434\u0430\u0447\u0430 ${subtaskId.slice(0, 8)}`;
   const fallbackStatus = patch.status ?? 'TODO';
   const fallbackCreatedAt = '1970-01-01T00:00:00.000Z';
   const createdSubtask: Subtask = {
@@ -388,8 +388,8 @@ export function AiProposalCard({
 
     onRevise({
       revisionPrompt: hasStructuredEdits
-        ? 'ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±ÃÂµÃ‘â‚¬ÃÂ¸ ÃÂ¿ÃÂ»ÃÂ°ÃÂ½ Ã‘Â Ã‘Æ’Ã‘â€¡ÃÂµÃ‘â€šÃÂ¾ÃÂ¼ ÃÂ¿Ã‘â‚¬ÃÂ°ÃÂ²ÃÂ¾ÃÂº ÃÂ¸ÃÂ· UI-ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂµÃÂº ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡.'
-        : 'ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±ÃÂµÃ‘â‚¬ÃÂ¸ ÃÂ¿ÃÂ»ÃÂ°ÃÂ½ ÃÂ¸ÃÂ·ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¸ÃÂ¹ ÃÂ¸ ÃÂ¿Ã‘â‚¬ÃÂµÃÂ´ÃÂ»ÃÂ¾ÃÂ¶ÃÂ¸ ÃÂ±ÃÂ¾ÃÂ»ÃÂµÃÂµ Ã‘â€šÃÂ¾Ã‘â€¡ÃÂ½Ã‘â€¹ÃÂ¹ ÃÂ²ÃÂ°Ã‘â‚¬ÃÂ¸ÃÂ°ÃÂ½Ã‘â€š.',
+        ? '\u041f\u0435\u0440\u0435\u0441\u043e\u0431\u0435\u0440\u0438 \u043f\u043b\u0430\u043d \u0441 \u0443\u0447\u0435\u0442\u043e\u043c \u043f\u0440\u0430\u0432\u043e\u043a \u0438\u0437 UI-\u043a\u0430\u0440\u0442\u043e\u0447\u0435\u043a \u0437\u0430\u0434\u0430\u0447.'
+        : '\u041f\u0435\u0440\u0435\u0441\u043e\u0431\u0435\u0440\u0438 \u043f\u043b\u0430\u043d \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439 \u0438 \u043f\u0440\u0435\u0434\u043b\u043e\u0436\u0438 \u0431\u043e\u043b\u0435\u0435 \u0442\u043e\u0447\u043d\u044b\u0439 \u0432\u0430\u0440\u0438\u0430\u043d\u0442.',
       operations: hasStructuredEdits ? draftOperations : undefined,
       metadata: hasStructuredEdits ? { source: 'ui_task_preview' } : { source: 'ai_rebuild' },
     });
@@ -398,7 +398,7 @@ export function AiProposalCard({
   const canApprove = status === 'PLANNED' && !isBusy;
   const canRebuild = !isBusy && !isExecuted && !isUndone;
   const showUndoInPrimarySlot = isExecuted && Boolean(onUndo);
-  const primaryLabel = showUndoInPrimarySlot ? 'Undo' : 'ÃÅ¸Ã‘â‚¬ÃÂ¸ÃÂ½Ã‘ÂÃ‘â€šÃ‘Å’';
+  const primaryLabel = showUndoInPrimarySlot ? 'Undo' : '\u041f\u0440\u0438\u043d\u044f\u0442\u044c';
   const primaryDisabled = showUndoInPrimarySlot ? isBusy : !canApprove;
 
   return (
@@ -470,7 +470,7 @@ export function AiProposalCard({
       ) : null}
 
       {executionCount && isExecuted ? (
-        <div className={styles.metaRow}>ÃÅ¸Ã‘â‚¬ÃÂ¸ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¾ ÃÂ¸ÃÂ·ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¸ÃÂ¹: {executionCount}</div>
+        <div className={styles.metaRow}>\u041f\u0440\u0438\u043c\u0435\u043d\u0435\u043d\u043e \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0439: {executionCount}</div>
       ) : null}
 
       {busyLabel ? <div className={styles.busyLabel}>{busyLabel}</div> : null}
@@ -482,7 +482,7 @@ export function AiProposalCard({
           onClick={submitRevision}
           disabled={!canRebuild}
         >
-          ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±Ã‘â‚¬ÃÂ°Ã‘â€šÃ‘Å’
+          \u041f\u0435\u0440\u0435\u0441\u043e\u0431\u0440\u0430\u0442\u044c
         </button>
         <button
           type="button"
