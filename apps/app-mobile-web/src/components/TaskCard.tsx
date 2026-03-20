@@ -67,6 +67,8 @@ export function TaskCard({
   const [localPriority, setLocalPriority] = useState<TaskPriority>(task.priority);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(forceSubtasksOpen);
   const enterPressedRef = useRef(false);
+  const taskToggleStampRef = useRef(0);
+  const subtaskToggleStampRef = useRef<Record<string, number>>({});
   const canOpenAssistant = clickToOpenAssistant && typeof onOpenAssistant === 'function';
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
@@ -220,15 +222,51 @@ export function TaskCard({
     if (id.startsWith('draft-')) return;
     const subtask = localSubtasks.find((s) => s.id === id);
     if (!subtask) return;
-    const nextStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
+
+    const previousStatus = subtask.status;
+    const nextStatus = previousStatus === 'DONE' ? 'TODO' : 'DONE';
+
     setLocalSubtasks((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: nextStatus } : s))
     );
+
     if (onUpdateSubtask) {
       onUpdateSubtask(task.id, id, { status: nextStatus });
-    } else {
-      updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
+      return;
     }
+
+    updateSubtaskMut.mutate(
+      { taskId: task.id, id, status: nextStatus },
+      {
+        onError: () => {
+          setLocalSubtasks((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, status: previousStatus } : item))
+          );
+        },
+      },
+    );
+  }
+
+  function triggerTaskToggle() {
+    const now = Date.now();
+    if (now - taskToggleStampRef.current < 220) {
+      return;
+    }
+
+    taskToggleStampRef.current = now;
+    toggleTaskCompleted();
+  }
+
+  function triggerSubtaskToggle(id: string) {
+    const now = Date.now();
+    const previousStamp = subtaskToggleStampRef.current[id] ?? 0;
+
+    if (now - previousStamp < 220) {
+      return;
+    }
+
+    subtaskToggleStampRef.current[id] = now;
+    toggleSubtaskCompleted(id);
   }
 
   function handleOpenAssistant() {
@@ -286,7 +324,10 @@ export function TaskCard({
         <button
           type="button"
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onClick={(e) => { e.stopPropagation(); toggleTaskCompleted(); }}
+          onPointerDown={(e) => { e.stopPropagation(); }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+          onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
+          onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
           aria-pressed={taskCompleted}
         />
@@ -383,7 +424,10 @@ export function TaskCard({
                     <button
                       type="button"
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onClick={(e) => { e.stopPropagation(); toggleSubtaskCompleted(sub.id); }}
+                      onPointerDown={(e) => { e.stopPropagation(); }}
+                      onMouseDown={(e) => { e.stopPropagation(); }}
+                      onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
+                      onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
                       aria-pressed={isSubtaskCompleted}
                     />
