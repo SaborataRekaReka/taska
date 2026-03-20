@@ -294,7 +294,7 @@ export function TaskCard({
       return false;
     }
 
-    return Boolean(target.closest('button, [contenteditable="true"], [data-dropdown-menu]'));
+    return Boolean(target.closest('button, input, textarea, select, label, [contenteditable="true"], [data-dropdown-menu]'));
   }
 
   return (
@@ -321,15 +321,15 @@ export function TaskCard({
       } : undefined}
     >
       <div className={styles.row}>
-        <button
-          type="button"
+        <input
+          type="checkbox"
+          checked={taskCompleted}
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
           onPointerDown={(e) => { e.stopPropagation(); }}
           onMouseDown={(e) => { e.stopPropagation(); }}
           onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
           onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
-          aria-pressed={taskCompleted}
         />
         <div className={styles.content}>
           <EditableText
@@ -421,15 +421,15 @@ export function TaskCard({
                 <div key={sub.id}>
                   {i > 0 && <div className={styles.divider} />}
                   <div className={styles.subtaskRow}>
-                    <button
-                      type="button"
+                    <input
+                      type="checkbox"
+                      checked={isSubtaskCompleted}
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
                       onPointerDown={(e) => { e.stopPropagation(); }}
                       onMouseDown={(e) => { e.stopPropagation(); }}
                       onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
                       onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
-                      aria-pressed={isSubtaskCompleted}
                     />
                     <SubtaskEditable
                       sub={sub}
