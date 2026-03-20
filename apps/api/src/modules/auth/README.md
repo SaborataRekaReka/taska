@@ -30,4 +30,4 @@ Authentication, session issuing and provider-based identity entry points for all
 ## Notes
 - Every private endpoint must resolve an authenticated user.
 - Google OAuth uses standard scopes: `openid email profile`.
-- For local development you must configure Google Console redirect URIs for backend and frontend callback URLs.
+- For local development configure Google Console redirect URI only for backend (`http://localhost:3000/auth/google/callback`); frontend callback is handled by `returnTo` / `GOOGLE_FRONTEND_CALLBACK_URL`.

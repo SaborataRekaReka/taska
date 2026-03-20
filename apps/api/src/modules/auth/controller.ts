@@ -35,7 +35,8 @@ export class AuthController {
     @Res() reply: FastifyReply,
     @Query('returnTo') returnTo?: string,
   ) {
-    return reply.redirect(this.googleOAuthService.getAuthorizationUrl(returnTo));
+    const authUrl = this.googleOAuthService.getAuthorizationUrl(returnTo);
+    return reply.status(302).redirect(authUrl);
   }
 
   @Get('google/callback')
@@ -49,16 +50,17 @@ export class AuthController {
     const { returnTo } = this.googleOAuthService.decodeState(state);
 
     if (error) {
-      return reply.redirect(`${returnTo}?error=${encodeURIComponent(error)}`);
+      return reply.status(302).redirect(`${returnTo}?error=${encodeURIComponent(error)}`);
     }
 
     if (!code) {
-      return reply.redirect(`${returnTo}?error=missing_code`);
+      return reply.status(302).redirect(`${returnTo}?error=missing_code`);
     }
 
     const googleUser = await this.googleOAuthService.authenticateWithCode(code);
     const auth = this.authService.buildAuthResponse(googleUser);
-    return reply.redirect(this.googleOAuthService.buildFrontendRedirectUrl(returnTo, auth));
+    const frontendRedirect = this.googleOAuthService.buildFrontendRedirectUrl(returnTo, auth);
+    return reply.status(302).redirect(frontendRedirect);
   }
 
   @Post('refresh')

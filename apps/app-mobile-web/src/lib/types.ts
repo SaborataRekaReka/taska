@@ -75,7 +75,7 @@ export interface AiTaskPatch {
   description?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
-  deadline?: string;
+  deadline?: string | null;
   listId?: string | null;
 }
 

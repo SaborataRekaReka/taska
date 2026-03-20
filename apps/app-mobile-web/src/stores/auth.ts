@@ -33,6 +33,19 @@ export const useAuthStore = create<AuthState>()(
         set({ accessToken, refreshToken }),
       logout: () => set({ user: null, accessToken: null, refreshToken: null }),
     }),
-    { name: 'taska-auth' },
+    {
+      name: 'taska-auth',
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<AuthState> | undefined;
+
+        // Prevent late hydration from overwriting a fresh in-memory auth session
+        // (can happen right after OAuth callback on first load).
+        if (currentState.user || currentState.accessToken || currentState.refreshToken) {
+          return { ...persisted, ...currentState };
+        }
+
+        return { ...currentState, ...persisted };
+      },
+    },
   ),
 );

@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import type { TaskPriority } from '../lib/types';
+import type { TaskPriority, TaskStatus } from '../lib/types';
 import { useTasks, useUpdateTask, useLists } from '../hooks/queries';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
@@ -11,18 +11,48 @@ export function TaskList() {
   const { data: tasks = [] } = useTasks();
   const { data: lists = [] } = useLists();
   const updateTask = useUpdateTask();
+  const [optimisticStatusById, setOptimisticStatusById] = useState<Record<string, TaskStatus>>({});
 
   const availableTaskLists = useMemo(
     () => lists.map((list) => ({ id: list.id, name: list.name, isDefault: list.isDefault })),
     [lists],
   );
 
+  const serverStatusById = useMemo<Record<string, TaskStatus>>(
+    () => Object.fromEntries(tasks.map((task) => [task.id, task.status])),
+    [tasks],
+  );
+
+  useEffect(() => {
+    setOptimisticStatusById((current) => {
+      const liveTaskIds = new Set(tasks.map((task) => task.id));
+      let changed = false;
+      const next = { ...current };
+
+      for (const taskId of Object.keys(next)) {
+        if (!liveTaskIds.has(taskId)) {
+          delete next[taskId];
+          changed = true;
+          continue;
+        }
+
+        if (next[taskId] === serverStatusById[taskId]) {
+          delete next[taskId];
+          changed = true;
+        }
+      }
+
+      return changed ? next : current;
+    });
+  }, [serverStatusById, tasks]);
+
   const sortedTasks = useMemo(
     () => [...tasks]
       .map((task, index) => ({
         task,
         index,
-        isCompleted: task.status === 'DONE',
+        resolvedStatus: optimisticStatusById[task.id] ?? task.status,
+        isCompleted: (optimisticStatusById[task.id] ?? task.status) === 'DONE',
       }))
       .sort((a, b) => {
         if (a.isCompleted === b.isCompleted) {
@@ -30,11 +60,32 @@ export function TaskList() {
         }
         return a.isCompleted ? 1 : -1;
       }),
-    [tasks],
+    [optimisticStatusById, tasks],
   );
 
   function handleToggleTaskCompleted(taskId: string, nextCompleted: boolean) {
-    updateTask.mutate({ id: taskId, status: nextCompleted ? 'DONE' : 'TODO' });
+    const nextStatus: TaskStatus = nextCompleted ? 'DONE' : 'TODO';
+    const previousStatus = optimisticStatusById[taskId] ?? serverStatusById[taskId];
+
+    setOptimisticStatusById((current) => ({ ...current, [taskId]: nextStatus }));
+
+    updateTask.mutate(
+      { id: taskId, status: nextStatus },
+      {
+        onError: () => {
+          if (!previousStatus) {
+            setOptimisticStatusById((current) => {
+              const next = { ...current };
+              delete next[taskId];
+              return next;
+            });
+            return;
+          }
+
+          setOptimisticStatusById((current) => ({ ...current, [taskId]: previousStatus }));
+        },
+      },
+    );
   }
 
   function handleUpdateTaskDeadline(taskId: string, nextDeadline: string | null): void {
@@ -51,7 +102,7 @@ export function TaskList() {
 
   return (
     <div className={styles.list}>
-      {sortedTasks.map(({ task, isCompleted }) => (
+      {sortedTasks.map(({ task, isCompleted, resolvedStatus }) => (
         <motion.div
           key={task.id}
           className={styles.item}
@@ -59,7 +110,7 @@ export function TaskList() {
           transition={{ layout: { duration: 0.34, ease: [0.22, 1, 0.36, 1] } }}
         >
           <TaskCard
-            task={task}
+            task={resolvedStatus === task.status ? task : { ...task, status: resolvedStatus }}
             isCompleted={isCompleted}
             onToggleCompleted={handleToggleTaskCompleted}
             onOpenAssistant={openTaskAssistantModal}

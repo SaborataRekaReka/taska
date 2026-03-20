@@ -90,9 +90,10 @@ async function bootstrap(): Promise<void> {
   });
 
   const port = Number(process.env.PORT ?? 3000);
-  await app.listen(port, '0.0.0.0');
+  const host = process.env.HOST ?? '::';
+  await app.listen(port, host);
 
-  console.log(`[api] listening on :${port}`);
+  console.log(`[api] listening on ${host}:${port}`);
   console.log(`[api] health: http://localhost:${port}/health`);
   console.log(`[api] docs: http://localhost:${port}/docs`);
   console.log(`[api] openapi: http://localhost:${port}/openapi.json`);

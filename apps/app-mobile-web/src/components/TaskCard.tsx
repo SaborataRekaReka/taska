@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Subtask, Task, TaskPriority } from '../lib/types';
+import type { Subtask, Task, TaskPriority, TaskStatus } from '../lib/types';
 import subtasksIcon from '../assests/subtasks.svg';
 import listIcon from '../assests/list.svg';
 import aiFlashIcon from '../assests/ai_flash.svg';
@@ -25,10 +25,17 @@ interface TaskCardProps {
   isCompleted?: boolean;
   onToggleCompleted?: (taskId: string, nextCompleted: boolean) => void;
   onOpenAssistant?: (taskId: string) => void;
+  onUpdateTitle?: (taskId: string, nextTitle: string) => void;
+  onCreateSubtask?: (taskId: string, title: string) => void;
+  onUpdateSubtask?: (taskId: string, subtaskId: string, patch: { title?: string; status?: TaskStatus }) => void;
   onUpdateDeadline?: (taskId: string, nextDeadline: string | null) => void;
   availableLists?: { id: string; name: string; isDefault?: boolean }[];
   onUpdateList?: (taskId: string, nextListId: string | null) => void;
   onUpdatePriority?: (taskId: string, nextPriority: TaskPriority) => void;
+  showActionMenu?: boolean;
+  showAddSubtaskButton?: boolean;
+  clickToOpenAssistant?: boolean;
+  forceSubtasksOpen?: boolean;
 }
 
 export function TaskCard({
@@ -36,10 +43,17 @@ export function TaskCard({
   isCompleted,
   onToggleCompleted,
   onOpenAssistant,
+  onUpdateTitle,
+  onCreateSubtask,
+  onUpdateSubtask,
   onUpdateDeadline,
   availableLists,
   onUpdateList,
   onUpdatePriority,
+  showActionMenu = true,
+  showAddSubtaskButton = true,
+  clickToOpenAssistant = true,
+  forceSubtasksOpen = false,
 }: TaskCardProps) {
   const updateTaskMut = useUpdateTask();
   const createSubtaskMut = useCreateSubtask();
@@ -51,11 +65,16 @@ export function TaskCard({
   const [localDeadline, setLocalDeadline] = useState(task.deadline);
   const [localListId, setLocalListId] = useState<string | null>(task.listId);
   const [localPriority, setLocalPriority] = useState<TaskPriority>(task.priority);
-  const [isSubtasksOpen, setIsSubtasksOpen] = useState(false);
+  const [isSubtasksOpen, setIsSubtasksOpen] = useState(forceSubtasksOpen);
   const enterPressedRef = useRef(false);
+  const taskToggleStampRef = useRef(0);
+  const subtaskToggleStampRef = useRef<Record<string, number>>({});
+  const canOpenAssistant = clickToOpenAssistant && typeof onOpenAssistant === 'function';
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
+  const subtasksForcedOpen = forceSubtasksOpen && hasSubs;
+  const subtasksOpen = subtasksForcedOpen || isSubtasksOpen;
 
   const listOptions = useMemo<TaskChipMenuOption[]>(() => {
     const normalized: TaskChipMenuOption[] = [
@@ -85,6 +104,24 @@ export function TaskCard({
   }, [availableLists, localListId, task.list]);
 
   useEffect(() => {
+    setLocalTitle(task.title);
+  }, [task.id, task.title]);
+
+  useEffect(() => {
+    setLocalSubtasks(task.subtasks);
+  }, [task.id, task.subtasks]);
+
+  useEffect(() => {
+    if (forceSubtasksOpen) {
+      setIsSubtasksOpen(true);
+    }
+  }, [forceSubtasksOpen, task.id, hasSubs]);
+
+  useEffect(() => {
+    setLocalTaskCompleted(task.status === 'DONE');
+  }, [task.id, task.status]);
+
+  useEffect(() => {
     setLocalDeadline(task.deadline);
   }, [task.deadline]);
 
@@ -105,9 +142,14 @@ export function TaskCard({
     },
     {
       id: 'toggle-subtasks',
-      label: isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи',
-      onSelect: () => setIsSubtasksOpen((prev) => !prev),
-      disabled: !hasSubs,
+      label: subtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи',
+      onSelect: () => {
+        if (subtasksForcedOpen) {
+          return;
+        }
+        setIsSubtasksOpen((prev) => !prev);
+      },
+      disabled: !hasSubs || subtasksForcedOpen,
       icon: subtasksIcon,
     },
     {
@@ -142,9 +184,17 @@ export function TaskCard({
       prev.map((s) => (s.id === id ? { ...s, title: trimmed || s.title } : s))
     );
     if (isDraft && trimmed) {
-      createSubtaskMut.mutate({ taskId: task.id, title: trimmed });
+      if (onCreateSubtask) {
+        onCreateSubtask(task.id, trimmed);
+      } else {
+        createSubtaskMut.mutate({ taskId: task.id, title: trimmed });
+      }
     } else if (!isDraft && trimmed) {
-      updateSubtaskMut.mutate({ taskId: task.id, id, title: trimmed });
+      if (onUpdateSubtask) {
+        onUpdateSubtask(task.id, id, { title: trimmed });
+      } else {
+        updateSubtaskMut.mutate({ taskId: task.id, id, title: trimmed });
+      }
     }
   }
 
@@ -159,6 +209,15 @@ export function TaskCard({
     setLocalTaskCompleted(nextCompleted);
   }
 
+  function triggerTaskToggle() {
+    const now = Date.now();
+    if (now - taskToggleStampRef.current < 220) {
+      return;
+    }
+    taskToggleStampRef.current = now;
+    toggleTaskCompleted();
+  }
+
   function toggleSubtaskCompleted(id: string) {
     if (id.startsWith('draft-')) return;
     const subtask = localSubtasks.find((s) => s.id === id);
@@ -167,7 +226,21 @@ export function TaskCard({
     setLocalSubtasks((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: nextStatus } : s))
     );
-    updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
+    if (onUpdateSubtask) {
+      onUpdateSubtask(task.id, id, { status: nextStatus });
+    } else {
+      updateSubtaskMut.mutate({ taskId: task.id, id, status: nextStatus });
+    }
+  }
+
+  function triggerSubtaskToggle(id: string) {
+    const now = Date.now();
+    const previousStamp = subtaskToggleStampRef.current[id] ?? 0;
+    if (now - previousStamp < 220) {
+      return;
+    }
+    subtaskToggleStampRef.current[id] = now;
+    toggleSubtaskCompleted(id);
   }
 
   function handleOpenAssistant() {
@@ -200,17 +273,17 @@ export function TaskCard({
 
   return (
     <div
-      className={`${styles.card} ${taskCompleted ? styles.cardDone : ''}`}
-      role="button"
-      tabIndex={0}
-      onClick={(e) => {
+      className={`${styles.card} ${taskCompleted ? styles.cardDone : ''} ${canOpenAssistant ? '' : styles.cardStatic}`}
+      role={canOpenAssistant ? 'button' : undefined}
+      tabIndex={canOpenAssistant ? 0 : undefined}
+      onClick={canOpenAssistant ? (e) => {
         if (isInteractiveTarget(e.target)) {
           return;
         }
 
         handleOpenAssistant();
-      }}
-      onKeyDown={(e) => {
+      } : undefined}
+      onKeyDown={canOpenAssistant ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           if (isInteractiveTarget(e.target)) {
             return;
@@ -219,13 +292,16 @@ export function TaskCard({
           e.preventDefault();
           handleOpenAssistant();
         }
-      }}
+      } : undefined}
     >
       <div className={styles.row}>
         <button
           type="button"
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onClick={(e) => { e.stopPropagation(); toggleTaskCompleted(); }}
+          onPointerDown={(e) => { e.stopPropagation(); }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+          onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
+          onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
           aria-pressed={taskCompleted}
         />
@@ -234,7 +310,13 @@ export function TaskCard({
             value={localTitle}
             onChange={(val) => {
               setLocalTitle(val);
-              if (val.trim() && val !== task.title) {
+              if (!val.trim() || val === task.title) {
+                return;
+              }
+
+              if (onUpdateTitle) {
+                onUpdateTitle(task.id, val);
+              } else {
                 updateTaskMut.mutate({ id: task.id, title: val });
               }
             }}
@@ -245,9 +327,15 @@ export function TaskCard({
             {persistedSubtasksCount > 0 && (
               <button
                 type="button"
-                className={`${styles.metaItem} ${styles.metaToggle} ${isSubtasksOpen ? styles.metaToggleActive : ''}`}
-                onClick={(e) => { e.stopPropagation(); setIsSubtasksOpen((prev) => !prev); }}
-                aria-label={isSubtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи'}
+                className={`${styles.metaItem} ${styles.metaToggle} ${subtasksOpen ? styles.metaToggleActive : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (subtasksForcedOpen) {
+                    return;
+                  }
+                  setIsSubtasksOpen((prev) => !prev);
+                }}
+                aria-label={subtasksOpen ? 'Скрыть подзадачи' : 'Показать подзадачи'}
               >
                 <img src={subtasksIcon} alt="" className={styles.metaIcon} />
                 {persistedSubtasksCount}
@@ -282,7 +370,8 @@ export function TaskCard({
             </div>
           </div>
         </div>
-        <div className={styles.actions}>
+        {showActionMenu ? (
+          <div className={styles.actions}>
           <button
             className={styles.actionCircle}
             type="button"
@@ -292,11 +381,12 @@ export function TaskCard({
             <img src={aiFlashIcon} alt="" className={styles.actionIcon} />
           </button>
           <DropdownMenu items={menuItems} triggerAriaLabel="Действия задачи" />
-        </div>
+          </div>
+        ) : null}
       </div>
 
       {hasSubs && (
-        <div className={`${styles.subtasksPanel} ${isSubtasksOpen ? styles.subtasksOpen : styles.subtasksClosed}`}>
+        <div className={`${styles.subtasksPanel} ${subtasksOpen ? styles.subtasksOpen : styles.subtasksClosed}`}>
           <div className={styles.subtasks}>
             {localSubtasks.map((sub, i) => {
               const isSubtaskCompleted = sub.status === 'DONE';
@@ -308,7 +398,10 @@ export function TaskCard({
                     <button
                       type="button"
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onClick={(e) => { e.stopPropagation(); toggleSubtaskCompleted(sub.id); }}
+                      onPointerDown={(e) => { e.stopPropagation(); }}
+                      onMouseDown={(e) => { e.stopPropagation(); }}
+                      onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
+                      onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
                       aria-pressed={isSubtaskCompleted}
                     />
@@ -340,18 +433,20 @@ export function TaskCard({
         </div>
       )}
 
-      <div className={styles.plusWrap}>
-        <button
-          className={styles.plusBtn}
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-          onClick={(e) => { e.stopPropagation(); addDraft(); }}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </div>
+      {showAddSubtaskButton ? (
+        <div className={styles.plusWrap}>
+          <button
+            className={styles.plusBtn}
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onClick={(e) => { e.stopPropagation(); addDraft(); }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 1v10M1 6h10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

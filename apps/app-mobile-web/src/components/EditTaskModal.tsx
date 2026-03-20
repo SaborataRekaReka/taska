@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  useAllTasks,
   useConfirmAiOperation,
   useCreateAiPlan,
   useExecuteAiOperation,
+  useLists,
   useReviseAiPlan,
-  useTasks,
   useUndoAiOperation,
   useUpdateTask,
 } from '../hooks/queries';
 import type { AiPlanResponse } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
-import { AiProposalCard } from './AiProposalCard';
+import { AiProposalCard, type AiProposalRevisionPayload } from './AiProposalCard';
 import { AiToolChips } from './AiToolChips';
 import sendIcon from '../assests/send.svg';
 import styles from './EditTaskModal.module.css';
@@ -52,7 +53,7 @@ type ChatMessage =
       role: 'assistant';
       content: string;
       proposal?: AiPlanResponse;
-      status?: 'DRAFT' | 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED' | 'REJECTED';
+      status?: 'DRAFT' | 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED';
       busyLabel?: string | null;
       executionCount?: number;
     };
@@ -68,7 +69,8 @@ function nextMessageId(prefix: string): string {
 export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const selectedTaskId = useUiStore((s) => s.selectedTaskId);
   const closeTaskAssistantModal = useUiStore((s) => s.closeTaskAssistantModal);
-  const { data: tasks } = useTasks();
+  const { data: allTasks = [] } = useAllTasks();
+  const { data: lists = [] } = useLists();
   const updateTask = useUpdateTask();
   const createPlan = useCreateAiPlan();
   const revisePlan = useReviseAiPlan();
@@ -81,14 +83,14 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
         return null;
       }
 
-      const apiTask = tasks?.find((task) => task.id === selectedTaskId);
+      const apiTask = allTasks.find((task) => task.id === selectedTaskId);
       if (apiTask) {
         return apiTask;
       }
 
       return null;
     },
-    [selectedTaskId, tasks],
+    [allTasks, selectedTaskId],
   );
   const [cachedTask, setCachedTask] = useState<typeof selectedTask>(null);
   const [activeTab, setActiveTab] = useState<'visual' | 'editor'>('visual');
@@ -99,6 +101,10 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const taskForView = selectedTask ?? cachedTask;
+  const availableTaskLists = useMemo(
+    () => lists.map((list) => ({ id: list.id, name: list.name, isDefault: list.isDefault })),
+    [lists],
+  );
 
   useEffect(() => {
     if (!selectedTask) {
@@ -206,8 +212,15 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
     setAssistantPrompt('');
 
     try {
+      const taskContext = [
+        `Current task title: ${taskForView.title}`,
+        taskForView.description ? `Current task description: ${taskForView.description}` : null,
+        `Current status: ${taskForView.status}`,
+        `Current priority: ${taskForView.priority}`,
+      ].filter(Boolean).join('\n');
+
       const proposal = await createPlan.mutateAsync({
-        prompt: `${trimmed}\n\nCurrent markdown:\n${markdownValue}`,
+        prompt: `${trimmed}\n\nTask context:\n${taskContext}`,
         scope: 'TASK',
         taskId: taskForView.id,
         context: { taskIds: [taskForView.id], limit: 1 },
@@ -253,13 +266,18 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
     }
   }
 
-  async function handleRevise(messageId: string, proposal: AiPlanResponse, revisionPrompt: string): Promise<void> {
+  async function handleRevise(messageId: string, proposal: AiPlanResponse, revision: AiProposalRevisionPayload): Promise<void> {
     setMessages((current) => current.map((message) => (
       message.id === messageId ? { ...message, busyLabel: 'Пересобираем план…' } : message
     )));
 
     try {
-      const revised = await revisePlan.mutateAsync({ operationId: proposal.operationId, revisionPrompt });
+      const revised = await revisePlan.mutateAsync({
+        operationId: proposal.operationId,
+        revisionPrompt: revision.revisionPrompt,
+        operations: revision.operations,
+        metadata: revision.metadata,
+      });
       setMessages((current) => current.map((message) => (
         message.id === messageId
           ? { ...message, proposal: revised, content: revised.assistantMessage, status: revised.status, busyLabel: null }
@@ -289,12 +307,6 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
         item.id === messageId ? { ...item, status: 'FAILED', busyLabel: message } : item
       )));
     }
-  }
-
-  function handleReject(messageId: string): void {
-    setMessages((current) => current.map((message) => (
-      message.id === messageId ? { ...message, status: 'REJECTED', busyLabel: null } : message
-    )));
   }
 
   const autosaveLabel = (() => {
@@ -398,7 +410,7 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                   <div className={styles.chatMessages}>
                     {messages.length === 0 ? (
                       <div className={styles.chatEmptyState}>
-                        Спроси AI про эту задачу: разбить на подзадачи, переписать markdown или предложить безопасный план изменений.
+                        Спроси AI про эту задачу: разбить на подзадачи, уточнить формулировку или предложить безопасный план изменений.
                       </div>
                     ) : null}
                     {messages.map((message) => (
@@ -412,11 +424,11 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                             status={message.status ?? 'DRAFT'}
                             busyLabel={message.busyLabel}
                             executionCount={message.executionCount}
-                            canUndo={message.status === 'EXECUTED'}
+                            tasks={allTasks}
+                            availableLists={availableTaskLists}
                             onApprove={() => void handleApprove(message.id, message.proposal!)}
-                            onReject={() => handleReject(message.id)}
-                            onRevise={(revisionPrompt) => void handleRevise(message.id, message.proposal!, revisionPrompt)}
-                            onUndo={message.status === 'EXECUTED' ? () => void handleUndo(message.id, message.proposal!) : undefined}
+                            onRevise={(revision) => void handleRevise(message.id, message.proposal!, revision)}
+                            onUndo={() => void handleUndo(message.id, message.proposal!)}
                           />
                         ) : null}
                       </div>

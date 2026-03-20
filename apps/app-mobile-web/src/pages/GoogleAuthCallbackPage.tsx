@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
+import { api } from '../lib/api';
 import type { AuthResponse } from '../lib/types';
 import { useAuthStore } from '../stores/auth';
 import styles from './Auth.module.css';
@@ -21,9 +22,26 @@ export function GoogleAuthCallbackPage() {
       return;
     }
 
-    const parsedUser = JSON.parse(rawUser) as AuthResponse['user'];
+    let parsedUser: AuthResponse['user'];
+    try {
+      parsedUser = JSON.parse(rawUser) as AuthResponse['user'];
+    } catch {
+      navigate('/login?error=google_payload_invalid', { replace: true });
+      return;
+    }
+
     setAuth(parsedUser, accessToken, refreshToken);
-    navigate('/app', { replace: true });
+
+    void (async () => {
+      try {
+        const freshUser = await api.get<AuthResponse['user']>('/auth/me');
+        setAuth(freshUser, accessToken, refreshToken);
+      } catch {
+        // keep optimistic OAuth payload if /auth/me is temporarily unavailable
+      } finally {
+        navigate('/app', { replace: true });
+      }
+    })();
   }, [navigate, params, setAuth]);
 
   return (

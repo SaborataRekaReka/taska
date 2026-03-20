@@ -123,7 +123,7 @@ export class TasksService {
     description?: string;
     priority?: TaskPriority;
     status?: TaskStatus;
-    deadline?: string;
+    deadline?: string | null;
     listId?: string | null;
   }) {
     await this.findOwned(userId, taskId);

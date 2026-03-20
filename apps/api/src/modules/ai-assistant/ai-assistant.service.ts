@@ -43,8 +43,8 @@ export interface PlanTaskPatch {
   description?: string;
   priority?: TaskPriority;
   status?: TaskStatus;
-  deadline?: string;
-  listId?: string;
+  deadline?: string | null;
+  listId?: string | null;
 }
 
 export interface PlanSubtaskPatch {
@@ -96,6 +96,19 @@ interface JsonSchemaResponse {
     | { type?: string; text?: string }
   >;
 }
+
+const MY_DAY_SMART_LIST_HINT = {
+  id: '__my_day__',
+  name: 'Мой день',
+  aliases: ['мой день', 'my day'],
+  description: 'Virtual smart list. It is not a database list entity.',
+  filterRule: 'Includes tasks with deadline within today (local day start..end).',
+  mutationGuide: {
+    addToMyDay: 'Use UPDATE_TASK and set task.deadline to a datetime within today.',
+    removeFromMyDay: 'Use UPDATE_TASK and set task.deadline to null or datetime outside today.',
+    note: 'Do not use CREATE_LIST/UPDATE_LIST for "Мой день".',
+  },
+};
 
 @Injectable()
 export class AiAssistantService {
@@ -655,6 +668,7 @@ export class AiAssistantService {
       summary: `Global plan over ${lists.length} lists and ${tasks.length} tasks`,
       payload: {
         lists,
+        smartLists: [MY_DAY_SMART_LIST_HINT],
         tasks,
       },
     };
@@ -688,7 +702,13 @@ export class AiAssistantService {
                   `Scope: ${scope}`,
                   'Allowed operation types: CREATE_LIST, UPDATE_LIST, CREATE_TASK, UPDATE_TASK, DELETE_TASK, CREATE_SUBTASK, UPDATE_SUBTASK, DELETE_SUBTASK.',
                   'Every operation must have a unique key.',
+                  'For fields that are not applicable to an operation, return null.',
+                  'Use task object only for task operations, subtask object only for subtask operations, otherwise set them to null.',
                   'Only include operations that are explicitly supported by the provided context.',
+                  '"Мой день" / "my day" is a virtual smart list, not a physical list entity in database.',
+                  'Never answer that "Мой день" list does not exist.',
+                  'When user asks to modify "Мой день", operate on tasks via UPDATE_TASK and deadline changes.',
+                  'Do not create or rename a real list for "Мой день".',
                 ].join('\n'),
               },
             ],
@@ -722,32 +742,34 @@ export class AiAssistantService {
                   items: {
                     type: 'object',
                     additionalProperties: false,
-                    required: ['type', 'key'],
+                    required: ['type', 'key', 'listId', 'taskId', 'subtaskId', 'name', 'task', 'subtask'],
                     properties: {
                       type: { type: 'string', enum: [...ALLOWED_OPERATION_TYPES] },
                       key: { type: 'string' },
-                      listId: { type: 'string' },
-                      taskId: { type: 'string' },
-                      subtaskId: { type: 'string' },
-                      name: { type: 'string' },
+                      listId: { type: ['string', 'null'] },
+                      taskId: { type: ['string', 'null'] },
+                      subtaskId: { type: ['string', 'null'] },
+                      name: { type: ['string', 'null'] },
                       task: {
-                        type: 'object',
+                        type: ['object', 'null'],
                         additionalProperties: false,
+                        required: ['title', 'description', 'priority', 'status', 'deadline', 'listId'],
                         properties: {
-                          title: { type: 'string' },
-                          description: { type: 'string' },
-                          priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
-                          status: { type: 'string', enum: ['TODO', 'IN_PROGRESS', 'DONE'] },
-                          deadline: { type: 'string' },
-                          listId: { type: 'string' },
+                          title: { type: ['string', 'null'] },
+                          description: { type: ['string', 'null'] },
+                          priority: { type: ['string', 'null'], enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', null] },
+                          status: { type: ['string', 'null'], enum: ['TODO', 'IN_PROGRESS', 'DONE', null] },
+                          deadline: { type: ['string', 'null'] },
+                          listId: { type: ['string', 'null'] },
                         },
                       },
                       subtask: {
-                        type: 'object',
+                        type: ['object', 'null'],
                         additionalProperties: false,
+                        required: ['title', 'status'],
                         properties: {
-                          title: { type: 'string' },
-                          status: { type: 'string', enum: ['TODO', 'IN_PROGRESS', 'DONE'] },
+                          title: { type: ['string', 'null'] },
+                          status: { type: ['string', 'null'], enum: ['TODO', 'IN_PROGRESS', 'DONE', null] },
                         },
                       },
                     },
@@ -840,8 +862,8 @@ export class AiAssistantService {
       description: typeof record.description === 'string' ? record.description : undefined,
       priority: typeof record.priority === 'string' ? record.priority as TaskPriority : undefined,
       status: typeof record.status === 'string' ? record.status as TaskStatus : undefined,
-      deadline: typeof record.deadline === 'string' ? record.deadline : undefined,
-      listId: typeof record.listId === 'string' ? record.listId : undefined,
+      deadline: typeof record.deadline === 'string' ? record.deadline : record.deadline === null ? null : undefined,
+      listId: typeof record.listId === 'string' ? record.listId : record.listId === null ? null : undefined,
     }) as PlanTaskPatch;
   }
 
@@ -899,8 +921,8 @@ export class AiAssistantService {
 
     if (task.description !== undefined) payload.description = task.description;
     if (task.priority !== undefined) payload.priority = task.priority;
-    if (task.deadline !== undefined) payload.deadline = task.deadline;
-    if (task.listId !== undefined) payload.listId = task.listId;
+    if (typeof task.deadline === 'string') payload.deadline = task.deadline;
+    if (typeof task.listId === 'string') payload.listId = task.listId;
 
     return payload;
   }
@@ -910,7 +932,7 @@ export class AiAssistantService {
     description?: string;
     priority?: TaskPriority;
     status?: TaskStatus;
-    deadline?: string;
+    deadline?: string | null;
     listId?: string | null;
   } {
     const payload: {
@@ -918,7 +940,7 @@ export class AiAssistantService {
       description?: string;
       priority?: TaskPriority;
       status?: TaskStatus;
-      deadline?: string;
+      deadline?: string | null;
       listId?: string | null;
     } = {};
 

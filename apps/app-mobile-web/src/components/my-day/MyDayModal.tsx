@@ -18,7 +18,12 @@ interface MyDayModalProps {
   tasks?: DayTask[];
   date?: Date;
   closeOnBackdrop?: boolean;
-  onCreateMyDay?: (profile: DayProfile) => void;
+  onCreateMyDay?: (payload: {
+    profile: DayProfile;
+    mood: MoodLevel;
+    energy: number;
+    wishes: string[];
+  }) => Promise<void> | void;
 }
 
 const MOCK_DAY_TASKS: DayTask[] = [
@@ -77,6 +82,8 @@ export function MyDayModal({
   const [mood, setMood] = useState<MoodLevel>(3);
   const [energy, setEnergy] = useState<number>(11);
   const [wishes, setWishes] = useState<string[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const setDayColors = useUiStore((s) => s.setDayColors);
 
   const effectiveTasks = tasks.length > 0 ? tasks : MOCK_DAY_TASKS;
@@ -93,6 +100,9 @@ export function MyDayModal({
     if (!isOpen) {
       return;
     }
+
+    setCreateError(null);
+    setIsCreating(false);
 
     function onKeyDown(event: KeyboardEvent): void {
       if (event.key === 'Escape') {
@@ -126,6 +136,30 @@ export function MyDayModal({
     month: '2-digit',
     year: 'numeric',
   });
+
+  async function handleCreateMyDay(): Promise<void> {
+    if (isCreating) {
+      return;
+    }
+
+    setCreateError(null);
+    setIsCreating(true);
+
+    try {
+      await onCreateMyDay?.({
+        profile,
+        mood,
+        energy,
+        wishes,
+      });
+      setDayColors([c0, c1], energy);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось собрать "Мой день". Попробуйте еще раз.';
+      setCreateError(message);
+    } finally {
+      setIsCreating(false);
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -192,15 +226,16 @@ export function MyDayModal({
                 <button
                   type="button"
                   className={styles.primaryAction}
-                  onClick={() => {
-                    setDayColors([c0, c1], energy);
-                    onCreateMyDay?.(profile);
-                  }}
+                  onClick={() => void handleCreateMyDay()}
+                  disabled={isCreating || !onCreateMyDay}
                 >
-                  {'\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043c\u043e\u0439 \u0434\u0435\u043d\u044c'}
+                  {isCreating ? 'Собираем мой день...' : '\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043c\u043e\u0439 \u0434\u0435\u043d\u044c'}
                   <img src={aiStarsIcon} alt="" className={styles.primaryActionIcon} />
                 </button>
               </div>
+              {createError ? (
+                <p className={styles.errorText}>{createError}</p>
+              ) : null}
             </section>
 
             <section className={styles.rightColumn}>

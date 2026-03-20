@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  useAllTasks,
   useConfirmAiOperation,
   useCreateAiPlan,
   useExecuteAiOperation,
@@ -11,7 +12,7 @@ import {
 import type { AiPlanResponse } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import sendIcon from '../assests/send.svg';
-import { AiProposalCard } from './AiProposalCard';
+import { AiProposalCard, type AiProposalRevisionPayload } from './AiProposalCard';
 import styles from './HeroPanel.module.css';
 
 const CHIPS = [
@@ -31,7 +32,7 @@ type ChatMessage =
       role: 'assistant';
       content: string;
       proposal?: AiPlanResponse;
-      status?: 'DRAFT' | 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED' | 'REJECTED';
+      status?: 'DRAFT' | 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED';
       busyLabel?: string | null;
       executionCount?: number;
     };
@@ -57,7 +58,12 @@ export function HeroPanel() {
   const executeOperation = useExecuteAiOperation();
   const undoOperation = useUndoAiOperation();
   const { data: tasks = [] } = useTasks();
+  const { data: allTasks = [] } = useAllTasks();
   const { data: lists = [] } = useLists();
+  const availableTaskLists = useMemo(
+    () => lists.map((list) => ({ id: list.id, name: list.name, isDefault: list.isDefault })),
+    [lists],
+  );
 
   useEffect(() => {
     if (collapseTimer.current !== null) {
@@ -191,13 +197,18 @@ export function HeroPanel() {
     }
   }
 
-  async function handleRevise(messageId: string, proposal: AiPlanResponse, revisionPrompt: string): Promise<void> {
+  async function handleRevise(messageId: string, proposal: AiPlanResponse, revision: AiProposalRevisionPayload): Promise<void> {
     setMessages((current) => current.map((message) => (
       message.id === messageId ? { ...message, busyLabel: 'Пересобираем план…' } : message
     )));
 
     try {
-      const revised = await revisePlan.mutateAsync({ operationId: proposal.operationId, revisionPrompt });
+      const revised = await revisePlan.mutateAsync({
+        operationId: proposal.operationId,
+        revisionPrompt: revision.revisionPrompt,
+        operations: revision.operations,
+        metadata: revision.metadata,
+      });
       setMessages((current) => current.map((message) => (
         message.id === messageId
           ? { ...message, content: revised.assistantMessage, proposal: revised, status: revised.status, busyLabel: null }
@@ -229,12 +240,6 @@ export function HeroPanel() {
     }
   }
 
-  function handleReject(messageId: string): void {
-    setMessages((current) => current.map((message) => (
-      message.id === messageId ? { ...message, status: 'REJECTED', busyLabel: null } : message
-    )));
-  }
-
   const panelClass = [
     styles.panel,
     panelOpen ? styles.expanded : styles.collapsed,
@@ -263,11 +268,11 @@ export function HeroPanel() {
                   status={message.status ?? 'DRAFT'}
                   busyLabel={message.busyLabel}
                   executionCount={message.executionCount}
-                  canUndo={message.status === 'EXECUTED'}
+                  tasks={allTasks}
+                  availableLists={availableTaskLists}
                   onApprove={() => handleApprove(message.id, message.proposal!)}
-                  onReject={() => handleReject(message.id)}
-                  onRevise={(revisionPrompt) => handleRevise(message.id, message.proposal!, revisionPrompt)}
-                  onUndo={message.status === 'EXECUTED' ? () => handleUndo(message.id, message.proposal!) : undefined}
+                  onRevise={(revision) => handleRevise(message.id, message.proposal!, revision)}
+                  onUndo={() => handleUndo(message.id, message.proposal!)}
                 />
               ) : null}
             </div>

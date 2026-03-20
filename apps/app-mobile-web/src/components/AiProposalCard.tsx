@@ -1,67 +1,219 @@
-import { useMemo, useState } from 'react';
-import type { AiOperationStatus, AiPlanOperation, AiPlanResponse } from '../lib/types';
+import { useEffect, useMemo, useState } from 'react';
+import type {
+  AiOperationStatus,
+  AiPlanOperation,
+  AiPlanResponse,
+  Subtask,
+  Task,
+  TaskPriority,
+  TaskStatus,
+} from '../lib/types';
+import { TaskCard } from './TaskCard';
 import styles from './AiProposalCard.module.css';
 
-type ProposalViewState = AiOperationStatus | 'REJECTED' | 'DRAFT';
+type ProposalViewState = AiOperationStatus | 'DRAFT';
+
+type ListOption = { id: string; name: string; isDefault?: boolean };
+
+type TaskPatchUpdates = {
+  title?: string;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  deadline?: string | null;
+  listId?: string | null;
+};
+
+interface TaskPreviewItem {
+  previewKey: string;
+  operationIndexes: number[];
+  operationKeys: string[];
+  taskOperationIndex?: number;
+  isDeletePlanned: boolean;
+  task: Task;
+}
+
+export interface AiProposalRevisionPayload {
+  revisionPrompt: string;
+  operations?: AiPlanOperation[];
+  metadata?: Record<string, unknown>;
+}
 
 interface AiProposalCardProps {
   proposal: AiPlanResponse;
   status: ProposalViewState;
   busyLabel?: string | null;
   executionCount?: number;
-  canUndo?: boolean;
+  tasks?: Task[];
+  availableLists?: ListOption[];
   onApprove: () => void;
-  onReject: () => void;
-  onRevise: (revisionPrompt: string) => void;
+  onRevise: (payload: AiProposalRevisionPayload) => void;
   onUndo?: () => void;
 }
 
 function formatOperationTitle(operation: AiPlanOperation): string {
-  if (operation.type === 'CREATE_LIST') return `Создать список “${operation.name ?? 'Без названия'}”`;
-  if (operation.type === 'UPDATE_LIST') return `Переименовать список в “${operation.name ?? '…'}”`;
-  if (operation.type === 'CREATE_TASK') return `Создать задачу “${operation.task?.title ?? 'Без названия'}”`;
-  if (operation.type === 'UPDATE_TASK') return `Обновить задачу ${operation.taskId ?? ''}`.trim();
-  if (operation.type === 'DELETE_TASK') return `Удалить задачу ${operation.taskId ?? ''}`.trim();
-  if (operation.type === 'CREATE_SUBTASK') return `Добавить подзадачу “${operation.subtask?.title ?? 'Без названия'}”`;
-  if (operation.type === 'UPDATE_SUBTASK') return `Обновить подзадачу ${operation.subtaskId ?? ''}`.trim();
-  return `Удалить подзадачу ${operation.subtaskId ?? ''}`.trim();
+  if (operation.type === 'CREATE_LIST') return `ÃÂ¡ÃÂ¾ÃÂ·ÃÂ´ÃÂ°Ã‘â€šÃ‘Å’ Ã‘ÂÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº "${operation.name ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
+  if (operation.type === 'UPDATE_LIST') return `ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃÂ¸ÃÂ¼ÃÂµÃÂ½ÃÂ¾ÃÂ²ÃÂ°Ã‘â€šÃ‘Å’ Ã‘ÂÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº ÃÂ² "${operation.name ?? '...'}"`;
+  if (operation.type === 'DELETE_TASK') return '\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0437\u0430\u0434\u0430\u0447\u0443';
+  if (operation.type === 'CREATE_SUBTASK') return `Ãâ€ÃÂ¾ÃÂ±ÃÂ°ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ "${operation.subtask?.title ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
+  if (operation.type === 'UPDATE_SUBTASK') return `ÃÅ¾ÃÂ±ÃÂ½ÃÂ¾ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.subtaskId ?? ''}`.trim();
+  if (operation.type === 'DELETE_SUBTASK') return `ÃÂ£ÃÂ´ÃÂ°ÃÂ»ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ¿ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.subtaskId ?? ''}`.trim();
+  if (operation.type === 'CREATE_TASK') return `ÃÂ¡ÃÂ¾ÃÂ·ÃÂ´ÃÂ°Ã‘â€šÃ‘Å’ ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ "${operation.task?.title ?? 'Ãâ€˜ÃÂµÃÂ· ÃÂ½ÃÂ°ÃÂ·ÃÂ²ÃÂ°ÃÂ½ÃÂ¸Ã‘Â'}"`;
+  return `ÃÅ¾ÃÂ±ÃÂ½ÃÂ¾ÃÂ²ÃÂ¸Ã‘â€šÃ‘Å’ ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡Ã‘Æ’ ${operation.taskId ?? ''}`.trim();
 }
 
-function buildMarkdown(proposal: AiPlanResponse): string {
-  const operationsBlock = proposal.operations.length > 0
-    ? proposal.operations.map((operation) => {
-        const details: string[] = [];
-        if (operation.name) details.push(`name:: ${operation.name}`);
-        if (operation.task?.title) details.push(`task.title:: ${operation.task.title}`);
-        if (operation.task?.description) details.push(`task.description:: ${operation.task.description}`);
-        if (operation.task?.priority) details.push(`task.priority:: ${operation.task.priority}`);
-        if (operation.task?.status) details.push(`task.status:: ${operation.task.status}`);
-        if (operation.task?.deadline) details.push(`task.deadline:: ${operation.task.deadline}`);
-        if (operation.subtask?.title) details.push(`subtask.title:: ${operation.subtask.title}`);
-        if (operation.subtask?.status) details.push(`subtask.status:: ${operation.subtask.status}`);
-        return [`- op:: ${operation.type}`, ...details.map((detail) => `  - ${detail}`)].join('\n');
-      }).join('\n')
-    : '- op:: NO_CHANGES';
+function buildTaskPreview(
+  operation: AiPlanOperation,
+  tasksById: Map<string, Task>,
+  listById: Map<string, string>,
+): Task {
+  const fallbackCreatedAt = '1970-01-01T00:00:00.000Z';
+  const sourceTask = operation.taskId ? tasksById.get(operation.taskId) : undefined;
+  const taskPatch = operation.task ?? {};
+  const resolvedListId = taskPatch.listId !== undefined
+    ? taskPatch.listId ?? null
+    : sourceTask?.listId ?? null;
 
-  return [
-    `# ${proposal.summary}`,
-    '',
-    proposal.assistantMessage,
-    '',
-    '## Operations',
-    operationsBlock,
-    proposal.warnings.length > 0 ? `\n## Warnings\n${proposal.warnings.map((warning) => `- ${warning}`).join('\n')}` : '',
-  ].filter(Boolean).join('\n');
+  const resolvedList = resolvedListId
+    ? sourceTask?.list && sourceTask.list.id === resolvedListId
+      ? sourceTask.list
+      : listById.has(resolvedListId)
+        ? { id: resolvedListId, name: listById.get(resolvedListId)! }
+        : null
+    : null;
+
+  const fallbackTitle = operation.type === 'CREATE_TASK'
+    ? 'ÃÂÃÂ¾ÃÂ²ÃÂ°Ã‘Â ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡ÃÂ°'
+    : sourceTask?.title ?? '\u0417\u0430\u0434\u0430\u0447\u0430 (\u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 \u0432 \u043f\u043b\u0430\u043d\u0435)';
+
+  return {
+    id: operation.taskId ?? `proposal-${operation.key}`,
+    title: taskPatch.title ?? fallbackTitle,
+    description: taskPatch.description ?? sourceTask?.description ?? null,
+    priority: taskPatch.priority ?? sourceTask?.priority ?? 'MEDIUM',
+    deadline: taskPatch.deadline ?? sourceTask?.deadline ?? null,
+    status: taskPatch.status ?? sourceTask?.status ?? 'TODO',
+    listId: resolvedListId,
+    list: resolvedList,
+    subtasks: [],
+    createdAt: sourceTask?.createdAt ?? fallbackCreatedAt,
+  };
 }
 
-function statusLabel(status: ProposalViewState): string {
-  if (status === 'PLANNED') return 'План готов';
-  if (status === 'CONFIRMED') return 'Подтверждено';
-  if (status === 'EXECUTED') return 'Применено';
-  if (status === 'UNDONE') return 'Отменено';
-  if (status === 'FAILED') return 'Ошибка';
-  if (status === 'REJECTED') return 'Отклонено';
-  return 'Черновик';
+function buildTaskPreviewFromTaskId(
+  taskId: string,
+  tasksById: Map<string, Task>,
+  listById: Map<string, string>,
+): Task {
+  const sourceTask = tasksById.get(taskId);
+  const fallbackCreatedAt = '1970-01-01T00:00:00.000Z';
+  const listId = sourceTask?.listId ?? null;
+  const list = listId
+    ? sourceTask?.list && sourceTask.list.id === listId
+      ? sourceTask.list
+      : listById.has(listId)
+        ? { id: listId, name: listById.get(listId)! }
+        : null
+    : null;
+
+  return {
+    id: sourceTask?.id ?? taskId,
+    title: sourceTask?.title ?? '\u0417\u0430\u0434\u0430\u0447\u0430 (\u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430 \u0432 \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\u0435)',
+    description: sourceTask?.description ?? null,
+    priority: sourceTask?.priority ?? 'MEDIUM',
+    deadline: sourceTask?.deadline ?? null,
+    status: sourceTask?.status ?? 'TODO',
+    listId,
+    list,
+    subtasks: (sourceTask?.subtasks ?? []).map((subtask) => ({ ...subtask })),
+    createdAt: sourceTask?.createdAt ?? fallbackCreatedAt,
+  };
+}
+
+function resolveSubtaskPreviewId(operation: AiPlanOperation): string {
+  return operation.subtaskId ?? `proposal-subtask-${operation.key}`;
+}
+
+function applyTaskOperationPatch(
+  task: Task,
+  taskPatch: AiPlanOperation['task'],
+  listById: Map<string, string>,
+): Task {
+  if (!taskPatch) {
+    return task;
+  }
+
+  const nextTask: Task = {
+    ...task,
+    subtasks: task.subtasks.map((subtask) => ({ ...subtask })),
+  };
+
+  if (taskPatch.title !== undefined) nextTask.title = taskPatch.title;
+  if (taskPatch.description !== undefined) nextTask.description = taskPatch.description ?? null;
+  if (taskPatch.priority !== undefined) nextTask.priority = taskPatch.priority;
+  if (taskPatch.status !== undefined) nextTask.status = taskPatch.status;
+  if (taskPatch.deadline !== undefined) nextTask.deadline = taskPatch.deadline ?? null;
+  if (taskPatch.listId !== undefined) {
+    nextTask.listId = taskPatch.listId ?? null;
+    if (taskPatch.listId) {
+      if (nextTask.list?.id !== taskPatch.listId) {
+        nextTask.list = listById.has(taskPatch.listId)
+          ? { id: taskPatch.listId, name: listById.get(taskPatch.listId)! }
+          : { id: taskPatch.listId, name: 'ÃÂ¡ÃÂ¿ÃÂ¸Ã‘ÂÃÂ¾ÃÂº' };
+      }
+    } else {
+      nextTask.list = null;
+    }
+  }
+
+  return nextTask;
+}
+
+function applySubtaskOperationPatch(task: Task, operation: AiPlanOperation): Task {
+  const nextTask: Task = {
+    ...task,
+    subtasks: task.subtasks.map((subtask) => ({ ...subtask })),
+  };
+
+  if (operation.type === 'DELETE_SUBTASK') {
+    if (!operation.subtaskId) {
+      return nextTask;
+    }
+
+    nextTask.subtasks = nextTask.subtasks.filter((subtask) => subtask.id !== operation.subtaskId);
+    return nextTask;
+  }
+
+  if (operation.type !== 'CREATE_SUBTASK' && operation.type !== 'UPDATE_SUBTASK') {
+    return nextTask;
+  }
+
+  const subtaskId = resolveSubtaskPreviewId(operation);
+  const patch = operation.subtask ?? {};
+  const existingIndex = nextTask.subtasks.findIndex((subtask) => subtask.id === subtaskId);
+
+  if (existingIndex >= 0) {
+    const existing = nextTask.subtasks[existingIndex];
+    nextTask.subtasks[existingIndex] = {
+      ...existing,
+      title: patch.title ?? existing.title,
+      status: patch.status ?? existing.status,
+    };
+    return nextTask;
+  }
+
+  const fallbackTitle = patch.title ?? `ÃÅ¸ÃÂ¾ÃÂ´ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡ÃÂ° ${subtaskId.slice(0, 8)}`;
+  const fallbackStatus = patch.status ?? 'TODO';
+  const fallbackCreatedAt = '1970-01-01T00:00:00.000Z';
+  const createdSubtask: Subtask = {
+    id: subtaskId,
+    taskId: nextTask.id,
+    title: fallbackTitle,
+    status: fallbackStatus,
+    createdAt: fallbackCreatedAt,
+  };
+
+  nextTask.subtasks.push(createdSubtask);
+  return nextTask;
 }
 
 export function AiProposalCard({
@@ -69,92 +221,277 @@ export function AiProposalCard({
   status,
   busyLabel,
   executionCount,
-  canUndo,
+  tasks,
+  availableLists,
   onApprove,
-  onReject,
   onRevise,
   onUndo,
 }: AiProposalCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useState(() => buildMarkdown(proposal));
-  const statusText = useMemo(() => statusLabel(status), [status]);
+  const [draftOperations, setDraftOperations] = useState<AiPlanOperation[]>(proposal.operations);
   const isBusy = Boolean(busyLabel);
-  const isTerminal = status === 'EXECUTED' || status === 'UNDONE' || status === 'REJECTED';
+  const isExecuted = status === 'EXECUTED';
+  const isUndone = status === 'UNDONE';
+
+  useEffect(() => {
+    setDraftOperations(proposal.operations);
+  }, [proposal.operationId, proposal.operations]);
+
+  const tasksById = useMemo(
+    () => new Map((tasks ?? []).map((task) => [task.id, task])),
+    [tasks],
+  );
+
+  const listById = useMemo(
+    () => new Map((availableLists ?? []).map((list) => [list.id, list.name])),
+    [availableLists],
+  );
+
+  const taskPreviewItems = useMemo<TaskPreviewItem[]>(() => {
+    const previewMap = new Map<string, TaskPreviewItem>();
+
+    draftOperations.forEach((operation, index) => {
+      const isTaskOperation = operation.type === 'CREATE_TASK'
+        || operation.type === 'UPDATE_TASK'
+        || operation.type === 'DELETE_TASK';
+      const isSubtaskOperation = operation.type === 'CREATE_SUBTASK'
+        || operation.type === 'UPDATE_SUBTASK'
+        || operation.type === 'DELETE_SUBTASK';
+
+      if (!isTaskOperation && !isSubtaskOperation) {
+        return;
+      }
+
+      let previewKey: string | null = null;
+      if (operation.type === 'CREATE_TASK') {
+        previewKey = `create-task:${operation.key}`;
+      } else if (operation.taskId) {
+        previewKey = `task:${operation.taskId}`;
+      }
+
+      if (!previewKey) {
+        return;
+      }
+
+      let previewItem = previewMap.get(previewKey);
+      if (!previewItem) {
+        const baseTask = operation.type === 'CREATE_TASK' || operation.type === 'UPDATE_TASK'
+          ? buildTaskPreview(operation, tasksById, listById)
+          : buildTaskPreviewFromTaskId(operation.taskId!, tasksById, listById);
+
+        previewItem = {
+          previewKey,
+          operationIndexes: [],
+          operationKeys: [],
+          isDeletePlanned: false,
+          task: baseTask,
+        };
+        previewMap.set(previewKey, previewItem);
+      }
+
+      previewItem.operationIndexes.push(index);
+      previewItem.operationKeys.push(operation.key);
+
+      if (operation.type === 'DELETE_TASK') {
+        previewItem.isDeletePlanned = true;
+      }
+
+      if (isTaskOperation && operation.type !== 'DELETE_TASK') {
+        previewItem.task = applyTaskOperationPatch(previewItem.task, operation.task, listById);
+        if (previewItem.taskOperationIndex === undefined) {
+          previewItem.taskOperationIndex = index;
+        }
+      }
+
+      if (isSubtaskOperation) {
+        previewItem.task = applySubtaskOperationPatch(previewItem.task, operation);
+      }
+    });
+
+    return Array.from(previewMap.values());
+  }, [draftOperations, listById, tasksById]);
+
+  const taskPreviewKeys = useMemo(
+    () => new Set(taskPreviewItems.flatMap((item) => item.operationKeys)),
+    [taskPreviewItems],
+  );
+
+  const additionalOperations = useMemo(
+    () => draftOperations.filter((operation) => !taskPreviewKeys.has(operation.key)),
+    [draftOperations, taskPreviewKeys],
+  );
+
+  const hasStructuredEdits = useMemo(
+    () => JSON.stringify(draftOperations) !== JSON.stringify(proposal.operations),
+    [draftOperations, proposal.operations],
+  );
+
+  function updateTaskPatch(operationIndex: number, updates: TaskPatchUpdates): void {
+    setDraftOperations((current) => current.map((operation, index) => {
+      if (index !== operationIndex) {
+        return operation;
+      }
+
+      if (operation.type !== 'CREATE_TASK' && operation.type !== 'UPDATE_TASK') {
+        return operation;
+      }
+
+      const nextTaskPatch: NonNullable<AiPlanOperation['task']> = { ...(operation.task ?? {}) };
+
+      if (updates.title !== undefined) nextTaskPatch.title = updates.title;
+      if (updates.priority !== undefined) nextTaskPatch.priority = updates.priority;
+      if (updates.status !== undefined) nextTaskPatch.status = updates.status;
+      if (updates.listId !== undefined) nextTaskPatch.listId = updates.listId;
+      if (updates.deadline !== undefined) {
+        if (updates.deadline) {
+          nextTaskPatch.deadline = updates.deadline;
+        } else {
+          delete nextTaskPatch.deadline;
+        }
+      }
+
+      return {
+        ...operation,
+        task: nextTaskPatch,
+      };
+    }));
+  }
+
+  function updateSubtaskOperationPatch(item: TaskPreviewItem, subtaskId: string, patch: { title?: string; status?: TaskStatus }): void {
+    setDraftOperations((current) => current.map((operation, index) => {
+      if (!item.operationIndexes.includes(index)) {
+        return operation;
+      }
+
+      if (operation.type !== 'CREATE_SUBTASK' && operation.type !== 'UPDATE_SUBTASK') {
+        return operation;
+      }
+
+      if (resolveSubtaskPreviewId(operation) !== subtaskId) {
+        return operation;
+      }
+
+      return {
+        ...operation,
+        subtask: {
+          ...(operation.subtask ?? {}),
+          ...(patch.title !== undefined ? { title: patch.title } : {}),
+          ...(patch.status !== undefined ? { status: patch.status } : {}),
+        },
+      };
+    }));
+  }
+
+  function submitRevision(): void {
+    if (isBusy || isExecuted || isUndone) {
+      return;
+    }
+
+    onRevise({
+      revisionPrompt: hasStructuredEdits
+        ? 'ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±ÃÂµÃ‘â‚¬ÃÂ¸ ÃÂ¿ÃÂ»ÃÂ°ÃÂ½ Ã‘Â Ã‘Æ’Ã‘â€¡ÃÂµÃ‘â€šÃÂ¾ÃÂ¼ ÃÂ¿Ã‘â‚¬ÃÂ°ÃÂ²ÃÂ¾ÃÂº ÃÂ¸ÃÂ· UI-ÃÂºÃÂ°Ã‘â‚¬Ã‘â€šÃÂ¾Ã‘â€¡ÃÂµÃÂº ÃÂ·ÃÂ°ÃÂ´ÃÂ°Ã‘â€¡.'
+        : 'ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±ÃÂµÃ‘â‚¬ÃÂ¸ ÃÂ¿ÃÂ»ÃÂ°ÃÂ½ ÃÂ¸ÃÂ·ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¸ÃÂ¹ ÃÂ¸ ÃÂ¿Ã‘â‚¬ÃÂµÃÂ´ÃÂ»ÃÂ¾ÃÂ¶ÃÂ¸ ÃÂ±ÃÂ¾ÃÂ»ÃÂµÃÂµ Ã‘â€šÃÂ¾Ã‘â€¡ÃÂ½Ã‘â€¹ÃÂ¹ ÃÂ²ÃÂ°Ã‘â‚¬ÃÂ¸ÃÂ°ÃÂ½Ã‘â€š.',
+      operations: hasStructuredEdits ? draftOperations : undefined,
+      metadata: hasStructuredEdits ? { source: 'ui_task_preview' } : { source: 'ai_rebuild' },
+    });
+  }
+
+  const canApprove = status === 'PLANNED' && !isBusy;
+  const canRebuild = !isBusy && !isExecuted && !isUndone;
+  const showUndoInPrimarySlot = isExecuted && Boolean(onUndo);
+  const primaryLabel = showUndoInPrimarySlot ? 'Undo' : 'ÃÅ¸Ã‘â‚¬ÃÂ¸ÃÂ½Ã‘ÂÃ‘â€šÃ‘Å’';
+  const primaryDisabled = showUndoInPrimarySlot ? isBusy : !canApprove;
 
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <div>
-          <div className={styles.eyebrow}>AI proposal</div>
-          <h3 className={styles.title}>{proposal.summary}</h3>
-        </div>
-        <span className={`${styles.badge} ${styles[`status${status}`] ?? ''}`}>{busyLabel ?? statusText}</span>
-      </div>
-
-      <p className={styles.message}>{proposal.assistantMessage}</p>
-
-      {executionCount && status === 'EXECUTED' ? (
-        <div className={styles.metaRow}>Изменений применено: {executionCount}</div>
-      ) : null}
-
-      {proposal.warnings.length > 0 ? (
-        <div className={styles.warningBox}>
-          {proposal.warnings.map((warning) => (
-            <p key={warning}>{warning}</p>
-          ))}
-        </div>
-      ) : null}
-
-      {isEditing ? (
-        <textarea
-          className={styles.editor}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          spellCheck={false}
-        />
-      ) : (
-        <div className={styles.operations}>
-          {proposal.operations.map((operation) => (
-            <div key={operation.key} className={styles.operationRow}>
-              <div className={styles.operationTitle}>{formatOperationTitle(operation)}</div>
-              <div className={styles.operationType}>{operation.type}</div>
+    <div className={styles.cleanBlock}>
+      {taskPreviewItems.length > 0 ? (
+        <div className={styles.previewList}>
+          {taskPreviewItems.map((item) => (
+            <div key={item.previewKey}>
+              {item.isDeletePlanned ? (
+                <div className={styles.deleteHint}>{'\u0411\u0443\u0434\u0435\u0442 \u0443\u0434\u0430\u043b\u0435\u043d\u0430'}</div>
+              ) : null}
+              <TaskCard
+                task={item.task}
+                isCompleted={item.task.status === 'DONE'}
+                onToggleCompleted={(_, nextCompleted) => {
+                  if (item.taskOperationIndex === undefined) {
+                    return;
+                  }
+                  updateTaskPatch(item.taskOperationIndex, { status: nextCompleted ? 'DONE' : 'TODO' });
+                }}
+                onUpdateTitle={(_, nextTitle) => {
+                  if (item.taskOperationIndex === undefined) {
+                    return;
+                  }
+                  updateTaskPatch(item.taskOperationIndex, { title: nextTitle });
+                }}
+                onUpdateDeadline={(_, nextDeadline) => {
+                  if (item.taskOperationIndex === undefined) {
+                    return;
+                  }
+                  updateTaskPatch(item.taskOperationIndex, { deadline: nextDeadline });
+                }}
+                onUpdateList={(_, nextListId) => {
+                  if (item.taskOperationIndex === undefined) {
+                    return;
+                  }
+                  updateTaskPatch(item.taskOperationIndex, { listId: nextListId });
+                }}
+                onUpdatePriority={(_, nextPriority) => {
+                  if (item.taskOperationIndex === undefined) {
+                    return;
+                  }
+                  updateTaskPatch(item.taskOperationIndex, { priority: nextPriority });
+                }}
+                onCreateSubtask={() => undefined}
+                onUpdateSubtask={(_, subtaskId, patch) => {
+                  updateSubtaskOperationPatch(item, subtaskId, patch);
+                }}
+                availableLists={availableLists}
+                showActionMenu={false}
+                showAddSubtaskButton={false}
+                clickToOpenAssistant={false}
+                forceSubtasksOpen
+              />
             </div>
           ))}
-          {proposal.operations.length === 0 ? <div className={styles.emptyState}>AI не предложил изменений.</div> : null}
         </div>
-      )}
+      ) : null}
+
+      {additionalOperations.length > 0 ? (
+        <div className={styles.operationList}>
+          {additionalOperations.map((operation) => (
+            <div key={operation.key} className={styles.operationItem}>
+              <span>{formatOperationTitle(operation)}</span>
+              <span className={styles.operationType}>{operation.type}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {executionCount && isExecuted ? (
+        <div className={styles.metaRow}>ÃÅ¸Ã‘â‚¬ÃÂ¸ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¾ ÃÂ¸ÃÂ·ÃÂ¼ÃÂµÃÂ½ÃÂµÃÂ½ÃÂ¸ÃÂ¹: {executionCount}</div>
+      ) : null}
+
+      {busyLabel ? <div className={styles.busyLabel}>{busyLabel}</div> : null}
 
       <div className={styles.actions}>
         <button
           type="button"
           className={styles.secondaryButton}
-          onClick={() => {
-            if (isEditing) {
-              onRevise(draft);
-            }
-            setIsEditing((current) => !current);
-          }}
-          disabled={isBusy || status === 'EXECUTED' || status === 'UNDONE'}
+          onClick={submitRevision}
+          disabled={!canRebuild}
         >
-          {isEditing ? 'Обновить план' : 'Править в MD'}
+          ÃÅ¸ÃÂµÃ‘â‚¬ÃÂµÃ‘ÂÃÂ¾ÃÂ±Ã‘â‚¬ÃÂ°Ã‘â€šÃ‘Å’
         </button>
-
-        {!isTerminal ? (
-          <>
-            <button type="button" className={styles.ghostButton} onClick={onReject} disabled={isBusy}>
-              Отклонить
-            </button>
-            <button type="button" className={styles.primaryButton} onClick={onApprove} disabled={isBusy}>
-              Одобрить и применить
-            </button>
-          </>
-        ) : null}
-
-        {status === 'EXECUTED' && canUndo && onUndo ? (
-          <button type="button" className={styles.ghostButton} onClick={onUndo} disabled={isBusy}>
-            Undo
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className={styles.acceptButton}
+          onClick={showUndoInPrimarySlot ? onUndo : onApprove}
+          disabled={primaryDisabled}
+        >
+          {primaryLabel}
+        </button>
       </div>
     </div>
   );

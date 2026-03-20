@@ -1,3 +1,9 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .bar {
   display: flex;
   align-items: center;
@@ -21,6 +27,11 @@
 
 .secondary:hover {
   background: rgba(255, 255, 255, 0.80);
+}
+
+.secondary:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
 }
 
 .secondaryIcon {
@@ -47,9 +58,21 @@
   opacity: 0.85;
 }
 
+.primary:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
 .primaryIcon {
   width: 14px;
   height: 14px;
   display: block;
   object-fit: contain;
+}
+
+.errorText {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: #b42318;
 }

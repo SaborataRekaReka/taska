@@ -10,8 +10,16 @@
   cursor: pointer;
 }
 
+.cardStatic {
+  cursor: default;
+}
+
 .card:hover {
   background: var(--card-bg-hover);
+}
+
+.cardStatic:hover {
+  background: var(--card-bg);
 }
 
 .card:focus-visible {
@@ -49,6 +57,8 @@
     background 0.18s ease;
   background: transparent;
   cursor: pointer;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .checkbox:hover {
@@ -234,6 +244,8 @@
   margin-top: 2px;
   background: transparent;
   cursor: pointer;
+  z-index: 2;
+  pointer-events: auto;
   transition:
     border-color 0.18s ease,
     background 0.18s ease;

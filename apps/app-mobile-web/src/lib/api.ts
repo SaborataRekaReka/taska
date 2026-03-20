@@ -1,6 +1,30 @@
 import { useAuthStore } from '../stores/auth';
 
-const BASE = '';
+const DEFAULT_LOCAL_API_URL = 'http://localhost:3000';
+
+function normalizeApiBase(value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    const isLocalDevHost = typeof window !== 'undefined'
+      && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+    if (isLocalDevHost) {
+      return DEFAULT_LOCAL_API_URL;
+    }
+    return '';
+  }
+
+  return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+}
+
+const BASE = normalizeApiBase(
+  import.meta.env.VITE_API_URL
+  ?? import.meta.env.EXPO_PUBLIC_API_URL,
+);
+
+function withBase(path: string): string {
+  return BASE ? `${BASE}${path}` : path;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = useAuthStore.getState().accessToken;
@@ -14,13 +38,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
+  const res = await fetch(withBase(path), { ...init, headers });
 
   if (res.status === 401 && token) {
     const refreshed = await tryRefresh();
     if (refreshed) {
       headers.Authorization = `Bearer ${useAuthStore.getState().accessToken}`;
-      const retry = await fetch(`${BASE}${path}`, { ...init, headers });
+      const retry = await fetch(withBase(path), { ...init, headers });
       return handleResponse<T>(retry);
     }
     useAuthStore.getState().logout();
@@ -47,7 +71,7 @@ async function tryRefresh(): Promise<boolean> {
   const { refreshToken, setTokens } = useAuthStore.getState();
   if (!refreshToken) return false;
   try {
-    const res = await fetch(`${BASE}/auth/refresh`, {
+    const res = await fetch(withBase('/auth/refresh'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -62,8 +86,8 @@ async function tryRefresh(): Promise<boolean> {
 }
 
 export function getGoogleAuthStartUrl(): string {
-  const callbackUrl = `${window.location.origin}/auth/google/callback`;
-  return `/auth/google/start?returnTo=${encodeURIComponent(callbackUrl)}`;
+  const callbackUrl = `${window.location.origin}/oauth/google/callback`;
+  return `${withBase('/auth/google/start')}?returnTo=${encodeURIComponent(callbackUrl)}`;
 }
 
 export class ApiError extends Error {

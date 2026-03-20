@@ -8,7 +8,7 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GOOGLE_USERINFO_URL = 'https://openidconnect.googleapis.com/v1/userinfo';
 const DEFAULT_SCOPES = ['openid', 'email', 'profile'];
 const DEFAULT_LOCAL_CALLBACK = 'http://localhost:3000/auth/google/callback';
-const DEFAULT_FRONTEND_CALLBACK = 'http://localhost:5173/auth/google/callback';
+const DEFAULT_FRONTEND_CALLBACK = 'http://localhost:5173/oauth/google/callback';
 
 @Injectable()
 export class GoogleOAuthService {

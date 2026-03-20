@@ -1,180 +1,92 @@
-.card {
+.cleanBlock {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(18, 18, 18, 0.08);
-  border-radius: 24px;
-  padding: 18px;
-  box-shadow: 0 10px 24px rgba(25, 22, 40, 0.08);
+  gap: 10px;
+  width: 100%;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.eyebrow {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.title {
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.2;
-}
-
-.badge {
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  background: rgba(17, 17, 17, 0.08);
-  color: var(--text-primary);
-}
-
-.statusPLANNED,
-.statusDRAFT {
-  background: rgba(70, 104, 247, 0.12);
-  color: #3450d4;
-}
-
-.statusCONFIRMED {
-  background: rgba(255, 176, 0, 0.18);
-  color: #936100;
-}
-
-.statusEXECUTED {
-  background: rgba(38, 191, 108, 0.16);
-  color: #1f7b50;
-}
-
-.statusUNDONE,
-.statusREJECTED,
-.statusFAILED {
-  background: rgba(214, 69, 69, 0.16);
-  color: #a23333;
-}
-
-.message {
-  margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.45;
-}
-
-.metaRow {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.warningBox {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255, 184, 0, 0.12);
-  color: #855b00;
-  font-size: 13px;
-}
-
-.warningBox p {
-  margin: 0;
-}
-
-.operations {
+.previewList {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.operationRow {
+.deleteHint {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b42318;
+}
+
+.operationList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.operationItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(250, 250, 252, 0.9);
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.58);
   border: 1px solid rgba(18, 18, 18, 0.06);
-}
-
-.operationTitle {
-  font-size: 14px;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  font-size: 13px;
 }
 
 .operationType {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--text-muted);
   letter-spacing: 0.08em;
-}
-
-.emptyState {
-  font-size: 14px;
+  text-transform: uppercase;
   color: var(--text-muted);
-  padding: 12px 4px 0;
+  white-space: nowrap;
 }
 
-.editor {
-  min-height: 220px;
-  width: 100%;
-  resize: vertical;
-  border-radius: 20px;
-  border: 1px solid rgba(18, 18, 18, 0.08);
-  background: rgba(252, 252, 255, 0.92);
-  padding: 16px 18px;
-  font-size: 14px;
-  line-height: 1.45;
-  font-family: var(--font);
-  color: var(--text-primary);
+.metaRow {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.busyLabel {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 2px;
 }
 
-.primaryButton,
 .secondaryButton,
-.ghostButton {
-  min-height: 40px;
-  padding: 0 16px;
+.acceptButton {
+  min-height: 34px;
   border-radius: 999px;
+  padding: 0 14px;
   font-size: 14px;
   font-weight: 600;
-  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
-}
-
-.primaryButton {
-  background: #111111;
-  color: white;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .secondaryButton {
-  background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(18, 18, 18, 0.1);
+  background: rgba(255, 255, 255, 0.78);
   color: var(--text-primary);
 }
 
-.ghostButton {
-  background: rgba(17, 17, 17, 0.05);
-  color: var(--text-secondary);
+.acceptButton {
+  border: 1px solid rgba(22, 142, 84, 0.34);
+  background: rgba(41, 194, 117, 0.16);
+  color: #11834f;
 }
 
-.primaryButton:disabled,
 .secondaryButton:disabled,
-.ghostButton:disabled {
-  opacity: 0.55;
+.acceptButton:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }

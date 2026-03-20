@@ -127,12 +127,25 @@
   opacity: 0.9;
 }
 
+.primaryAction:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
 .primaryActionIcon {
   width: 16px;
   height: 16px;
   object-fit: contain;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
+}
+
+.errorText {
+  margin: -18px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: #b42318;
 }
 
 .rightColumn {

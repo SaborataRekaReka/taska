@@ -42,6 +42,13 @@ export function useTasks() {
   });
 }
 
+export function useAllTasks() {
+  return useQuery({
+    queryKey: ['tasks', 'all'],
+    queryFn: () => api.get<Task[]>('/tasks'),
+  });
+}
+
 export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({
@@ -186,8 +193,22 @@ export function useCreateAiPlan() {
 
 export function useReviseAiPlan() {
   return useMutation({
-    mutationFn: ({ operationId, revisionPrompt }: { operationId: string; revisionPrompt: string }) =>
-      api.post<AiPlanResponse>(`/ai/operations/${operationId}/revise`, { revisionPrompt }),
+    mutationFn: ({
+      operationId,
+      revisionPrompt,
+      operations,
+      metadata,
+    }: {
+      operationId: string;
+      revisionPrompt: string;
+      operations?: AiPlanResponse['operations'];
+      metadata?: Record<string, unknown>;
+    }) =>
+      api.post<AiPlanResponse>(`/ai/operations/${operationId}/revise`, {
+        revisionPrompt,
+        operations,
+        metadata,
+      }),
   });
 }
 
