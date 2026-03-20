@@ -5,6 +5,7 @@ import { DayProfileRadar } from './DayProfileRadar';
 import { EnergyBars } from './EnergyBars';
 import { MoodSelector } from './MoodSelector';
 import { GradientBlob } from '../GradientBackground';
+import { AiProcessIndicator } from '../AiProcessIndicator';
 import { computeDayProfile } from './computeDayProfile';
 import { profileToColors, energyToSpread } from '../../lib/profileColors';
 import { useUiStore } from '../../stores/ui';
@@ -233,6 +234,9 @@ export function MyDayModal({
                   <img src={aiStarsIcon} alt="" className={styles.primaryActionIcon} />
                 </button>
               </div>
+              {isCreating ? (
+                <AiProcessIndicator label="AI собирает мой день..." tone="soft" />
+              ) : null}
               {createError ? (
                 <p className={styles.errorText}>{createError}</p>
               ) : null}

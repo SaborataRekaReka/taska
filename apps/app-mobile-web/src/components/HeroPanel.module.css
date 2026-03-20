@@ -176,6 +176,11 @@
   opacity: 0.92;
 }
 
+.sendBtn:disabled {
+  opacity: 0.56;
+  cursor: wait;
+}
+
 .sendIcon {
   width: 16px;
   height: 16px;
