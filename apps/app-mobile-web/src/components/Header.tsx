@@ -27,6 +27,8 @@ export function Header() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const openMyDayModal = useUiStore((s) => s.openMyDayModal);
+  const theme = useUiStore((s) => s.theme);
+  const toggleTheme = useUiStore((s) => s.toggleTheme);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isAvatarBroken, setIsAvatarBroken] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +98,23 @@ export function Header() {
           <img src={aiStarsIcon} alt="" className={styles.sparkle} />
         </button>
         <div className={styles.right}>
+          <button
+            type="button"
+            className={styles.themeToggle}
+            onClick={toggleTheme}
+            aria-pressed={theme === 'quanta-night'}
+            aria-label={theme === 'quanta-night' ? 'Switch to default theme' : 'Switch to Quanta night theme'}
+            title={theme === 'quanta-night' ? 'Default theme' : 'Quanta night theme'}
+          >
+            <span className={styles.themeToggleTrack}>
+              <span className={styles.themeToggleLabel}>Light</span>
+              <span className={styles.themeToggleLabel}>Quanta</span>
+              <span
+                className={`${styles.themeToggleThumb} ${theme === 'quanta-night' ? styles.themeToggleThumbActive : ''}`}
+                aria-hidden
+              />
+            </span>
+          </button>
           {user ? (
             <div ref={accountMenuRef} className={styles.accountMenuRoot}>
               <button

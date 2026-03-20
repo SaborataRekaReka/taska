@@ -54,6 +54,58 @@
   display: flex;
   align-items: center;
   justify-self: end;
+  gap: 14px;
+}
+
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.themeToggleTrack {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 4px;
+  min-width: 124px;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--theme-toggle-border);
+  background: var(--theme-toggle-bg);
+  box-shadow: var(--theme-toggle-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.themeToggleLabel {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 7px 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--theme-toggle-label);
+  transition: color var(--dur-180) var(--ease-out-expo);
+}
+
+.themeToggleThumb {
+  position: absolute;
+  inset: 4px auto 4px 4px;
+  width: calc(50% - 6px);
+  border-radius: 9999px;
+  background: var(--theme-toggle-thumb-bg);
+  border: 1px solid var(--theme-toggle-thumb-border);
+  box-shadow: var(--theme-toggle-thumb-shadow);
+  transition:
+    transform var(--dur-240) var(--ease-out-expo),
+    background var(--dur-180) var(--ease-standard),
+    border-color var(--dur-180) var(--ease-standard);
+}
+
+.themeToggleThumbActive {
+  transform: translateX(100%);
 }
 
 .accountMenuRoot {
@@ -67,16 +119,21 @@
   padding: 6px 8px 6px 12px;
   border-radius: 9999px;
   border: none;
-  background: transparent;
-  transition: background-color 0.18s ease;
+  background: var(--header-account-bg);
+  box-shadow: var(--header-account-shadow);
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
 .accountTrigger:hover {
-  background: transparent;
+  background: var(--header-account-hover-bg);
+  box-shadow: var(--header-account-hover-shadow);
 }
 
 .accountTriggerActive {
-  background: transparent;
+  background: var(--header-account-hover-bg);
 }
 
 .profileMeta {
@@ -158,6 +215,23 @@
   gap: 2px;
   z-index: 50;
   animation: menuIn 0.16s ease;
+}
+
+@media (max-width: 960px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .left,
+  .right,
+  .dayButton {
+    justify-self: stretch;
+  }
+
+  .right {
+    justify-content: space-between;
+  }
 }
 
 .accountMenuItem {

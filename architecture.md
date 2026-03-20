@@ -68,6 +68,7 @@
 ### Frontend UX-срез (актуально)
 - Pixel-perfect desktop layout (base 1440), собственные дизайн-токены и градиентный фон.
 - Hero panel с анимированным сворачиванием/раскрытием, локальной AI chat-лентой и proposal cards safe-mode c task-preview в UI карточки (редактирование плана без MD).
+- Header theme toggle переключает глобальные CSS-токены между базовой светлой палитрой и альтернативной Quanta-inspired dark palette без изменения компонентных контрактов.
 - Все AI UX-потоки показывают единый lightweight processing indicator ("Думает..."/контекстный статус) во время plan/revise/execute ожидания.
 - Списки и карточки задач с inline-editing текста (задачи/подзадачи).
 - Добавление подзадач через контекстный `+` в карточке, автофокус и Enter-flow.

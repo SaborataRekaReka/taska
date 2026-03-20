@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthLandingPage } from './pages/AuthLandingPage';
@@ -7,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { MainPage } from './pages/MainPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { useAuthStore } from './stores/auth';
+import { useUiStore } from './stores/ui';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,9 +28,21 @@ function GuestGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function ThemeSync() {
+  const theme = useUiStore((s) => s.theme);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('taska-theme', theme);
+  }, [theme]);
+
+  return null;
+}
+
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeSync />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />

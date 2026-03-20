@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 
+const THEME_STORAGE_KEY = 'taska-theme';
+
+function getInitialTheme(): 'default' | 'quanta-night' {
+  if (typeof window === 'undefined') {
+    return 'default';
+  }
+
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return savedTheme === 'quanta-night' ? 'quanta-night' : 'default';
+}
+
 interface UiState {
+  theme: 'default' | 'quanta-night';
   activeListId: string | null;
   isMyDayModalOpen: boolean;
   isMyDaySaved: boolean;
@@ -15,6 +27,8 @@ interface UiState {
   selectedTaskId: string | null;
 
   setDemoState: (state: string) => void;
+  toggleTheme: () => void;
+  setTheme: (theme: 'default' | 'quanta-night') => void;
   setActiveList: (id: string | null) => void;
   setSearch: (q: string) => void;
   setFilterStatus: (s: string | null) => void;
@@ -31,6 +45,7 @@ interface UiState {
 }
 
 export const useUiStore = create<UiState>()((set) => ({
+  theme: getInitialTheme(),
   activeListId: null,
   isMyDayModalOpen: false,
   isMyDaySaved: false,
@@ -45,6 +60,11 @@ export const useUiStore = create<UiState>()((set) => ({
   selectedTaskId: null,
 
   setDemoState: () => undefined,
+  toggleTheme: () =>
+    set((state) => ({
+      theme: state.theme === 'default' ? 'quanta-night' : 'default',
+    })),
+  setTheme: (theme) => set({ theme }),
   setActiveList: (id) => set({ activeListId: id }),
   setSearch: (q) => set({ searchQuery: q }),
   setFilterStatus: (s) => set({ filterStatus: s }),
