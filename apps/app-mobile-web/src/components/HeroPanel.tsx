@@ -13,6 +13,7 @@ import type { AiPlanResponse } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import sendIcon from '../assests/send.svg';
 import { AiProposalCard, type AiProposalRevisionPayload } from './AiProposalCard';
+import { AiProcessIndicator } from './AiProcessIndicator';
 import styles from './HeroPanel.module.css';
 
 const CHIPS = [
@@ -52,6 +53,7 @@ export function HeroPanel() {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const collapseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingLabel, setPendingLabel] = useState<string | null>(null);
   const createPlan = useCreateAiPlan();
   const revisePlan = useReviseAiPlan();
   const confirmOperation = useConfirmAiOperation();
@@ -131,7 +133,7 @@ export function HeroPanel() {
 
   async function submitPrompt(): Promise<void> {
     const trimmed = value.trim();
-    if (!trimmed) {
+    if (!trimmed || pendingLabel) {
       return;
     }
 
@@ -139,6 +141,7 @@ export function HeroPanel() {
     setMessages((current) => [...current, { id: userMessageId, role: 'user', content: trimmed }]);
     setValue('');
     setIsExpanded(true);
+    setPendingLabel('AI собирает план...');
 
     try {
       const proposal = await createPlan.mutateAsync({
@@ -168,6 +171,8 @@ export function HeroPanel() {
           status: 'FAILED',
         },
       ]);
+    } finally {
+      setPendingLabel(null);
     }
   }
 
@@ -277,6 +282,11 @@ export function HeroPanel() {
               ) : null}
             </div>
           ))}
+          {pendingLabel ? (
+            <div className={`${styles.messageRow} ${styles.assistantRow}`}>
+              <AiProcessIndicator label={pendingLabel} />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -286,6 +296,7 @@ export function HeroPanel() {
           className={styles.input}
           placeholder="Что бы вы хотели сделать?"
           value={value}
+          disabled={Boolean(pendingLabel)}
           onChange={(e) => setValue(e.target.value)}
           onFocus={() => setIsExpanded(true)}
           onKeyDown={(event) => {
@@ -302,6 +313,7 @@ export function HeroPanel() {
           aria-label="Отправить"
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => void submitPrompt()}
+          disabled={Boolean(pendingLabel)}
         >
           <img src={sendIcon} alt="" className={styles.sendIcon} />
         </button>

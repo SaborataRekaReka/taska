@@ -15,6 +15,7 @@ import { useUiStore } from '../stores/ui';
 import { TaskCard } from './TaskCard';
 import { AiProposalCard, type AiProposalRevisionPayload } from './AiProposalCard';
 import { AiToolChips } from './AiToolChips';
+import { AiProcessIndicator } from './AiProcessIndicator';
 import sendIcon from '../assests/send.svg';
 import styles from './EditTaskModal.module.css';
 
@@ -100,6 +101,7 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
   const [autosaveState, setAutosaveState] = useState<AutosaveState>('idle');
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [pendingLabel, setPendingLabel] = useState<string | null>(null);
   const taskForView = selectedTask ?? cachedTask;
   const availableTaskLists = useMemo(
     () => lists.map((list) => ({ id: list.id, name: list.name, isDefault: list.isDefault })),
@@ -204,12 +206,13 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
 
   async function submitAssistantPrompt(): Promise<void> {
     const trimmed = assistantPrompt.trim();
-    if (!trimmed || !taskForView) {
+    if (!trimmed || !taskForView || pendingLabel) {
       return;
     }
 
     setMessages((current) => [...current, { id: nextMessageId('task-user'), role: 'user', content: trimmed }]);
     setAssistantPrompt('');
+    setPendingLabel('AI анализирует задачу...');
 
     try {
       const taskContext = [
@@ -242,6 +245,8 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
         ...current,
         { id: nextMessageId('task-error'), role: 'assistant', content: message, status: 'FAILED' },
       ]);
+    } finally {
+      setPendingLabel(null);
     }
   }
 
@@ -433,6 +438,11 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                         ) : null}
                       </div>
                     ))}
+                    {pendingLabel ? (
+                      <div className={`${styles.chatRow} ${styles.chatRowAssistant}`}>
+                        <AiProcessIndicator label={pendingLabel} tone="soft" />
+                      </div>
+                    ) : null}
                   </div>
                 </aside>
               </div>
@@ -445,6 +455,7 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                   className={styles.inputField}
                   placeholder="Что бы вы хотели сделать?"
                   value={assistantPrompt}
+                  disabled={Boolean(pendingLabel)}
                   onChange={(e) => setAssistantPrompt(e.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
@@ -453,7 +464,13 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                     }
                   }}
                 />
-                <button className={styles.sendBtn} type="button" aria-label="Send" onClick={() => void submitAssistantPrompt()}>
+                <button
+                  className={styles.sendBtn}
+                  type="button"
+                  aria-label="Send"
+                  onClick={() => void submitAssistantPrompt()}
+                  disabled={Boolean(pendingLabel)}
+                >
                   <img src={sendIcon} alt="" className={styles.sendIcon} />
                 </button>
               </div>
