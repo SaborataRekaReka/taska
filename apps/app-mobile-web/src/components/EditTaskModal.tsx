@@ -290,13 +290,6 @@ export function EditTaskModal({ isOpen }: EditTaskModalProps) {
                   </div>
                 </div>
 
-                {messages.length === 0 ? (
-                  <div className={`${styles.messageRow} ${styles.assistantRow}`}>
-                    <div className={`${styles.messageBubble} ${styles.assistantBubble}`}>
-                      <p>Спроси AI про эту задачу: разбить на подзадачи, уточнить формулировку или предложить безопасный план изменений.</p>
-                    </div>
-                  </div>
-                ) : null}
 
                 {messages.map((message) => (
                   <div key={message.id} className={`${styles.messageRow} ${message.role === 'user' ? styles.userRow : styles.assistantRow}`}>

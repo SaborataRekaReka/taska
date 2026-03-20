@@ -9,16 +9,16 @@
   height: 33px;
   border-radius: 999px;
   border: 1px solid transparent;
-  background: #d9d9d9;
+  background: var(--gray-mood-300);
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .circle:hover {
   transform: translateY(-1px) scale(1.02);
-  background: #cfcfcf;
+  background: var(--gray-mood-400);
 }
 
 .active {
-  background: #bdbdbd;
-  box-shadow: 0 0 0 1px rgba(65, 70, 81, 0.2);
+  background: var(--gray-mood-500);
+  box-shadow: 0 0 0 1px var(--ring-slate-label);
 }

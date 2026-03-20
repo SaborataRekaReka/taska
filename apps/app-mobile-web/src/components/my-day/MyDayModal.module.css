@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 320;
-  background: rgba(15, 23, 42, 0.22);
+  background: var(--overlay-scrim-slate);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
@@ -15,8 +15,8 @@
   min-height: 703px;
   max-height: calc(100vh - 20px);
   border-radius: 33px;
-  border: 1px solid rgba(24, 29, 39, 0.05);
-  background: #ffffff;
+  border: 1px solid var(--ui-line-06);
+  background: var(--solid-white);
   backdrop-filter: blur(16.35px);
   overflow: hidden;
   position: relative;
@@ -31,15 +31,15 @@
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  color: #181d27;
+  color: var(--ui-fg-strong);
   border: 1px solid transparent;
   transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   z-index: 3;
 }
 
 .closeBtn:hover {
-  background: rgba(243, 244, 246, 0.7);
-  border-color: rgba(24, 29, 39, 0.08);
+  background: var(--surface-gray-hover);
+  border-color: var(--ui-line-08);
   opacity: 0.85;
 }
 
@@ -62,7 +62,7 @@
   font-weight: 400;
   font-size: 36px;
   line-height: 24px;
-  color: #000000;
+  color: var(--text-primary);
 }
 
 .date {
@@ -71,7 +71,7 @@
   font-weight: 100;
   font-size: 32px;
   line-height: 24px;
-  color: rgba(0, 0, 0, 0.62);
+  color: var(--text-secondary);
 }
 
 .section {
@@ -86,7 +86,7 @@
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
-  color: #414651;
+  color: var(--text-slate-label);
 }
 
 .sectionSubtitle {
@@ -95,7 +95,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  color: #535862;
+  color: var(--text-slate-caption);
 }
 
 .actionsRow {
@@ -113,8 +113,8 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #121212;
-  color: #ffffff;
+  background: var(--ink-121212);
+  color: var(--btn-white);
   font-family: 'Inter', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -145,7 +145,7 @@
   font-family: 'Inter', sans-serif;
   font-size: 13px;
   line-height: 18px;
-  color: #b42318;
+  color: var(--semantic-danger);
 }
 
 .rightColumn {
@@ -155,7 +155,7 @@
   justify-content: center;
   align-items: center;
   padding: 54px 44px 42px;
-  background: #fff;
+  background: var(--solid-white);
 }
 
 .glowPrimary {

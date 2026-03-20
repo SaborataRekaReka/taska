@@ -59,6 +59,7 @@
 - **ai-assistant**: safe-mode foundation — `/ai/plan`, `/ai/operations/:id`, `/confirm`, `/execute`, `/undo`, `/revise`, OpenAI-backed structured planning
 
 ### Frontend (apps/app-mobile-web) — React + Vite
+- **Design tokens**: палитра, glass, градиенты, семантика, z-index, motion — в `src/styles/global.css`; обзор и правила — `src/styles/DESIGN_TOKENS.md`. В CSS-модулях только `var(--token)`.
 - **Auth**: Landing/Login/Register/Google callback pages с auth guard routing
 - **Main layout**: Header, AI Prompt bar, ListTabs, Search + Filter toolbar
 - **TaskList + TaskCard**: полный рендер задач с subtasks, meta, priority icons
@@ -113,7 +114,7 @@ TASKA 2.0/
 │       │   ├── lib/            # API client, types
 │       │   ├── pages/          # LoginPage, RegisterPage, MainPage
 │       │   ├── stores/         # Zustand stores (auth, ui)
-│       │   └── styles/         # Global CSS
+│       │   └── styles/         # global.css (токены), DESIGN_TOKENS.md
 │       └── index.html          # Entry point
 ├── packages/
 │   ├── types/                  # Shared TS типы: TaskDto, TaskPriority, TaskStatus
@@ -266,6 +267,7 @@ curl http://localhost:3000/openapi.json
 - TypeScript strict, no-any
 - ESM imports (`.js` расширения в TypeScript import paths)
 - Encoding policy: all text/code files must be UTF-8. For PowerShell file writes, never use `Set-Content` without explicit `-Encoding utf8`.
+- Перед коммитом/пушем обязательно запускать `pnpm run check:encoding` (ловит типичные маркеры битой кодировки).
 - Маленькие функции с говорящими именами
 - DTO через `class-validator` на backend
 - Без try/catch вокруг import

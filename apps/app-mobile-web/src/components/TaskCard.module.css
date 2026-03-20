@@ -23,7 +23,7 @@
 }
 
 .card:focus-visible {
-  outline: 2px solid rgba(15, 15, 15, 0.32);
+  outline: 2px solid var(--focus-outline-ink);
   outline-offset: 2px;
 }
 
@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1.5px solid rgba(20, 20, 20, 0.15);
+  border: 1.5px solid var(--border-strong);
   background: transparent;
   pointer-events: none;
   transition:
@@ -80,19 +80,19 @@
 }
 
 .checkboxShell:hover .checkboxFace {
-  border-color: rgba(20, 20, 20, 0.35);
+  border-color: var(--border-strong-hover);
 }
 
 .checkboxFaceChecked {
-  border-color: #111111;
-  background: #111111;
+  border-color: var(--btn-black);
+  background: var(--btn-black);
 }
 
 .checkboxTick {
   width: 6px;
   height: 10px;
-  border-right: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
+  border-right: 2px solid var(--btn-white);
+  border-bottom: 2px solid var(--btn-white);
   transform: rotate(45deg) translate(-1px, -1px) scale(0.6);
   opacity: 0;
   transition:
@@ -144,7 +144,7 @@
 
 .metaToggle:hover {
   background: transparent;
-  color: #000000;
+  color: var(--text-primary);
 }
 
 .metaToggle:hover .metaIcon {
@@ -276,7 +276,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1.5px solid rgba(20, 20, 20, 0.12);
+  border: 1.5px solid var(--border-subtle);
   background: transparent;
   pointer-events: none;
   transition:
@@ -285,19 +285,19 @@
 }
 
 .subCheckboxShell:hover .subCheckboxFace {
-  border-color: rgba(20, 20, 20, 0.28);
+  border-color: var(--border-subtle-hover);
 }
 
 .subCheckboxFaceChecked {
-  border-color: #111111;
-  background: #111111;
+  border-color: var(--btn-black);
+  background: var(--btn-black);
 }
 
 .subCheckboxTick {
   width: 6px;
   height: 10px;
-  border-right: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
+  border-right: 2px solid var(--btn-white);
+  border-bottom: 2px solid var(--btn-white);
   transform: rotate(45deg) translate(-1px, -1px) scale(0.6);
   opacity: 0;
   transition:
@@ -354,7 +354,7 @@
   justify-content: center;
   position: absolute;
   top: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ui-shadow-btn);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease;

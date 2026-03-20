@@ -14,13 +14,13 @@
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--panel-bg);
   transition: background 0.15s;
   white-space: nowrap;
 }
 
 .chip:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--glass-80);
 }
 
 .dot {

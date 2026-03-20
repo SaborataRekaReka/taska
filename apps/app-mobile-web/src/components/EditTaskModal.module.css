@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(240, 238, 248, 0.65);
+  background: var(--overlay-scrim-ink);
   backdrop-filter: blur(16px);
   display: flex;
   align-items: flex-end;
@@ -18,9 +18,9 @@
   flex-direction: column;
   gap: 14px;
   padding: 14px 18px 18px;
-  border: 6px solid rgba(255, 255, 255, 0.36);
+  border: none;
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--auth-input-bg);
   box-sizing: border-box;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -41,7 +41,7 @@
 }
 
 .closeBtn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--interactive-hover-ink);
 }
 
 .body {
@@ -85,14 +85,14 @@
 }
 
 .userBubble {
-  background: #121212;
-  color: #fff;
+  background: var(--ink-121212);
+  color: var(--btn-white);
 }
 
 .assistantBubble {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass-78);
   color: var(--text-primary);
-  border: 1px solid rgba(18, 18, 18, 0.06);
+  border: 1px solid var(--hero-bubble-assistant-border);
 }
 
 .taskCardWrap {
@@ -114,7 +114,7 @@
   min-height: 56px;
   padding: 8px 8px 8px 16px;
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--solid-white);
 }
 
 .input {
@@ -126,7 +126,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #1b1b1b;
+  color: var(--text-hero-input);
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
@@ -145,7 +145,7 @@
 }
 
 .input::placeholder {
-  color: #62646a;
+  color: var(--text-hero-placeholder);
 }
 
 .input:disabled {
@@ -161,8 +161,8 @@
   height: 40px;
   border: none;
   border-radius: 999px;
-  background: #151515;
-  color: #ffffff;
+  background: var(--toggle-track-on);
+  color: var(--btn-white);
   flex-shrink: 0;
   transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
 }

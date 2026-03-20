@@ -7,16 +7,16 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(20, 20, 20, 0.10);
+  background: var(--ink-neutral-10);
   border: 2px solid transparent;
   transition: all 0.15s;
 }
 
 .circle:hover {
-  background: rgba(20, 20, 20, 0.18);
+  background: var(--ink-neutral-18);
 }
 
 .active {
   border-color: var(--btn-black);
-  background: rgba(20, 20, 20, 0.22);
+  background: var(--ink-neutral-22);
 }

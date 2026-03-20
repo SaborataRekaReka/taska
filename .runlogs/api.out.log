@@ -1,0 +1,129 @@
+
+> @taska/api@0.1.0 dev C:\TASKA 2.0\apps\api
+> node --watch --loader ts-node/esm/transpile-only src/main.ts
+
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +20ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHistoryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mListsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTasksModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSubtasksModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAiAssistantModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +84ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/register, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/google/start, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/google/callback, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/me, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/health, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/users}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me/preferences, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me/preferences, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mListsController {/lists}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/reorder, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHistoryController {/history}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/history, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/history/health, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTasksController {/tasks}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSubtasksController {/tasks/:taskId/subtasks}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiAssistantController {/ai}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/plan, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/revise, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/confirm, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/execute, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/undo, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/health, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250544  - [39m20.03.2026, 15:51:35 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +9ms[39m
+[api] listening on :::3000
+[api] health: http://localhost:3000/health
+[api] docs: http://localhost:3000/docs
+[api] openapi: http://localhost:3000/openapi.json
+Restarting 'src/main.ts'
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +16ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHistoryModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mListsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTasksModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSubtasksModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAiAssistantModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +71ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/register, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/google/start, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/google/callback, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/me, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/users}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me/preferences, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/me/preferences, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mListsController {/lists}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/reorder, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/lists/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHistoryController {/history}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/history, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/history/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTasksController {/tasks}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSubtasksController {/tasks/:taskId/subtasks}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/:id, PATCH} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/tasks/:taskId/subtasks/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAiAssistantController {/ai}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/plan, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/revise, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/confirm, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/execute, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/operations/:id/undo, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/ai/health, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 250028  - [39m20.03.2026, 15:51:37 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +12ms[39m
+Failed running 'src/main.ts'
+C:\TASKA 2.0\apps\api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taska/api@0.1.0 dev: `node --watch --loader ts-node/esm/transpile-only src/main.ts`
+Exit status 3221225786

@@ -1,4 +1,4 @@
-﻿.root {
+.root {
   position: relative;
   display: inline-flex;
 }
@@ -27,16 +27,16 @@
 
 .trigger:hover {
   color: var(--text-secondary);
-  background: rgba(17, 17, 17, 0.06);
+  background: var(--menu-item-hover);
 }
 
 .triggerOpen {
   color: var(--text-primary);
-  background: rgba(17, 17, 17, 0.08);
+  background: var(--menu-item-active);
 }
 
 .trigger:focus-visible {
-  outline: 2px solid rgba(17, 17, 17, 0.24);
+  outline: 2px solid var(--menu-focus-ring-strong);
   outline-offset: 2px;
 }
 
@@ -49,10 +49,10 @@
 .menu {
   position: fixed;
   min-width: 144px;
-  background: #ffffff;
-  border: 1px solid rgba(17, 17, 17, 0.07);
+  background: var(--solid-white);
+  border: 1px solid var(--border-ink-07);
   border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.16);
+  box-shadow: var(--shadow-dropdown);
   padding: 4px;
   overflow: hidden;
   z-index: 9999;
@@ -70,13 +70,13 @@
   padding: 8px 10px;
   border-radius: 8px;
   font-size: 14px;
-  color: #3f3f46;
+  color: var(--text-zinc-500-item);
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 
 .item:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--surface-gray-100);
+  color: var(--ui-fg-strong);
 }
 
 .item:disabled {
@@ -102,12 +102,12 @@
 }
 
 .danger {
-  color: #b42318;
+  color: var(--semantic-danger);
 }
 
 .danger:hover:not(:disabled) {
-  color: #912018;
-  background: rgba(180, 35, 24, 0.08);
+  color: var(--semantic-danger-pressed);
+  background: var(--semantic-danger-soft-hover-bg);
 }
 
 @keyframes menuIn {

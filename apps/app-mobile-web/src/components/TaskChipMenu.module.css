@@ -1,4 +1,4 @@
-﻿.root {
+.root {
   position: relative;
   display: inline-flex;
 }
@@ -18,12 +18,12 @@
 }
 
 .trigger:hover {
-  color: #000000;
+  color: var(--text-primary);
 }
 
 .triggerActive {
-  color: #000000;
-  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-primary);
+  background: var(--glass-56);
 }
 
 .icon {
@@ -63,7 +63,7 @@
   min-width: 188px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--glass-94);
   backdrop-filter: blur(16px);
   box-shadow: var(--shadow-elevated);
   padding: 8px;
@@ -87,12 +87,12 @@
 }
 
 .menuItem:hover {
-  background: rgba(17, 17, 17, 0.06);
+  background: var(--menu-item-hover);
   color: var(--text-primary);
 }
 
 .menuItemActive {
-  background: rgba(17, 17, 17, 0.08);
+  background: var(--menu-item-active);
   color: var(--text-primary);
 }
 

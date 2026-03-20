@@ -7,9 +7,9 @@
   min-height: 52px;
   border-radius: 999px;
   padding: 0 16px;
-  background: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
+  background: var(--oauth-google-bg);
+  color: var(--oauth-google-text);
+  border: 1px solid var(--oauth-google-border);
   font-size: 14px;
   font-weight: 500;
   box-shadow: none;
@@ -17,14 +17,14 @@
 }
 
 .button:hover {
-  background: #f8f9fa;
-  border-color: #d2d6dc;
+  background: var(--oauth-google-hover-bg);
+  border-color: var(--oauth-google-hover-border);
 }
 
 .button:focus-visible {
   outline: none;
-  border-color: #c2c7cd;
-  box-shadow: 0 0 0 2px rgba(60, 64, 67, 0.15);
+  border-color: var(--oauth-google-active-border);
+  box-shadow: var(--oauth-google-focus-ring);
 }
 
 .icon {

@@ -5,26 +5,23 @@
   gap: 14px;
   margin: 20px 0 24px;
   padding: 13px 18px 16px;
-  border: 6px solid rgba(255, 255, 255, 0.36);
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: var(--r-hero-panel);
   box-sizing: border-box;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  background: var(--hero-panel-bg);
   transition:
-    box-shadow 0.26s ease,
-    border-color 0.26s ease,
-    background 0.26s ease,
-    padding 0.26s ease;
+    box-shadow var(--dur-260) var(--ease-standard),
+    background var(--dur-260) var(--ease-standard);
 }
 
 .panel:focus-within {
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 18px 45px rgba(21, 21, 21, 0.08);
+  box-shadow: var(--hero-panel-focus-shadow);
 }
 
 .withHistory {
-  padding-bottom: 20px;
+  padding-bottom: 16px;
 }
 
 .topRow {
@@ -39,10 +36,10 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #1b1b1b;
+  color: var(--text-hero-input);
   font-size: 16px;
   line-height: 23px;
-  font-weight: 400;
+  font-weight: var(--font-weight-body);
 }
 
 .toggleTrack {
@@ -52,29 +49,31 @@
   width: 40px;
   height: 20px;
   padding: 2px;
-  border-radius: 999px;
-  background: #151515;
-  transition: background 0.2s ease;
+  border-radius: var(--r-pill);
+  background: var(--toggle-track-on);
+  transition: background var(--dur-200) var(--ease-standard);
 }
 
 .toggleKnob {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--btn-white);
   transform: translateX(20px);
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform var(--dur-200) var(--ease-standard),
+    background var(--dur-200) var(--ease-standard);
 }
 
 .toggleOn {}
 
 .toggleOff .toggleTrack {
-  background: rgba(21, 21, 21, 0.24);
+  background: var(--toggle-track-off);
 }
 
 .toggleOff .toggleKnob {
   transform: translateX(0);
-  background: #151515;
+  background: var(--toggle-track-on);
 }
 
 .toggleLabel {
@@ -93,10 +92,10 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.24s ease,
-    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    margin 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    max-height var(--dur-320) var(--ease-out-expo),
+    opacity var(--dur-240) var(--ease-standard),
+    transform var(--dur-320) var(--ease-out-expo),
+    margin var(--dur-320) var(--ease-out-expo);
 }
 
 .messagesHidden {
@@ -124,7 +123,7 @@
 
 .messageBubble {
   max-width: min(760px, 100%);
-  border-radius: 24px;
+  border-radius: var(--r-message-bubble);
   padding: 12px 16px;
   font-size: 15px;
   line-height: 1.45;
@@ -135,14 +134,14 @@
 }
 
 .userBubble {
-  background: #121212;
-  color: #fff;
+  background: var(--hero-bubble-user-bg);
+  color: var(--btn-white);
 }
 
 .assistantBubble {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass-78);
   color: var(--text-primary);
-  border: 1px solid rgba(18, 18, 18, 0.06);
+  border: 1px solid var(--hero-bubble-assistant-border);
 }
 
 .searchRow {
@@ -151,8 +150,8 @@
   gap: 16px;
   min-height: 48px;
   padding: 4px 4px 4px 16px;
-  border-radius: 11px;
-  background: #ffffff;
+  border-radius: var(--r-hero-search);
+  background: var(--solid-white);
 }
 
 .input {
@@ -164,10 +163,10 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #1b1b1b;
+  color: var(--text-hero-input);
   font-size: 16px;
   line-height: 24px;
-  font-weight: 400;
+  font-weight: var(--font-weight-body);
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -183,7 +182,7 @@
 }
 
 .input::placeholder {
-  color: #62646a;
+  color: var(--text-hero-placeholder);
 }
 
 .input:disabled {
@@ -198,17 +197,20 @@
   width: 40px;
   height: 40px;
   border: none;
-  border-radius: 999px;
-  background: #151515;
-  color: #ffffff;
+  border-radius: var(--r-pill);
+  background: var(--toggle-track-on);
+  color: var(--btn-white);
   flex-shrink: 0;
-  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  transition:
+    transform var(--dur-150) var(--ease-standard),
+    opacity var(--dur-150) var(--ease-standard),
+    background var(--dur-150) var(--ease-standard);
 }
 
 .sendBtnNonAi {
-  background: rgba(255, 255, 255, 0.82);
-  color: #151515;
-  box-shadow: inset 0 0 0 1px rgba(21, 21, 21, 0.14);
+  background: var(--glass-82);
+  color: var(--toggle-track-on);
+  box-shadow: var(--hero-send-inset);
 }
 
 .sendBtn:hover:not(:disabled) {
@@ -229,12 +231,12 @@
   height: 20px;
   display: block;
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    color 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    transform var(--dur-280) var(--ease-out-expo),
+    color var(--dur-280) var(--ease-out-expo);
 }
 
 .sendIconNonAi {
-  color: #151515;
+  color: var(--toggle-track-on);
   transform: rotate(45deg);
 }
 
@@ -247,10 +249,10 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.22s ease,
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    max-height var(--dur-280) var(--ease-out-expo),
+    opacity 220ms var(--ease-standard),
+    transform var(--dur-280) var(--ease-out-expo),
+    margin var(--dur-280) var(--ease-out-expo);
 }
 
 .chipsHidden {
@@ -268,18 +270,21 @@
   min-height: 35px;
   padding: 6px 20px;
   border: none;
-  border-radius: 55px;
-  background: rgba(255, 255, 255, 0.56);
-  color: #000000;
+  border-radius: var(--r-tab-pill);
+  background: var(--glass-56);
+  color: var(--text-primary);
   font-size: 14px;
   line-height: 23px;
-  font-weight: 300;
+  font-weight: var(--font-weight-tab);
   white-space: nowrap;
-  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    background var(--dur-150) var(--ease-standard),
+    transform var(--dur-150) var(--ease-standard),
+    opacity var(--dur-150) var(--ease-standard);
 }
 
 .chip:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass-78);
   transform: translateY(-1px);
 }
 
@@ -291,6 +296,10 @@
 @media (max-width: 1100px) {
   .panel {
     padding: 13px 14px 14px;
+  }
+
+  .withHistory {
+    padding-bottom: 14px;
   }
 
   .searchRow {

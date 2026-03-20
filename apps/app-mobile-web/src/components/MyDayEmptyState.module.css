@@ -40,8 +40,8 @@
   align-items: center;
   gap: 10px;
   border: none;
-  background: #121212;
-  color: #ffffff;
+  background: var(--ink-121212);
+  color: var(--btn-white);
   font-size: 16px;
   font-weight: 400;
   line-height: 23px;

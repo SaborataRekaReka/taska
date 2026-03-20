@@ -30,8 +30,8 @@
   gap: 12px;
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(18, 18, 18, 0.06);
+  background: var(--glass-56);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 13px;
 }
@@ -72,38 +72,38 @@
   border: none;
   cursor: pointer;
   transition:
-    transform 0.15s ease,
-    opacity 0.15s ease,
-    background 0.15s ease;
+    transform var(--dur-150) var(--ease-standard),
+    opacity var(--dur-150) var(--ease-standard),
+    background var(--dur-150) var(--ease-standard);
 }
 
 .softGhost {
-  background: rgba(255, 255, 255, 0.58);
-  color: rgba(27, 27, 27, 0.92);
+  background: var(--glass-56);
+  color: var(--text-primary);
 }
 
 .softGhost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--glass-78);
   transform: translateY(-0.5px);
 }
 
 /* «Вернуть»: белая слегка прозрачная заливка, читаемый тёмный текст */
 .softGhostReturn {
-  background: rgba(255, 255, 255, 0.82);
-  color: rgba(27, 27, 27, 0.88);
+  background: var(--glass-82);
+  color: var(--text-primary);
 }
 
 .softGhostReturn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--glass-94);
 }
 
 .actionAccept {
-  background: rgba(41, 194, 117, 0.22);
-  color: #0d6e42;
+  background: var(--semantic-success-bg);
+  color: var(--semantic-success-fg);
 }
 
 .actionAccept:hover:not(:disabled) {
-  background: rgba(41, 194, 117, 0.3);
+  background: var(--semantic-success-bg-hover);
   transform: translateY(-0.5px);
 }
 

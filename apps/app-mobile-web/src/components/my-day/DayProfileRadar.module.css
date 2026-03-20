@@ -28,18 +28,18 @@
 
 .grid {
   fill: none;
-  stroke: #f1f1f1;
+  stroke: var(--radar-grid-stroke);
   stroke-opacity: 0.36;
   stroke-width: 0.85;
 }
 
 .dataFill {
-  fill: rgba(255, 255, 255, 0.14);
+  fill: var(--radar-fill);
 }
 
 .dataStroke {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.9);
+  stroke: var(--radar-stroke);
   stroke-width: 1.1;
 }
 
@@ -50,7 +50,7 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .topLabel {
@@ -83,7 +83,7 @@
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--on-accent-muted);
   text-align: center;
   max-width: 320px;
 }

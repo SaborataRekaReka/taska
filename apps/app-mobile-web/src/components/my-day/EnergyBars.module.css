@@ -8,15 +8,15 @@
   width: 4px;
   height: 25.82px;
   border-radius: 999px;
-  background: #e5e5e5;
+  background: var(--gray-energy-track);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .bar:hover {
   transform: translateY(-1px);
-  background: #d2d2d2;
+  background: var(--gray-energy-hover);
 }
 
 .filled {
-  background: #b6b6b6;
+  background: var(--gray-energy-filled);
 }

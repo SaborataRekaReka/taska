@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(240, 238, 248, 0.55);
+  background: var(--overlay-scrim-lavender);
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
@@ -11,7 +11,7 @@
 }
 
 .modal {
-  background: rgba(255, 255, 255, 0.80);
+  background: var(--glass-80);
   border: 1px solid var(--border);
   border-radius: var(--r-huge);
   width: 100%;
@@ -35,7 +35,7 @@
 }
 
 .closeBtn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--interactive-hover-ink);
 }
 
 .left {
@@ -95,12 +95,12 @@
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--panel-bg);
   transition: background 0.15s;
 }
 
 .wishChip:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--glass-80);
 }
 
 .wishAdd {
@@ -166,9 +166,5 @@
 .bloom {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 40%, rgba(140, 120, 230, 0.30) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 60% at 30% 60%, rgba(100, 160, 240, 0.20) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 50% at 70% 30%, rgba(180, 140, 220, 0.15) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(200, 185, 240, 0.25) 0%, rgba(150, 190, 240, 0.20) 50%, rgba(180, 160, 230, 0.15) 100%);
+  background: var(--gradient-balance-bloom);
 }

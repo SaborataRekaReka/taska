@@ -21,12 +21,12 @@
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--glass-56);
   transition: background 0.15s;
 }
 
 .secondary:hover {
-  background: rgba(255, 255, 255, 0.80);
+  background: var(--glass-80);
 }
 
 .secondary:disabled {
@@ -74,5 +74,5 @@
   margin: 0;
   font-size: 12px;
   line-height: 16px;
-  color: #b42318;
+  color: var(--semantic-danger);
 }

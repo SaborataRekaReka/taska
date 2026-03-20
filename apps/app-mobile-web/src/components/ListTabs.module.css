@@ -6,7 +6,7 @@
   width: 100%;
   min-width: 0;
   position: relative;
-  z-index: 30;
+  z-index: var(--z-tabs);
 }
 
 .topRow {
@@ -61,15 +61,15 @@
 .tab {
   position: relative;
   z-index: 1;
-  border-radius: 55px;
-  color: #000000;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: var(--r-tab-pill);
+  color: var(--text-primary);
+  transition: transform 220ms var(--ease-out-expo);
 }
 
 .tabMain {
   border: none;
   border-radius: inherit;
-  background: rgba(255, 255, 255, 0.44);
+  background: var(--glass-44);
   min-height: 46px;
   padding: 6px 20px;
   display: inline-flex;
@@ -78,12 +78,12 @@
   gap: 8px;
   font-size: 16px;
   line-height: 1.44;
-  font-weight: 300;
+  font-weight: var(--font-weight-tab);
   white-space: nowrap;
 }
 
 .tabMainRenameMode {
-  background: #ffffff;
+  background: var(--solid-white);
   padding-right: 34px;
 }
 
@@ -92,8 +92,8 @@
 }
 
 .active .tabMain {
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  background: var(--solid-white);
+  box-shadow: var(--ui-shadow-tab);
 }
 
 .tabDragSource {
@@ -103,9 +103,9 @@
 }
 
 .tabMainDragSource {
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
-  background: #ffffff;
-  outline: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: var(--ui-shadow-drag);
+  background: var(--solid-white);
+  outline: 1px solid var(--ui-line-08);
 }
 
 .dragHandle {
@@ -116,7 +116,7 @@
   align-items: center;
   justify-content: center;
   cursor: grab;
-  color: rgba(17, 24, 39, 0.3);
+  color: var(--ui-fg-30);
   background: transparent;
   flex-shrink: 0;
   user-select: none;
@@ -126,17 +126,17 @@
 
 .dragHandle:active {
   cursor: grabbing;
-  color: rgba(17, 24, 39, 0.7);
-  background: rgba(17, 24, 39, 0.1);
+  color: var(--ui-fg-70);
+  background: var(--ui-fill-10);
 }
 
 .dragHandle:hover {
-  color: rgba(17, 24, 39, 0.6);
-  background: rgba(17, 24, 39, 0.06);
+  color: var(--ui-fg-60);
+  background: var(--ui-fill-06);
 }
 
 .dragHandle:focus-visible {
-  outline: 2px solid rgba(17, 24, 39, 0.25);
+  outline: 2px solid var(--ui-outline-focus);
   outline-offset: 1px;
 }
 
@@ -152,7 +152,7 @@
   max-width: 100%;
   border: none;
   background: transparent;
-  color: #111827;
+  color: var(--ui-fg-strong);
   font: inherit;
   line-height: inherit;
   padding: 0;
@@ -161,7 +161,7 @@
 }
 
 .renameInput::selection {
-  background: rgba(17, 24, 39, 0.12);
+  background: var(--ui-fill-12sel);
 }
 
 .badge,
@@ -172,7 +172,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--badge-neutral-bg);
   font-size: 11px;
   font-weight: 500;
 }
@@ -190,8 +190,8 @@
   height: 24px;
   border-radius: 999px;
   border: none;
-  background: #000;
-  color: #fff;
+  background: var(--btn-black);
+  color: var(--btn-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -205,8 +205,8 @@
   height: 24px;
   border-radius: 999px;
   border: none;
-  background: #000;
-  color: #fff;
+  background: var(--btn-black);
+  color: var(--btn-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -218,8 +218,8 @@
   height: 24px;
   border-radius: 999px;
   border: none;
-  background: #000;
-  color: #fff;
+  background: var(--btn-black);
+  color: var(--btn-white);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -235,16 +235,16 @@
 }
 
 .actionBtnActive {
-  background: #ffffff;
-  color: #000000;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+  background: var(--solid-white);
+  color: var(--text-primary);
+  box-shadow: var(--ui-shadow-xs);
 }
 
 .plusBtn:hover,
 .actionBtn:hover:not(.actionBtnActive),
 .resetBtn:hover {
   transform: scale(1.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ui-shadow-btn);
 }
 
 .plusBtn:active,
@@ -293,7 +293,7 @@
 }
 
 .searchInlineOpen {
-  z-index: 37;
+  z-index: var(--z-search-open);
 }
 
 .searchTriggerIcon {
@@ -308,10 +308,10 @@
   gap: 8px;
   height: 37px;
   padding: 0;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 55px;
-  background: rgba(255, 255, 255, 0.78);
-  color: rgba(17, 24, 39, 0.58);
+  border: 1px solid var(--ui-line-08);
+  border-radius: var(--r-tab-pill);
+  background: var(--glass-78);
+  color: var(--ui-fg-58);
   overflow: hidden;
   max-width: 0;
   opacity: 0;
@@ -340,15 +340,15 @@
 }
 
 .searchRail:hover {
-  background: rgba(255, 255, 255, 0.9);
-  color: rgba(17, 24, 39, 0.86);
+  background: var(--glass-90);
+  color: var(--ui-fg-86);
 }
 
 .searchRail:focus-within {
-  color: #111827;
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(20, 20, 20, 0.14);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.52);
+  color: var(--ui-fg-strong);
+  background: var(--glass-96);
+  border-color: var(--border-ink-14);
+  box-shadow: var(--focus-ring-tight);
 }
 
 .searchInput {
@@ -370,7 +370,7 @@
 }
 
 .searchInput::placeholder {
-  color: rgba(17, 24, 39, 0.42);
+  color: var(--ui-fg-42);
 }
 
 .searchInput::-webkit-search-cancel-button,
@@ -386,8 +386,8 @@
   font-size: 11px;
   font-weight: 500;
   line-height: 1;
-  color: rgba(17, 24, 39, 0.58);
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: var(--ui-fg-58);
+  border: 1px solid var(--ui-line-12);
   border-radius: 8px;
   padding: 3px 6px;
 }
@@ -397,8 +397,8 @@
   height: 18px;
   border-radius: 50%;
   border: none;
-  background: rgba(17, 24, 39, 0.1);
-  color: rgba(17, 24, 39, 0.72);
+  background: var(--ui-fill-10);
+  color: var(--ui-fg-72);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -408,26 +408,26 @@
 
 .filterWrap {
   position: relative;
-  z-index: 36;
+  z-index: var(--z-toolbar-priority);
 }
 
 .menuBackdrop {
   position: fixed;
   inset: 0;
   background: transparent;
-  z-index: 34;
+  z-index: var(--z-toolbar-backdrop);
 }
 
 .iconBtn {
   width: 37px;
   height: 37px;
-  border-radius: 55px;
+  border-radius: var(--r-tab-pill);
   border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.44);
-  color: #000;
+  background: var(--glass-44);
+  color: var(--text-primary);
   transition: background-color 0.18s ease;
 }
 
@@ -438,11 +438,11 @@
 }
 
 .priorityBtn {
-  background: rgba(255, 255, 255, 0.44);
+  background: var(--glass-44);
 }
 
 .iconBtn:hover {
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--glass-62);
 }
 
 .priorityInline {
@@ -472,7 +472,7 @@
 }
 
 .iconBtnOpen {
-  background: #ffffff;
+  background: var(--solid-white);
 }
 
 .urgencyInline {
@@ -505,12 +505,12 @@
   height: 30px;
   padding: 0 12px;
   border: none;
-  border-radius: 55px;
+  border-radius: var(--r-tab-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: rgba(17, 24, 39, 0.52);
+  color: var(--ui-fg-52);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
@@ -519,18 +519,18 @@
 }
 
 .urgencyOption:hover {
-  background: rgba(17, 24, 39, 0.06);
-  color: rgba(17, 24, 39, 0.8);
+  background: var(--ui-fill-06);
+  color: var(--ui-fg-80);
 }
 
 .urgencyOptionSelected {
-  background: #111827;
-  color: #ffffff;
+  background: var(--ui-fg-strong);
+  color: var(--btn-white);
 }
 
 .urgencyOptionSelected:hover {
-  background: #1f2937;
-  color: #ffffff;
+  background: var(--ui-selected-hover);
+  color: var(--btn-white);
 }
 
 .priorityDot {
@@ -541,7 +541,7 @@
 }
 
 .priorityDotDefault {
-  background: #000000;
+  background: var(--btn-black);
 }
 
 .priorityMenuItem {
@@ -551,7 +551,7 @@
   min-height: 37px;
   padding: 0;
   border: none;
-  border-radius: 45px;
+  border-radius: var(--r-priority-chip);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -562,7 +562,7 @@
 }
 
 .priorityMenuItemSelected {
-  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.22);
+  box-shadow: inset 0 0 0 1px var(--ui-inset-selected);
 }
 
 .menu {
@@ -572,10 +572,10 @@
   min-width: 190px;
   padding: 6px;
   border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.1);
-  z-index: 80;
+  border: 1px solid var(--ui-line-08);
+  background: var(--glass-96);
+  box-shadow: var(--ui-shadow-menu);
+  z-index: var(--z-dropdown);
 }
 
 .menu.priorityMenu {
@@ -592,18 +592,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  color: rgba(17, 24, 39, 0.72);
+  color: var(--ui-fg-72);
   font-size: 14px;
   font-weight: 500;
 }
 
 .menuItem:hover {
-  background: rgba(17, 24, 39, 0.08);
-  color: #111827;
+  background: var(--ui-fill-08);
+  color: var(--ui-fg-strong);
 }
 
 .check {
-  color: #111827;
+  color: var(--ui-fg-strong);
   font-size: 12px;
 }
 
@@ -619,12 +619,12 @@
   height: 46px;
   width: 170px;
   padding: 0 20px;
-  border-radius: 55px;
+  border-radius: var(--r-tab-pill);
   border: none;
-  background: #ffffff;
-  color: #111827;
+  background: var(--solid-white);
+  color: var(--ui-fg-strong);
   font-size: 16px;
-  font-weight: 300;
+  font-weight: var(--font-weight-tab);
   line-height: 1.44;
   box-shadow: none;
   appearance: none;
@@ -639,13 +639,13 @@
 .addConfirmBtn {
   width: 37px;
   height: 37px;
-  border-radius: 55px;
+  border-radius: var(--r-tab-pill);
   border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.44);
-  color: #000;
+  background: var(--glass-44);
+  color: var(--text-primary);
   cursor: pointer;
   flex-shrink: 0;
   margin-left: 6px;
@@ -653,7 +653,7 @@
 }
 
 .addConfirmBtn:hover {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-70);
 }
 
 .addConfirmBtnIcon {
@@ -681,27 +681,27 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 10;
+  z-index: var(--z-sticky);
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--ui-line-06);
+  background: var(--glass-92);
   backdrop-filter: blur(8px);
-  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--ui-shadow-float);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgba(17, 24, 39, 0.6);
+  color: var(--ui-fg-60);
   cursor: pointer;
   padding: 0;
   transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
 }
 
 .scrollArrow:hover {
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
-  color: #111827;
+  background: var(--solid-white);
+  box-shadow: var(--ui-shadow-hover);
+  color: var(--ui-fg-strong);
 }
 
 .scrollArrow:active {
@@ -727,24 +727,24 @@
   top: 50%;
   right: 7px;
   transform: translateY(-50%);
-  z-index: 8;
+  z-index: var(--z-tab-delete);
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: none;
-  background: #ffffff;
-  color: #e00000;
+  background: var(--solid-white);
+  color: var(--semantic-danger);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--ui-shadow-raised);
   cursor: pointer;
   transition: background-color 0.12s ease, transform 0.12s ease;
 }
 
 .deleteBtn:hover {
-  background: #fef2f2;
+  background: var(--semantic-danger-soft-bg);
   transform: translateY(-50%) scale(1.1);
 }
 
