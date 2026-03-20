@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   AiOperationStatus,
   AiPlanOperation,
@@ -128,6 +128,14 @@ function buildTaskPreviewFromTaskId(
   };
 }
 
+function cloneTaskSnapshot(task: Task): Task {
+  return {
+    ...task,
+    list: task.list ? { ...task.list } : null,
+    subtasks: task.subtasks.map((subtask) => ({ ...subtask })),
+  };
+}
+
 function resolveSubtaskPreviewId(operation: AiPlanOperation): string {
   return operation.subtaskId ?? `proposal-subtask-${operation.key}`;
 }
@@ -227,6 +235,7 @@ export function AiProposalCard({
   onUndo,
 }: AiProposalCardProps) {
   const [draftOperations, setDraftOperations] = useState<AiPlanOperation[]>(proposal.operations);
+  const taskSnapshotsRef = useRef<Map<string, Task>>(new Map());
   const isBusy = Boolean(busyLabel);
   const isExecuted = status === 'EXECUTED';
   const isUndone = status === 'UNDONE';
@@ -235,10 +244,19 @@ export function AiProposalCard({
     setDraftOperations(proposal.operations);
   }, [proposal.operationId, proposal.operations]);
 
-  const tasksById = useMemo(
-    () => new Map((tasks ?? []).map((task) => [task.id, task])),
-    [tasks],
-  );
+  useEffect(() => {
+    for (const task of tasks ?? []) {
+      taskSnapshotsRef.current.set(task.id, cloneTaskSnapshot(task));
+    }
+  }, [tasks]);
+
+  const tasksById = useMemo(() => {
+    const fromSnapshots = new Map(taskSnapshotsRef.current);
+    for (const task of tasks ?? []) {
+      fromSnapshots.set(task.id, cloneTaskSnapshot(task));
+    }
+    return fromSnapshots;
+  }, [tasks]);
 
   const listById = useMemo(
     () => new Map((availableLists ?? []).map((list) => [list.id, list.name])),
@@ -320,6 +338,14 @@ export function AiProposalCard({
     () => JSON.stringify(draftOperations) !== JSON.stringify(proposal.operations),
     [draftOperations, proposal.operations],
   );
+  const deleteOperationsCount = useMemo(
+    () => draftOperations.filter((operation) => (
+      operation.type === 'DELETE_TASK'
+      || operation.type === 'DELETE_SUBTASK'
+    )).length,
+    [draftOperations],
+  );
+  const totalChangesCount = executionCount ?? draftOperations.length;
 
   function applyTaskPatchToOperation(operation: AiPlanOperation, updates: TaskPatchUpdates): AiPlanOperation {
     if (operation.type !== 'CREATE_TASK' && operation.type !== 'UPDATE_TASK') {
@@ -419,7 +445,7 @@ export function AiProposalCard({
   const canApprove = status === 'PLANNED' && !isBusy;
   const canRebuild = !isBusy && !isExecuted && !isUndone;
   const showUndoInPrimarySlot = isExecuted && Boolean(onUndo);
-  const primaryLabel = showUndoInPrimarySlot ? 'Undo' : '\u041f\u0440\u0438\u043d\u044f\u0442\u044c';
+  const primaryLabel = showUndoInPrimarySlot ? '\u0412\u0435\u0440\u043d\u0443\u0442\u044c' : '\u041f\u0440\u0438\u043d\u044f\u0442\u044c';
   const primaryDisabled = showUndoInPrimarySlot ? isBusy : !canApprove;
 
   return (
@@ -427,10 +453,10 @@ export function AiProposalCard({
       {taskPreviewItems.length > 0 ? (
         <div className={styles.previewList}>
           {taskPreviewItems.map((item) => (
-            <div key={item.previewKey}>
-              {item.isDeletePlanned ? (
-                <div className={styles.deleteHint}>{'\u0411\u0443\u0434\u0435\u0442 \u0443\u0434\u0430\u043b\u0435\u043d\u0430'}</div>
-              ) : null}
+            <div
+              key={item.previewKey}
+              className={item.isDeletePlanned ? styles.previewItemDelete : undefined}
+            >
               <TaskCard
                 task={item.task}
                 isCompleted={item.task.status === 'DONE'}
@@ -475,8 +501,11 @@ export function AiProposalCard({
         </div>
       ) : null}
 
-      {executionCount && isExecuted ? (
-        <div className={styles.metaRow}>Изменений: {executionCount}</div>
+      {totalChangesCount > 0 ? (
+        <div className={styles.metaRow}>
+          Изменений: {totalChangesCount}
+          {deleteOperationsCount > 0 ? `, к удалению ${deleteOperationsCount} элементов` : ''}
+        </div>
       ) : null}
 
       {busyLabel ? <div className={styles.busyLabel}>{busyLabel}</div> : null}
@@ -484,7 +513,7 @@ export function AiProposalCard({
       <div className={styles.actions}>
         <button
           type="button"
-          className={styles.secondaryButton}
+          className={styles.softGhost}
           onClick={submitRevision}
           disabled={!canRebuild}
         >
@@ -492,7 +521,7 @@ export function AiProposalCard({
         </button>
         <button
           type="button"
-          className={styles.acceptButton}
+          className={showUndoInPrimarySlot ? `${styles.softGhost} ${styles.softGhostReturn}` : styles.actionAccept}
           onClick={showUndoInPrimarySlot ? onUndo : onApprove}
           disabled={primaryDisabled}
         >

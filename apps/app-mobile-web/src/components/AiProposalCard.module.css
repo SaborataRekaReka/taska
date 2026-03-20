@@ -11,11 +11,10 @@
   gap: 10px;
 }
 
-.deleteHint {
-  margin-bottom: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #b42318;
+.previewItemDelete {
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.62;
 }
 
 .operationList {
@@ -63,30 +62,54 @@
   margin-top: 2px;
 }
 
-.secondaryButton,
-.acceptButton {
+.softGhost,
+.actionAccept {
   min-height: 34px;
   border-radius: 999px;
   padding: 0 14px;
   font-size: 14px;
   font-weight: 600;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    background 0.15s ease;
 }
 
-.secondaryButton {
-  border: 1px solid rgba(18, 18, 18, 0.1);
+.softGhost {
+  background: rgba(255, 255, 255, 0.58);
+  color: rgba(27, 27, 27, 0.92);
+}
+
+.softGhost:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.78);
-  color: var(--text-primary);
+  transform: translateY(-0.5px);
 }
 
-.acceptButton {
-  border: 1px solid rgba(22, 142, 84, 0.34);
-  background: rgba(41, 194, 117, 0.16);
-  color: #11834f;
+/* «Вернуть»: белая слегка прозрачная заливка, читаемый тёмный текст */
+.softGhostReturn {
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 27, 27, 0.88);
 }
 
-.secondaryButton:disabled,
-.acceptButton:disabled {
+.softGhostReturn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.actionAccept {
+  background: rgba(41, 194, 117, 0.22);
+  color: #0d6e42;
+}
+
+.actionAccept:hover:not(:disabled) {
+  background: rgba(41, 194, 117, 0.3);
+  transform: translateY(-0.5px);
+}
+
+.softGhost:disabled,
+.actionAccept:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  transform: none;
 }
