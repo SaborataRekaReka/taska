@@ -67,6 +67,8 @@ export function TaskCard({
   const [localPriority, setLocalPriority] = useState<TaskPriority>(task.priority);
   const [isSubtasksOpen, setIsSubtasksOpen] = useState(forceSubtasksOpen);
   const enterPressedRef = useRef(false);
+  const taskToggleStampRef = useRef(0);
+  const subtaskToggleStampRef = useRef<Record<string, number>>({});
   const canOpenAssistant = clickToOpenAssistant && typeof onOpenAssistant === 'function';
   const taskCompleted = isCompleted ?? localTaskCompleted;
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
@@ -245,6 +247,28 @@ export function TaskCard({
     );
   }
 
+  function triggerTaskToggle() {
+    const now = Date.now();
+    if (now - taskToggleStampRef.current < 220) {
+      return;
+    }
+
+    taskToggleStampRef.current = now;
+    toggleTaskCompleted();
+  }
+
+  function triggerSubtaskToggle(id: string) {
+    const now = Date.now();
+    const previousStamp = subtaskToggleStampRef.current[id] ?? 0;
+
+    if (now - previousStamp < 220) {
+      return;
+    }
+
+    subtaskToggleStampRef.current[id] = now;
+    toggleSubtaskCompleted(id);
+  }
+
   function handleOpenAssistant() {
     onOpenAssistant?.(task.id);
   }
@@ -302,11 +326,9 @@ export function TaskCard({
           checked={taskCompleted}
           className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
           onPointerDown={(e) => { e.stopPropagation(); }}
-          onClick={(e) => { e.stopPropagation(); }}
-          onChange={(e) => {
-            e.stopPropagation();
-            toggleTaskCompleted();
-          }}
+          onMouseDown={(e) => { e.stopPropagation(); }}
+          onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
+          onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
           aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
         />
         <div className={styles.content}>
@@ -404,11 +426,9 @@ export function TaskCard({
                       checked={isSubtaskCompleted}
                       className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
                       onPointerDown={(e) => { e.stopPropagation(); }}
-                      onClick={(e) => { e.stopPropagation(); }}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        toggleSubtaskCompleted(sub.id);
-                      }}
+                      onMouseDown={(e) => { e.stopPropagation(); }}
+                      onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
+                      onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
                       aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
                     />
                     <SubtaskEditable
