@@ -16,6 +16,7 @@ import type {
 import { PrismaService } from '../../core/prisma.service.js';
 import { HistoryService } from '../history/history.service.js';
 import { ListsService } from '../lists/lists.service.js';
+import { PROTECTED_REAL_LIST_NAMES, VIRTUAL_TECH_LIST_NAMES } from '../lists/list.constants.js';
 import { SubtasksService } from '../subtasks/subtasks.service.js';
 import { TasksService } from '../tasks/tasks.service.js';
 import type {
@@ -107,6 +108,27 @@ const MY_DAY_SMART_LIST_HINT = {
     addToMyDay: 'Use UPDATE_TASK and set task.deadline to a datetime within today.',
     removeFromMyDay: 'Use UPDATE_TASK and set task.deadline to null or datetime outside today.',
     note: 'Do not use CREATE_LIST/UPDATE_LIST for "Мой день".',
+  },
+};
+
+const ALL_TECH_LIST_HINT = {
+  id: '__all__',
+  name: 'Все',
+  aliases: ['все', 'all'],
+  description: 'Virtual technical list that shows all tasks.',
+  mutationGuide: {
+    note: 'Do not use CREATE_LIST/UPDATE_LIST for "Все".',
+  },
+};
+
+const NO_LIST_SYSTEM_HINT = {
+  id: '__no_list__',
+  name: 'Без списка',
+  aliases: ['без списка', 'no list', 'without list'],
+  description: 'Protected system bucket for tasks without a list.',
+  mutationGuide: {
+    moveTask: 'Use UPDATE_TASK and set task.listId to null.',
+    note: 'Do not use CREATE_LIST/UPDATE_LIST for "Без списка".',
   },
 };
 
@@ -668,7 +690,10 @@ export class AiAssistantService {
       summary: `Global plan over ${lists.length} lists and ${tasks.length} tasks`,
       payload: {
         lists,
-        smartLists: [MY_DAY_SMART_LIST_HINT],
+        smartLists: [MY_DAY_SMART_LIST_HINT, ALL_TECH_LIST_HINT],
+        protectedLists: [NO_LIST_SYSTEM_HINT],
+        reservedVirtualListNames: VIRTUAL_TECH_LIST_NAMES,
+        protectedRealListNames: PROTECTED_REAL_LIST_NAMES,
         tasks,
       },
     };
@@ -709,6 +734,11 @@ export class AiAssistantService {
                   'Never answer that "Мой день" list does not exist.',
                   'When user asks to modify "Мой день", operate on tasks via UPDATE_TASK and deadline changes.',
                   'Do not create or rename a real list for "Мой день".',
+                  '"Все" / "all" is a virtual technical list, not a physical list entity in database.',
+                  'Do not create or rename a real list for "Все".',
+                  '"Без списка" / "no list" is a protected system bucket.',
+                  'Do not create or rename list "Без списка".',
+                  'When user asks to move task into "Без списка", use UPDATE_TASK and set task.listId to null.',
                 ].join('\n'),
               },
             ],

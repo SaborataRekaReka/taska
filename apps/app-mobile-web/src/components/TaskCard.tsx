@@ -12,6 +12,28 @@ import { TaskDeadlinePicker } from './TaskDeadlinePicker';
 import styles from './TaskCard.module.css';
 
 const NO_LIST_OPTION_VALUE = '__no_list__';
+const MY_DAY_OPTION_VALUE = '__my_day__';
+const NO_LIST_NAME_NORMALIZED = 'без списка';
+
+function isNoListSystemEntry(list: { name: string; isDefault?: boolean }): boolean {
+  return Boolean(list.isDefault) && list.name.trim().toLowerCase() === NO_LIST_NAME_NORMALIZED;
+}
+
+function isDeadlineInCurrentDay(deadline: string | null): boolean {
+  if (!deadline) {
+    return false;
+  }
+
+  const parsed = new Date(deadline);
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+
+  const now = new Date();
+  return parsed.getFullYear() === now.getFullYear()
+    && parsed.getMonth() === now.getMonth()
+    && parsed.getDate() === now.getDate();
+}
 
 const PRIORITY_OPTIONS: TaskChipMenuOption[] = [
   { value: 'LOW', label: 'Низкий', dotColor: '#8f9aa7' },
@@ -71,6 +93,7 @@ export function TaskCard({
   const subtaskToggleStampRef = useRef<Record<string, number>>({});
   const canOpenAssistant = clickToOpenAssistant && typeof onOpenAssistant === 'function';
   const taskCompleted = isCompleted ?? localTaskCompleted;
+  const isInMyDay = isDeadlineInCurrentDay(localDeadline);
   const persistedSubtasksCount = localSubtasks.filter((sub) => sub.title.trim().length > 0).length;
   const hasSubs = localSubtasks.length > 0;
   const subtasksForcedOpen = forceSubtasksOpen && hasSubs;
@@ -78,11 +101,12 @@ export function TaskCard({
 
   const listOptions = useMemo<TaskChipMenuOption[]>(() => {
     const normalized: TaskChipMenuOption[] = [
+      { value: MY_DAY_OPTION_VALUE, label: 'Мой день' },
       { value: NO_LIST_OPTION_VALUE, label: 'Без списка' },
     ];
 
     for (const list of availableLists ?? []) {
-      if (list.isDefault) {
+      if (isNoListSystemEntry(list)) {
         continue;
       }
 
@@ -139,6 +163,12 @@ export function TaskCard({
       label: 'Открыть AI-ассистент',
       onSelect: handleOpenAssistant,
       icon: aiFlashIcon,
+    },
+    {
+      id: 'toggle-my-day',
+      label: isInMyDay ? 'Убрать из "Мой день"' : 'Добавить в "Мой день"',
+      onSelect: handleToggleMyDay,
+      icon: listIcon,
     },
     {
       id: 'toggle-subtasks',
@@ -273,7 +303,26 @@ export function TaskCard({
     onOpenAssistant?.(task.id);
   }
 
+  function applyDeadlineChange(nextDeadline: string | null): void {
+    setLocalDeadline(nextDeadline);
+    onUpdateDeadline?.(task.id, nextDeadline);
+  }
+
+  function handleToggleMyDay(): void {
+    if (isInMyDay) {
+      applyDeadlineChange(null);
+      return;
+    }
+
+    applyDeadlineChange(new Date().toISOString());
+  }
+
   function handleListChange(nextValue: string): void {
+    if (nextValue === MY_DAY_OPTION_VALUE) {
+      handleToggleMyDay();
+      return;
+    }
+
     const nextListId = nextValue === NO_LIST_OPTION_VALUE ? null : nextValue;
     setLocalListId(nextListId);
     onUpdateList?.(task.id, nextListId);
@@ -379,8 +428,7 @@ export function TaskCard({
               <TaskDeadlinePicker
                 value={localDeadline}
                 onChange={(nextDeadline) => {
-                  setLocalDeadline(nextDeadline);
-                  onUpdateDeadline?.(task.id, nextDeadline);
+                  applyDeadlineChange(nextDeadline);
                 }}
               />
             </div>

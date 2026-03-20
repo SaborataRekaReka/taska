@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { PrismaService } from '../../../core/prisma.service.js';
+import { DEFAULT_PERSISTED_LISTS } from '../../lists/list.constants.js';
 import type { GoogleOAuthStatePayload, GoogleTokenResponse, GoogleUserProfile } from './types.js';
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -147,10 +148,11 @@ export class GoogleOAuthService {
   }
 
   private async createDefaultLists(userId: string): Promise<void> {
-    const defaultListNames = ['Работа', 'Личное', 'Без списка'];
-    await Promise.all(defaultListNames.map((name, index) => this.prisma.list.create({
-      data: { userId, name, isDefault: true, order: index },
-    })));
+    await Promise.all(
+      DEFAULT_PERSISTED_LISTS.map((list) => this.prisma.list.create({
+        data: { userId, name: list.name, isDefault: list.isDefault, order: list.order },
+      })),
+    );
   }
 
   private encodeState(payload: GoogleOAuthStatePayload): string {

@@ -8,6 +8,7 @@ import { useUiStore } from '../stores/ui';
 import styles from './ListTabs.module.css';
 
 const META_TAB_ORDER = ['my-day', 'all'] as const;
+const NO_LIST_NAME_NORMALIZED = 'без списка';
 
 const URGENCY_OPTIONS = [
   { id: null, label: 'Любая' },
@@ -46,6 +47,10 @@ interface TabDragState {
   startScrollLeft: number;
   moved: boolean;
   captured: boolean;
+}
+
+function isNoListSystemEntry(list: { name: string }): boolean {
+  return list.name.trim().toLowerCase() === NO_LIST_NAME_NORMALIZED;
 }
 
 export function ListTabs() {
@@ -99,7 +104,14 @@ export function ListTabs() {
   const reorderDragRef = useRef<ReorderDragSession | null>(null);
   const reorderPreviewRef = useRef<string[] | null>(null);
 
-  const noListEntry = apiLists.find((l) => l.isDefault && l.name === 'Без списка');
+  const noListEntry = useMemo(
+    () => apiLists.find((list) => isNoListSystemEntry(list)),
+    [apiLists],
+  );
+  const protectedListIds = useMemo(
+    () => new Set(apiLists.filter((list) => isNoListSystemEntry(list)).map((list) => list.id)),
+    [apiLists],
+  );
 
   const tabFromStore = (() => {
     if (activeListId === '__my_day__') {
@@ -115,13 +127,12 @@ export function ListTabs() {
   const currentActiveTab = tabFromStore ?? 'all';
 
   const orderedListTabIds = useMemo(() => apiLists.map((list) => list.id), [apiLists]);
-  const defaultListIds = useMemo(() => new Set(apiLists.filter((l) => l.isDefault).map((l) => l.id)), [apiLists]);
   const tabOrder = useMemo(() => [...META_TAB_ORDER, ...orderedListTabIds], [orderedListTabIds]);
 
   const visibleTabs = tabOrder;
   const renameableTabIds = useMemo(
-    () => visibleTabs.filter((id) => id !== 'my-day' && id !== 'all' && !defaultListIds.has(id)),
-    [visibleTabs, defaultListIds],
+    () => visibleTabs.filter((id) => id !== 'my-day' && id !== 'all' && !protectedListIds.has(id)),
+    [visibleTabs, protectedListIds],
   );
   const reorderableTabIds = renameableTabIds;
   const isRenameMode = listsPanelMode === 'rename';
@@ -847,7 +858,7 @@ export function ListTabs() {
     }
 
     const list = apiLists.find((l) => l.id === id);
-    if (list?.isDefault && list.name === 'Без списка') {
+    if (list && isNoListSystemEntry(list)) {
       setActiveList('__no_list__');
       closeMyDayModal();
       return;
@@ -1269,4 +1280,3 @@ export function ListTabs() {
     </div>
   );
 }
-

@@ -1,25 +1,31 @@
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
-const defaultListNames = ['Работа', 'Личное', 'Без списка'];
+const defaultLists = [
+  { name: 'Личное', order: 0 },
+  { name: 'Работа', order: 1 },
+  { name: 'Без списка', order: 2 },
+];
 
 async function ensureDefaultListsForUser(userId) {
-  for (const name of defaultListNames) {
+  for (const list of defaultLists) {
     await prisma.list.upsert({
       where: {
         userId_name: {
           userId,
-          name,
+          name: list.name,
         },
       },
       update: {
         isDefault: true,
+        order: list.order,
         deletedAt: null,
       },
       create: {
         userId,
-        name,
+        name: list.name,
         isDefault: true,
+        order: list.order,
       },
     });
   }
@@ -51,7 +57,7 @@ async function main() {
   }
 
   console.log(
-    `[seed] default lists ensured (${defaultListNames.join(', ')}) for ${
+    `[seed] default lists ensured (${defaultLists.map((list) => list.name).join(', ')}) for ${
       otherUsers.length + 1
     } user(s)`,
   );

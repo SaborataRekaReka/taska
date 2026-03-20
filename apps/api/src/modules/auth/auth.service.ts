@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import { PrismaService } from '../../core/prisma.service.js';
+import { DEFAULT_PERSISTED_LISTS } from '../lists/list.constants.js';
 
 export interface AuthUser {
   id: string;
@@ -156,10 +157,11 @@ export class AuthService {
   }
 
   private async createDefaultLists(userId: string): Promise<void> {
-    const defaultListNames = ['Работа', 'Личное', 'Без списка'];
-    await Promise.all(defaultListNames.map((name, index) => this.prisma.list.create({
-      data: { userId, name, isDefault: true, order: index },
-    })));
+    await Promise.all(
+      DEFAULT_PERSISTED_LISTS.map((list) => this.prisma.list.create({
+        data: { userId, name: list.name, isDefault: list.isDefault, order: list.order },
+      })),
+    );
   }
 
   static verifyAccessToken(token: string): JwtPayload {

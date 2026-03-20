@@ -52,7 +52,7 @@
 ### Текущее состояние модулей
 - **auth**: register, login, refresh, logout, me, google start/callback — полностью рабочий
 - **users**: GET /users/me — профиль текущего пользователя
-- **lists**: полный CRUD + ownership + soft-delete + запрет удаления дефолтных
+- **lists**: полный CRUD + ownership + soft-delete + защита системных списков (`Мой день`, `Все`, `Без списка`) от rename/delete
 - **tasks**: полный CRUD + 6 фильтров + includes subtasks/list
 - **subtasks**: полный CRUD через /tasks/:taskId/subtasks + ownership
 - **history**: append-only запись + read API с фильтрами

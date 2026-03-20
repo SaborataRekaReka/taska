@@ -84,6 +84,7 @@
 
 .tabMainRenameMode {
   background: #ffffff;
+  padding-right: 34px;
 }
 
 .tabMainReorderable {
@@ -723,8 +724,9 @@
 
 .deleteBtn {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 50%;
+  right: 7px;
+  transform: translateY(-50%);
   z-index: 8;
   width: 18px;
   height: 18px;
@@ -743,11 +745,11 @@
 
 .deleteBtn:hover {
   background: #fef2f2;
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .deleteBtn:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .deleteBtnIcon {
