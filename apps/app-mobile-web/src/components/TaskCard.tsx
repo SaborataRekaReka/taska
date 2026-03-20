@@ -321,16 +321,24 @@ export function TaskCard({
       } : undefined}
     >
       <div className={styles.row}>
-        <input
-          type="checkbox"
-          checked={taskCompleted}
-          className={`${styles.checkbox} ${taskCompleted ? styles.checkboxChecked : ''}`}
-          onPointerDown={(e) => { e.stopPropagation(); }}
-          onMouseDown={(e) => { e.stopPropagation(); }}
-          onPointerUp={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
-          onClick={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
-          aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
-        />
+        <span className={styles.checkboxShell}>
+          <input
+            type="checkbox"
+            checked={taskCompleted}
+            className={styles.checkboxInput}
+            onChange={(e) => { e.stopPropagation(); triggerTaskToggle(); }}
+            onClick={(e) => { e.stopPropagation(); }}
+            aria-label={taskCompleted ? 'Mark task as not completed' : 'Mark task as completed'}
+          />
+          <span
+            className={`${styles.checkboxFace} ${taskCompleted ? styles.checkboxFaceChecked : ''}`}
+            aria-hidden
+          >
+            <span
+              className={`${styles.checkboxTick} ${taskCompleted ? styles.checkboxTickVisible : ''}`}
+            />
+          </span>
+        </span>
         <div className={styles.content}>
           <EditableText
             value={localTitle}
@@ -421,16 +429,24 @@ export function TaskCard({
                 <div key={sub.id}>
                   {i > 0 && <div className={styles.divider} />}
                   <div className={styles.subtaskRow}>
-                    <input
-                      type="checkbox"
-                      checked={isSubtaskCompleted}
-                      className={`${styles.subCheckbox} ${isSubtaskCompleted ? styles.checkboxChecked : ''}`}
-                      onPointerDown={(e) => { e.stopPropagation(); }}
-                      onMouseDown={(e) => { e.stopPropagation(); }}
-                      onPointerUp={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
-                      onClick={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
-                      aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
-                    />
+                    <span className={styles.subCheckboxShell}>
+                      <input
+                        type="checkbox"
+                        checked={isSubtaskCompleted}
+                        className={styles.subCheckboxInput}
+                        onChange={(e) => { e.stopPropagation(); triggerSubtaskToggle(sub.id); }}
+                        onClick={(e) => { e.stopPropagation(); }}
+                        aria-label={isSubtaskCompleted ? 'Mark subtask as not completed' : 'Mark subtask as completed'}
+                      />
+                      <span
+                        className={`${styles.subCheckboxFace} ${isSubtaskCompleted ? styles.subCheckboxFaceChecked : ''}`}
+                        aria-hidden
+                      >
+                        <span
+                          className={`${styles.subCheckboxTick} ${isSubtaskCompleted ? styles.subCheckboxTickVisible : ''}`}
+                        />
+                      </span>
+                    </span>
                     <SubtaskEditable
                       sub={sub}
                       isDraft={sub.id.startsWith('draft-')}
