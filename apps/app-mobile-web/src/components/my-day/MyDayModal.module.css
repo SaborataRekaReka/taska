@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 320;
-  background: var(--overlay-scrim-slate);
+  background: rgba(17, 18, 40, 0.2);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
@@ -14,10 +14,9 @@
   width: min(1300px, 100%);
   min-height: 703px;
   max-height: calc(100vh - 20px);
-  border-radius: 33px;
-  border: 1px solid var(--ui-line-06);
-  background: var(--solid-white);
-  backdrop-filter: blur(16.35px);
+  border-radius: var(--r-huge);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-page);
   overflow: hidden;
   position: relative;
   display: grid;
@@ -28,19 +27,19 @@
   position: absolute;
   top: 19px;
   right: 22px;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
-  color: var(--ui-fg-strong);
-  border: 1px solid transparent;
-  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  color: var(--navy);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  transition: background 0.2s ease, border-color 0.2s ease;
   z-index: 3;
 }
 
 .closeBtn:hover {
-  background: var(--surface-gray-hover);
-  border-color: var(--ui-line-08);
-  opacity: 0.85;
+  background: var(--accent-yellow-soft);
+  border-color: var(--accent-yellow);
 }
 
 .leftColumn {
@@ -57,21 +56,19 @@
 }
 
 .weekday {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 36px;
-  line-height: 24px;
-  color: var(--text-primary);
+  font-family: var(--font);
+  font-weight: var(--font-weight-semibold);
+  font-size: 32px;
+  line-height: 1;
+  color: var(--navy);
 }
 
 .date {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 100;
-  font-size: 32px;
-  line-height: 24px;
-  color: var(--text-secondary);
+  font-family: var(--font);
+  font-weight: var(--font-weight-light);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--navy-soft);
 }
 
 .section {
@@ -81,21 +78,19 @@
 }
 
 .sectionTitle {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 600;
+  font-family: var(--font);
+  font-weight: var(--font-weight-semibold);
   font-size: 14px;
   line-height: 20px;
-  color: var(--text-slate-label);
+  color: var(--navy);
 }
 
 .sectionSubtitle {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 400;
+  font-family: var(--font);
+  font-weight: var(--font-weight-regular);
   font-size: 14px;
   line-height: 20px;
-  color: var(--text-slate-caption);
+  color: var(--navy-soft);
 }
 
 .actionsRow {
@@ -108,28 +103,29 @@
 
 .primaryAction {
   min-height: 52px;
-  border-radius: 51px;
-  padding: 10px 20px;
+  border-radius: 999px;
+  padding: 12px 24px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--ink-121212);
-  color: var(--btn-white);
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 23px;
-  transition: opacity 0.2s ease;
+  background: var(--accent-yellow);
+  color: var(--navy);
+  font-family: var(--font);
+  font-weight: var(--font-weight-semibold);
+  font-size: 15px;
+  line-height: 22px;
+  transition: background var(--dur-150) var(--ease-standard), transform var(--dur-150) var(--ease-standard);
 }
 
 .primaryAction:hover {
-  opacity: 0.9;
+  background: var(--accent-yellow-hover);
+  transform: translateY(-1px);
 }
 
 .primaryAction:disabled {
   opacity: 0.62;
   cursor: not-allowed;
+  transform: none;
 }
 
 .primaryActionIcon {
@@ -137,12 +133,11 @@
   height: 16px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: brightness(0) invert(1);
 }
 
 .errorText {
   margin: -18px 0 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font);
   font-size: 13px;
   line-height: 18px;
   color: var(--semantic-danger);
@@ -150,12 +145,58 @@
 
 .rightColumn {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 20px;
   padding: 54px 44px 42px;
-  background: var(--solid-white);
+  background: var(--surface-page);
+}
+
+/* Theme preview variants — scoped CSS vars for radar */
+.rightColumn[data-theme-preview="good"] {
+  --accent: #FEDC26;
+  --radar-data-fill: rgba(255, 220, 110, 0.22);
+}
+
+.rightColumn[data-theme-preview="calm"] {
+  --accent: #38BDF8;
+  --radar-data-fill: rgba(125, 211, 252, 0.22);
+}
+
+.rightColumn[data-theme-preview="energy"] {
+  --accent: #FB923C;
+  --radar-data-fill: rgba(253, 186, 116, 0.22);
+}
+
+.rightColumn[data-theme-preview="hard"] {
+  --accent: #A78BFA;
+  --radar-data-fill: rgba(196, 181, 253, 0.22);
+}
+
+.rightColumn[data-theme-preview="focus"] {
+  --accent: #34D399;
+  --radar-data-fill: rgba(110, 231, 183, 0.22);
+}
+
+.rightColumn[data-theme-preview="productive"] {
+  --accent: #F472B6;
+  --radar-data-fill: rgba(249, 168, 212, 0.22);
+}
+
+.themeLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font);
+  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--navy-soft);
+  text-align: center;
+  margin-top: 8px;
+  transition: color 0.3s ease;
 }
 
 .glowPrimary {

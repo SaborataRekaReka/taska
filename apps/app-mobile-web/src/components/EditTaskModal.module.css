@@ -1,8 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: var(--overlay-scrim-ink);
-  backdrop-filter: blur(16px);
+  background: rgba(17, 18, 40, 0.2);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -16,16 +16,13 @@
   height: min(86vh, 920px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 14px 18px 18px;
-  border: none;
-  border-radius: 28px;
-  background: var(--auth-input-bg);
+  gap: 16px;
+  padding: 20px 24px 24px;
+  border: 1px solid var(--gray-divider);
+  border-radius: var(--r-huge);
+  background: var(--surface-page);
   box-sizing: border-box;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-modal);
-  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(17, 18, 40, 0.12);
 }
 
 .header {
@@ -74,10 +71,11 @@
 
 .messageBubble {
   max-width: min(760px, 100%);
-  border-radius: 24px;
-  padding: 12px 16px;
-  font-size: 15px;
-  line-height: 1.45;
+  border-radius: var(--r-message-bubble);
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
 .messageBubble p {
@@ -85,19 +83,19 @@
 }
 
 .userBubble {
-  background: var(--ink-121212);
+  background: var(--navy);
   color: var(--btn-white);
 }
 
 .assistantBubble {
-  background: var(--glass-78);
-  color: var(--text-primary);
-  border: 1px solid var(--hero-bubble-assistant-border);
+  background: var(--surface-elevated);
+  color: var(--navy);
+  border: 1px solid var(--gray-divider);
+  box-shadow: 0 2px 8px rgba(17, 18, 40, 0.04);
 }
 
 .taskCardWrap {
   border-radius: 22px;
-  overflow: hidden;
 }
 
 .footer {
@@ -110,11 +108,17 @@
 .searchRow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-height: 56px;
-  padding: 8px 8px 8px 16px;
-  border-radius: 14px;
-  background: var(--solid-white);
+  padding: 8px 8px 8px 20px;
+  border-radius: var(--r-hero-search);
+  background: var(--surface-elevated);
+  border: 1px solid var(--gray-divider);
+  transition: border-color var(--dur-150) var(--ease-standard);
+}
+
+.searchRow:focus-within {
+  border-color: var(--accent-yellow);
 }
 
 .input {
@@ -161,8 +165,8 @@
   height: 40px;
   border: none;
   border-radius: 999px;
-  background: var(--toggle-track-on);
-  color: var(--btn-white);
+  background: var(--accent-yellow);
+  color: var(--navy);
   flex-shrink: 0;
   transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
 }

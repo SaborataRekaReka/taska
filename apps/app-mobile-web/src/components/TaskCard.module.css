@@ -1,13 +1,33 @@
 .card {
-  background: var(--card-bg);
+  background: var(--surface-card);
   border-radius: var(--r-card);
   padding: 20px 24px 18px;
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--gray-divider);
+  box-shadow: 0 2px 8px rgba(17, 18, 40, 0.03);
   transition:
-    background 0.15s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
     opacity 0.26s ease;
   position: relative;
   cursor: pointer;
+}
+
+/* Градиентный засвет — псевдоэлемент */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.3s ease;
+  z-index: 0;
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .cardStatic {
@@ -15,15 +35,30 @@
 }
 
 .card:hover {
-  background: var(--card-bg-hover);
+  transform: translateY(-2px);
+}
+
+.card:hover::before {
+  background: radial-gradient(
+    ellipse 80% 80% at 85% 15%,
+    rgba(254, 220, 38, 0.18) 0%,
+    rgba(254, 220, 38, 0.06) 35%,
+    rgba(254, 220, 38, 0) 60%
+  );
 }
 
 .cardStatic:hover {
-  background: var(--card-bg);
+  border-color: var(--gray-divider);
+  box-shadow: 0 2px 8px rgba(17, 18, 40, 0.03);
+  transform: none;
+}
+
+.cardStatic:hover::before {
+  background: transparent;
 }
 
 .card:focus-visible {
-  outline: 2px solid var(--focus-outline-ink);
+  outline: 2px solid var(--accent-yellow);
   outline-offset: 2px;
 }
 
@@ -71,7 +106,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1.5px solid var(--border-strong);
+  border: 2px solid var(--gray-border);
   background: transparent;
   pointer-events: none;
   transition:
@@ -80,19 +115,19 @@
 }
 
 .checkboxShell:hover .checkboxFace {
-  border-color: var(--border-strong-hover);
+  border-color: var(--accent-yellow);
 }
 
 .checkboxFaceChecked {
-  border-color: var(--btn-black);
-  background: var(--btn-black);
+  border-color: var(--accent-yellow);
+  background: var(--accent-yellow);
 }
 
 .checkboxTick {
   width: 6px;
   height: 10px;
-  border-right: 2px solid var(--btn-white);
-  border-bottom: 2px solid var(--btn-white);
+  border-right: 2px solid var(--navy);
+  border-bottom: 2px solid var(--navy);
   transform: rotate(45deg) translate(-1px, -1px) scale(0.6);
   opacity: 0;
   transition:
@@ -111,26 +146,29 @@
 }
 
 .title {
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: var(--font-weight-medium);
+  color: var(--navy);
   display: block;
   width: 100%;
+  letter-spacing: 0.01em;
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-top: 12px;
 }
 
 .metaItem {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
-  color: var(--text-muted);
+  gap: 6px;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  color: var(--gray-text);
 }
 
 .metaToggle {
@@ -276,7 +314,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1.5px solid var(--border-subtle);
+  border: 1.5px solid var(--gray-border);
   background: transparent;
   pointer-events: none;
   transition:
@@ -285,19 +323,19 @@
 }
 
 .subCheckboxShell:hover .subCheckboxFace {
-  border-color: var(--border-subtle-hover);
+  border-color: var(--accent-yellow);
 }
 
 .subCheckboxFaceChecked {
-  border-color: var(--btn-black);
-  background: var(--btn-black);
+  border-color: var(--accent-yellow);
+  background: var(--accent-yellow);
 }
 
 .subCheckboxTick {
   width: 6px;
   height: 10px;
-  border-right: 2px solid var(--btn-white);
-  border-bottom: 2px solid var(--btn-white);
+  border-right: 2px solid var(--navy);
+  border-bottom: 2px solid var(--navy);
   transform: rotate(45deg) translate(-1px, -1px) scale(0.6);
   opacity: 0;
   transition:
@@ -348,22 +386,27 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--btn-black);
+  background: var(--navy);
+  color: var(--btn-white);
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
   top: 4px;
-  box-shadow: var(--ui-shadow-btn);
+  box-shadow: 0 2px 8px rgba(17, 18, 40, 0.2);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease;
-  z-index: 20;
+  z-index: 100;
 }
 
 .card:hover .plusBtn {
   opacity: 1;
   pointer-events: auto;
+}
+
+.card:hover {
+  z-index: 10;
 }
 
 .plusBtn:hover {

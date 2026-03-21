@@ -3,18 +3,20 @@
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--btn-black);
+  background: var(--accent-yellow);
+  color: var(--navy);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-fab);
-  transition: transform 0.15s;
+  box-shadow: 0 4px 16px rgba(254, 220, 38, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
   z-index: 90;
 }
 
 .fab:hover {
   transform: translateX(-50%) scale(1.12);
+  box-shadow: 0 6px 20px rgba(254, 220, 38, 0.45);
 }

@@ -28,12 +28,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: var(--glass-56);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
+  padding: 10px 14px;
+  border-radius: var(--r-control);
+  background: var(--surface-muted);
+  border: 1px solid var(--gray-divider);
+  color: var(--navy-soft);
   font-size: 13px;
+  font-weight: var(--font-weight-medium);
 }
 
 .operationType {
@@ -64,46 +65,50 @@
 
 .softGhost,
 .actionAccept {
-  min-height: 34px;
+  min-height: 36px;
   border-radius: 999px;
-  padding: 0 14px;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--gray-divider);
   cursor: pointer;
   transition:
     transform var(--dur-150) var(--ease-standard),
     opacity var(--dur-150) var(--ease-standard),
-    background var(--dur-150) var(--ease-standard);
+    background var(--dur-150) var(--ease-standard),
+    border-color var(--dur-150) var(--ease-standard);
 }
 
 .softGhost {
-  background: var(--glass-56);
-  color: var(--text-primary);
+  background: var(--surface-muted);
+  color: var(--navy);
 }
 
 .softGhost:hover:not(:disabled) {
-  background: var(--glass-78);
+  background: var(--surface-card-hover);
+  border-color: var(--accent-yellow);
   transform: translateY(-0.5px);
 }
 
-/* «Вернуть»: белая слегка прозрачная заливка, читаемый тёмный текст */
 .softGhostReturn {
-  background: var(--glass-82);
-  color: var(--text-primary);
+  background: var(--surface-elevated);
+  color: var(--navy);
 }
 
 .softGhostReturn:hover:not(:disabled) {
-  background: var(--glass-94);
+  background: var(--surface-card-hover);
+  border-color: var(--accent-yellow);
 }
 
 .actionAccept {
-  background: var(--semantic-success-bg);
-  color: var(--semantic-success-fg);
+  background: var(--accent-yellow);
+  border-color: var(--accent-yellow);
+  color: var(--navy);
 }
 
 .actionAccept:hover:not(:disabled) {
-  background: var(--semantic-success-bg-hover);
+  background: var(--accent-yellow-hover);
+  border-color: var(--accent-yellow-hover);
   transform: translateY(-0.5px);
 }
 

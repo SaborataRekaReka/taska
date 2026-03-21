@@ -2,18 +2,16 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin: 20px 0 24px;
-  padding: 13px 18px 16px;
+  gap: 16px;
+  margin: 24px 0 28px;
+  padding: 20px 24px 20px;
   border: none;
   border-radius: var(--r-hero-panel);
   box-sizing: border-box;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   background: var(--hero-panel-bg);
+  box-shadow: 0 2px 12px rgba(17, 18, 40, 0.04);
   transition:
-    box-shadow var(--dur-260) var(--ease-standard),
-    background var(--dur-260) var(--ease-standard);
+    box-shadow var(--dur-260) var(--ease-standard);
 }
 
 .panel:focus-within {
@@ -21,7 +19,7 @@
 }
 
 .withHistory {
-  padding-bottom: 16px;
+  /* padding остается одинаковым */
 }
 
 .topRow {
@@ -32,33 +30,34 @@
 .toggle {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   padding: 0;
   border: none;
   background: transparent;
   color: var(--text-hero-input);
-  font-size: 16px;
-  line-height: 23px;
-  font-weight: var(--font-weight-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
 }
 
 .toggleTrack {
   position: relative;
   display: inline-flex;
   align-items: center;
-  width: 40px;
-  height: 20px;
-  padding: 2px;
+  width: 44px;
+  height: 24px;
+  padding: 3px;
   border-radius: var(--r-pill);
   background: var(--toggle-track-on);
   transition: background var(--dur-200) var(--ease-standard);
 }
 
 .toggleKnob {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--btn-white);
+  background: var(--navy);
   transform: translateX(20px);
   transition:
     transform var(--dur-200) var(--ease-standard),
@@ -68,12 +67,12 @@
 .toggleOn {}
 
 .toggleOff .toggleTrack {
-  background: var(--toggle-track-off);
+  background: var(--gray-divider);
 }
 
 .toggleOff .toggleKnob {
   transform: translateX(0);
-  background: var(--toggle-track-on);
+  background: var(--gray-text);
 }
 
 .toggleLabel {
@@ -104,7 +103,7 @@
   transform: translateY(-8px);
   overflow: hidden;
   pointer-events: none;
-  margin-bottom: -14px;
+  margin-top: -16px;
 }
 
 .messageRow {
@@ -124,9 +123,10 @@
 .messageBubble {
   max-width: min(760px, 100%);
   border-radius: var(--r-message-bubble);
-  padding: 12px 16px;
-  font-size: 15px;
-  line-height: 1.45;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
 }
 
 .messageBubble p {
@@ -139,19 +139,26 @@
 }
 
 .assistantBubble {
-  background: var(--glass-78);
+  background: var(--hero-bubble-assistant-bg);
   color: var(--text-primary);
   border: 1px solid var(--hero-bubble-assistant-border);
+  box-shadow: 0 2px 8px rgba(17, 18, 40, 0.04);
 }
 
 .searchRow {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-height: 48px;
-  padding: 4px 4px 4px 16px;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 8px 8px 20px;
   border-radius: var(--r-hero-search);
-  background: var(--solid-white);
+  background: var(--surface-elevated);
+  border: 1px solid var(--gray-divider);
+  transition: border-color var(--dur-150) var(--ease-standard);
+}
+
+.searchRow:focus-within {
+  border-color: var(--accent-yellow);
 }
 
 .input {
@@ -164,11 +171,12 @@
   border: none;
   background: transparent;
   color: var(--text-hero-input);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 24px;
   font-weight: var(--font-weight-body);
   overflow-y: auto;
   scrollbar-width: none;
+  letter-spacing: 0.01em;
 }
 
 .input::-webkit-scrollbar {
@@ -198,8 +206,8 @@
   height: 40px;
   border: none;
   border-radius: var(--r-pill);
-  background: var(--toggle-track-on);
-  color: var(--btn-white);
+  background: var(--hero-send-bg);
+  color: var(--navy);
   flex-shrink: 0;
   transition:
     transform var(--dur-150) var(--ease-standard),
@@ -208,9 +216,9 @@
 }
 
 .sendBtnNonAi {
-  background: var(--glass-82);
-  color: var(--toggle-track-on);
-  box-shadow: var(--hero-send-inset);
+  background: var(--surface-muted);
+  color: var(--navy);
+  box-shadow: inset 0 0 0 1px var(--gray-divider);
 }
 
 .sendBtn:hover:not(:disabled) {
@@ -244,8 +252,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  overflow: hidden;
   max-height: 200px;
+  padding-top: 2px;
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -260,32 +268,41 @@
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
-  margin-top: -14px;
+  margin-top: -16px;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 35px;
-  padding: 6px 20px;
-  border: none;
+  min-height: 36px;
+  padding: 8px 18px;
+  border: 1px solid var(--gray-divider);
   border-radius: var(--r-tab-pill);
-  background: var(--glass-56);
-  color: var(--text-primary);
-  font-size: 14px;
-  line-height: 23px;
-  font-weight: var(--font-weight-tab);
+  background: var(--hero-chip-bg);
+  color: var(--navy-soft);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
+  letter-spacing: 0.01em;
   transition:
     background var(--dur-150) var(--ease-standard),
-    transform var(--dur-150) var(--ease-standard),
-    opacity var(--dur-150) var(--ease-standard);
+    border-color var(--dur-150) var(--ease-standard),
+    color var(--dur-150) var(--ease-standard),
+    transform var(--dur-150) var(--ease-standard);
 }
 
 .chip:hover:not(:disabled) {
-  background: var(--glass-78);
+  background: var(--hero-chip-hover);
+  border-color: var(--accent-yellow);
+  color: var(--navy);
   transform: translateY(-1px);
+}
+
+.chip:active:not(:disabled) {
+  background: var(--hero-chip-active);
+  border-color: var(--accent-yellow);
 }
 
 .chip:disabled {

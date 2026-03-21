@@ -20,26 +20,33 @@
 }
 
 .logo {
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   line-height: 1;
-  color: var(--text-primary);
+  color: var(--navy);
 }
 
 .dayButton {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 17px;
-  font-weight: 500;
-  color: var(--text-primary);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  color: var(--navy);
   justify-self: center;
-  transition: opacity 0.2s ease;
+  background: var(--surface-card);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gray-divider);
+  transition: 
+    background var(--dur-150) var(--ease-standard),
+    border-color var(--dur-150) var(--ease-standard);
 }
 
 .dayButton:hover {
-  opacity: 0.65;
+  background: var(--accent-yellow-soft);
+  border-color: var(--accent-yellow);
 }
 
 .sparkle {
@@ -115,9 +122,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--gradient-avatar-fallback);
-  color: var(--btn-white);
-  font-weight: 700;
+  background: var(--accent-yellow);
+  color: var(--navy);
+  font-weight: var(--font-weight-semibold);
+  font-size: 16px;
 }
 
 .accountCaret {
@@ -146,34 +154,34 @@
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  min-width: 188px;
-  padding: 6px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--glass-94);
-  backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-elevated);
+  min-width: 200px;
+  padding: 8px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  box-shadow: 0 8px 24px rgba(17, 18, 40, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   z-index: 50;
   animation: menuIn 0.16s ease;
 }
 
 .accountMenuItem {
   width: 100%;
-  min-height: 38px;
-  border-radius: 9px;
-  padding: 9px 12px;
+  min-height: 40px;
+  border-radius: var(--r-control);
+  padding: 10px 14px;
   text-align: left;
-  color: var(--text-secondary);
+  color: var(--navy-soft);
   font-size: 14px;
+  font-weight: var(--font-weight-medium);
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 
 .accountMenuItem:hover {
-  background: var(--menu-item-hover);
-  color: var(--text-primary);
+  background: var(--accent-yellow-soft);
+  color: var(--navy);
 }
 
 .accountMenuItem:focus-visible {

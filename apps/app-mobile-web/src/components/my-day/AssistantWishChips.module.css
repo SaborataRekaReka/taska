@@ -5,59 +5,69 @@
 }
 
 .chip {
-  min-height: 42px;
-  padding: 6px 20px;
-  border-radius: 55px;
-  border: 1px solid transparent;
-  background: var(--wish-chip-bg);
-  color: var(--text-zinc-600);
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 400;
+  min-height: 44px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-muted);
+  color: var(--navy-soft);
+  font-family: var(--font);
+  font-weight: var(--font-weight-medium);
   font-size: 14px;
-  line-height: 23px;
-  transition: background 0.2s ease, color 0.2s ease;
+  line-height: 22px;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .chip:hover {
-  background: var(--wish-chip-bg-hover);
+  background: var(--surface-card-hover);
+  border-color: var(--accent-yellow);
+  color: var(--navy);
 }
 
 .active {
-  background: var(--wish-chip-bg-active);
-  color: var(--text-slate-label);
+  background: var(--accent-yellow);
+  border-color: var(--accent-yellow);
+  color: var(--navy);
 }
 
 .addChip {
-  width: 38px;
-  height: 38px;
-  border-radius: 55px;
-  border: 1px solid transparent;
-  background: var(--wish-chip-bg);
-  color: var(--text-primary);
-  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-muted);
+  color: var(--navy);
+  font-size: 24px;
   font-weight: 300;
   line-height: 1;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .addChip:hover {
   transform: translateY(-1px);
-  background: var(--wish-chip-add-hover);
+  background: var(--accent-yellow-soft);
+  border-color: var(--accent-yellow);
 }
 
 .customInput {
   min-width: 180px;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 55px;
-  border: 1px solid var(--wish-input-border);
-  background: var(--glass-94);
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  font-family: var(--font);
   font-size: 14px;
+  font-weight: var(--font-weight-medium);
   line-height: 20px;
-  color: var(--text-slate-label);
+  color: var(--navy);
+  transition: border-color 0.2s ease;
+}
+
+.customInput:focus {
+  border-color: var(--accent-yellow);
 }
 
 .customInput::placeholder {
-  color: var(--text-placeholder-zinc);
+  color: var(--gray-placeholder);
 }

@@ -60,16 +60,15 @@
   top: calc(100% + 10px);
   left: 0;
   z-index: 510;
-  min-width: 188px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--glass-94);
-  backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-elevated);
+  min-width: 200px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  box-shadow: 0 8px 24px rgba(17, 18, 40, 0.08);
   padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .menuItem {
@@ -78,22 +77,23 @@
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  border-radius: 9px;
-  padding: 8px;
+  border-radius: var(--r-control);
+  padding: 10px 12px;
   font-size: 13px;
-  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  color: var(--navy-soft);
   transition: background 0.15s ease, color 0.15s ease;
   text-align: left;
 }
 
 .menuItem:hover {
-  background: var(--menu-item-hover);
-  color: var(--text-primary);
+  background: var(--accent-yellow-soft);
+  color: var(--navy);
 }
 
 .menuItemActive {
-  background: var(--menu-item-active);
-  color: var(--text-primary);
+  background: var(--accent-yellow-muted);
+  color: var(--navy);
 }
 
 .menuItemMain {

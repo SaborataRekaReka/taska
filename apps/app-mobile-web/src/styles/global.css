@@ -9,13 +9,69 @@
 /*
   TASKA design tokens — единый источник для цветов, радиусов, motion, z-index.
   В CSS-модулях используйте var(--token); новые значения добавляйте сюда.
+  
+  Стиль: Premium Minimal Proptech — мягкий тонированный фон, теплый акцент,
+  глубокий navy текст, Poppins типографика, rounded pills, много воздуха.
+  
+  Темы дня переключаются через data-theme на :root
 */
 :root {
+  /* ══════════════════════════════════════════════════════════════════════════
+     DAY THEMES — цветовые схемы для разных состояний дня
+     ══════════════════════════════════════════════════════════════════════════ */
+  
+  /* ── Primary accent (динамический — меняется темой) ── */
+  --accent: #FEDC26;
+  --accent-hover: #FDE047;
+  --accent-pressed: #EAB308;
+  --accent-soft: rgba(254, 220, 38, 0.18);
+  --accent-muted: rgba(254, 220, 38, 0.12);
+  --accent-glow: rgba(254, 220, 38, 0.35);
+  
+  /* ── Surfaces (динамические — меняются темой) ── */
+  --surface-page: #DDE2D8;
+  --surface-page-alt: #D9DEDA;
+  --surface-card: #F4F4EF;
+  --surface-card-hover: #FAFAF6;
+  
+  /* ── Radar gradient (под радаром в модалке Мой день) ── */
+  --radar-glow-start: rgba(254, 220, 38, 0.25);
+  --radar-glow-end: rgba(254, 220, 38, 0.05);
+  --radar-data-fill: rgba(255, 220, 110, 0.22);
+  --radar-data-stroke: #FEDC26;
+  
+  /* ── Legacy aliases (для совместимости) ── */
+  --accent-yellow: var(--accent);
+  --accent-yellow-hover: var(--accent-hover);
+  --accent-yellow-pressed: var(--accent-pressed);
+  --accent-yellow-soft: var(--accent-soft);
+  --accent-yellow-muted: var(--accent-muted);
+  
+  /* ── Navy / dark text ── */
+  --navy: #111228;
+  --navy-soft: rgba(17, 18, 40, 0.72);
+  --navy-muted: rgba(17, 18, 40, 0.52);
+  --navy-subtle: rgba(17, 18, 40, 0.32);
+  --navy-faint: rgba(17, 18, 40, 0.12);
+  --navy-border: rgba(17, 18, 40, 0.08);
+  
+  /* ── Static surfaces ── */
+  --surface-elevated: #FFFFFF;
+  --surface-input: #FFFFFF;
+  --surface-muted: rgba(244, 244, 239, 0.7);
+  
+  /* ── Secondary gray ── */
+  --gray-text: #7E808A;
+  --gray-text-soft: rgba(126, 128, 138, 0.72);
+  --gray-placeholder: #A1A3AB;
+  --gray-border: rgba(126, 128, 138, 0.2);
+  --gray-divider: rgba(126, 128, 138, 0.12);
+  
   /* ── Page / marketing background ── */
-  --page-bg-left: #f5f2fb;
-  --page-bg-center: #eef6ee;
-  --page-bg-right: #e8f2fc;
-  --emotional-bloom: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(140, 120, 220, 0.18) 0%, rgba(100, 160, 240, 0.1) 40%, transparent 80%);
+  --page-bg-left: #DDE2D8;
+  --page-bg-center: #D9DEDA;
+  --page-bg-right: #E2E6DD;
+  --emotional-bloom: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(254, 220, 38, 0.08) 0%, rgba(244, 244, 239, 0.1) 40%, transparent 80%);
 
   /* ── Glass / frosted surfaces (белая база + opacity) ── */
   --solid-white: #ffffff;
@@ -58,21 +114,24 @@
   --focus-outline-ink: rgba(15, 15, 15, 0.32);
 
   /* ── Typography ── */
-  --text-primary: #171717;
-  --text-secondary: rgba(23, 23, 23, 0.62);
-  --text-placeholder: rgba(23, 23, 23, 0.26);
-  --text-muted: rgba(23, 23, 23, 0.38);
-  --text-calm-input: rgb(186 186 186);
-  --text-hero-input: #1b1b1b;
-  --text-hero-placeholder: #62646a;
-  --icon-muted: rgba(23, 23, 23, 0.22);
+  --text-primary: var(--navy);
+  --text-secondary: var(--navy-soft);
+  --text-placeholder: var(--gray-placeholder);
+  --text-muted: var(--navy-muted);
+  --text-calm-input: var(--gray-text);
+  --text-hero-input: var(--navy);
+  --text-hero-placeholder: var(--gray-text);
+  --icon-muted: var(--navy-subtle);
 
   /* ── Actions ── */
-  --btn-black: #111111;
+  --btn-primary: var(--accent-yellow);
+  --btn-primary-hover: var(--accent-yellow-hover);
+  --btn-primary-text: var(--navy);
+  --btn-black: var(--navy);
   --btn-white: #ffffff;
-  --ink-121212: #121212;
-  --toggle-track-on: #151515;
-  --toggle-track-off: rgba(21, 21, 21, 0.24);
+  --ink-121212: var(--navy);
+  --toggle-track-on: var(--accent-yellow);
+  --toggle-track-off: var(--gray-border);
 
   /* ── UI chrome: вкладки, тулбар, поиск (slate scale — визуальный паритет) ── */
   --ui-fg-strong: #111827;
@@ -109,11 +168,17 @@
   --ui-selected-hover: #1f2937;
 
   /* ── Hero / AI panel ── */
-  --hero-panel-bg: var(--glass-70);
-  --hero-panel-focus-shadow: 0 18px 45px rgba(21, 21, 21, 0.08);
-  --hero-bubble-user-bg: var(--ink-121212);
-  --hero-bubble-assistant-border: rgba(18, 18, 18, 0.06);
-  --hero-send-inset: inset 0 0 0 1px rgba(21, 21, 21, 0.14);
+  --hero-panel-bg: var(--surface-card);
+  --hero-panel-focus-shadow: 0 18px 45px rgba(17, 18, 40, 0.06);
+  --hero-bubble-user-bg: var(--navy);
+  --hero-bubble-assistant-bg: var(--surface-elevated);
+  --hero-bubble-assistant-border: var(--gray-divider);
+  --hero-send-bg: var(--accent-yellow);
+  --hero-send-hover: var(--accent-yellow-hover);
+  --hero-send-inset: none;
+  --hero-chip-bg: var(--surface-muted);
+  --hero-chip-hover: var(--surface-card-hover);
+  --hero-chip-active: var(--accent-yellow-soft);
 
   /* ── Semantic ── */
   --semantic-success-bg: rgba(41, 194, 117, 0.22);
@@ -237,19 +302,19 @@
   --z-toolbar-menu: 40;
   --z-dropdown: 80;
 
-  /* ── Radii ── */
-  --r-huge: 30px;
-  --r-card: 20px;
-  --r-panel: 20px;
+  /* ── Radii (proptech — более крупные, мягкие) ── */
+  --r-huge: 36px;
+  --r-card: 24px;
+  --r-panel: 28px;
   --r-pill: 9999px;
-  --r-badge: 12px;
-  --r-sm: 8px;
-  --r-control: 12px;
-  --r-tab-pill: 55px;
-  --r-priority-chip: 45px;
-  --r-hero-panel: 15px;
-  --r-hero-search: 11px;
-  --r-message-bubble: 24px;
+  --r-badge: 14px;
+  --r-sm: 10px;
+  --r-control: 14px;
+  --r-tab-pill: 9999px;
+  --r-priority-chip: 9999px;
+  --r-hero-panel: 24px;
+  --r-hero-search: 16px;
+  --r-message-bubble: 20px;
 
   /* ── Shadows ── */
   --shadow-card: 0 0 0 1px var(--border);
@@ -258,9 +323,10 @@
   --shadow-fab: 0 4px 16px rgba(0, 0, 0, 0.25);
   --shadow-dropdown: 0 12px 30px rgba(16, 24, 40, 0.16);
 
-  /* ── Typography stack ── */
-  --font: 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
-  --font-weight-tab: 300;
+  /* ── Typography stack (Poppins — geometric sans) ── */
+  --font: 'Poppins', 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', sans-serif;
+  --font-weight-light: 300;
+  --font-weight-tab: 400;
   --font-weight-body: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -291,13 +357,7 @@ html, body, #root {
   height: 100%;
   font-family: var(--font);
   color: var(--text-primary);
-  background:
-    radial-gradient(58% 54% at 72% 12%, rgba(255, 211, 55, 0.22) 0%, rgba(255, 250, 225, 0.06) 40%, transparent 70%),
-    radial-gradient(64% 62% at 28% 88%, rgba(126, 94, 255, 0.20) 0%, rgba(205, 3, 255, 0.08) 42%, transparent 72%),
-    radial-gradient(78% 72% at 52% 38%, rgba(75, 212, 255, 0.22) 0%, rgba(208, 75, 255, 0.10) 44%, transparent 78%),
-    radial-gradient(52% 46% at 20% 30%, rgba(199, 190, 255, 0.26) 0%, rgba(155, 255, 171, 0.10) 46%, transparent 76%),
-    linear-gradient(122deg, #f6f2fb 0%, #eef6ee 46%, #e8f2fc 100%);
-  background-attachment: fixed;
+  background: var(--surface-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -335,4 +395,118 @@ select:focus {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DAY THEMES — переключаются через data-theme на :root
+   Каждая тема: мягкий тонированный фон + гармоничный теплый акцент
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── GOOD DAY (default) — серо-мятный + желтый ── */
+:root[data-theme="good"],
+:root:not([data-theme]) {
+  --accent: #FEDC26;
+  --accent-hover: #FDE047;
+  --accent-pressed: #EAB308;
+  --accent-soft: rgba(254, 220, 38, 0.18);
+  --accent-muted: rgba(254, 220, 38, 0.12);
+  --accent-glow: rgba(254, 220, 38, 0.35);
+  --surface-page: #DDE2D8;
+  --surface-page-alt: #D9DEDA;
+  --surface-card: #F4F4EF;
+  --surface-card-hover: #FAFAF6;
+  --radar-glow-start: rgba(254, 220, 38, 0.25);
+  --radar-glow-end: rgba(254, 220, 38, 0.05);
+  --radar-data-fill: rgba(255, 220, 110, 0.22);
+  --radar-data-stroke: #FEDC26;
+}
+
+/* ── CALM DAY — сизый/голубоватый + бирюзовый ── */
+:root[data-theme="calm"] {
+  --accent: #38BDF8;
+  --accent-hover: #7DD3FC;
+  --accent-pressed: #0EA5E9;
+  --accent-soft: rgba(56, 189, 248, 0.18);
+  --accent-muted: rgba(56, 189, 248, 0.12);
+  --accent-glow: rgba(56, 189, 248, 0.35);
+  --surface-page: #D8DEE6;
+  --surface-page-alt: #D4DBE4;
+  --surface-card: #EFF3F7;
+  --surface-card-hover: #F7FAFC;
+  --radar-glow-start: rgba(56, 189, 248, 0.25);
+  --radar-glow-end: rgba(56, 189, 248, 0.05);
+  --radar-data-fill: rgba(125, 211, 252, 0.22);
+  --radar-data-stroke: #38BDF8;
+}
+
+/* ── ENERGY DAY — персиковый + оранжевый/коралловый ── */
+:root[data-theme="energy"] {
+  --accent: #FB923C;
+  --accent-hover: #FDBA74;
+  --accent-pressed: #EA580C;
+  --accent-soft: rgba(251, 146, 60, 0.18);
+  --accent-muted: rgba(251, 146, 60, 0.12);
+  --accent-glow: rgba(251, 146, 60, 0.35);
+  --surface-page: #E6DDD8;
+  --surface-page-alt: #E4DAD6;
+  --surface-card: #F7F3EF;
+  --surface-card-hover: #FFFAF7;
+  --radar-glow-start: rgba(251, 146, 60, 0.25);
+  --radar-glow-end: rgba(251, 146, 60, 0.05);
+  --radar-data-fill: rgba(253, 186, 116, 0.22);
+  --radar-data-stroke: #FB923C;
+}
+
+/* ── HARD DAY — лавандовый + фиолетовый ── */
+:root[data-theme="hard"] {
+  --accent: #A78BFA;
+  --accent-hover: #C4B5FD;
+  --accent-pressed: #8B5CF6;
+  --accent-soft: rgba(167, 139, 250, 0.18);
+  --accent-muted: rgba(167, 139, 250, 0.12);
+  --accent-glow: rgba(167, 139, 250, 0.35);
+  --surface-page: #E0DCE6;
+  --surface-page-alt: #DDD9E4;
+  --surface-card: #F5F3F7;
+  --surface-card-hover: #FAF9FC;
+  --radar-glow-start: rgba(167, 139, 250, 0.25);
+  --radar-glow-end: rgba(167, 139, 250, 0.05);
+  --radar-data-fill: rgba(196, 181, 253, 0.22);
+  --radar-data-stroke: #A78BFA;
+}
+
+/* ── FOCUS DAY — минтовый + зеленый ── */
+:root[data-theme="focus"] {
+  --accent: #34D399;
+  --accent-hover: #6EE7B7;
+  --accent-pressed: #10B981;
+  --accent-soft: rgba(52, 211, 153, 0.18);
+  --accent-muted: rgba(52, 211, 153, 0.12);
+  --accent-glow: rgba(52, 211, 153, 0.35);
+  --surface-page: #D8E4DE;
+  --surface-page-alt: #D5E1DB;
+  --surface-card: #EFF5F2;
+  --surface-card-hover: #F7FCF9;
+  --radar-glow-start: rgba(52, 211, 153, 0.25);
+  --radar-glow-end: rgba(52, 211, 153, 0.05);
+  --radar-data-fill: rgba(110, 231, 183, 0.22);
+  --radar-data-stroke: #34D399;
+}
+
+/* ── PRODUCTIVE DAY — теплый бежевый + розовый/коралловый ── */
+:root[data-theme="productive"] {
+  --accent: #F472B6;
+  --accent-hover: #F9A8D4;
+  --accent-pressed: #EC4899;
+  --accent-soft: rgba(244, 114, 182, 0.18);
+  --accent-muted: rgba(244, 114, 182, 0.12);
+  --accent-glow: rgba(244, 114, 182, 0.35);
+  --surface-page: #E4DDE0;
+  --surface-page-alt: #E2DADD;
+  --surface-card: #F6F2F4;
+  --surface-card-hover: #FCF9FA;
+  --radar-glow-start: rgba(244, 114, 182, 0.25);
+  --radar-glow-end: rgba(244, 114, 182, 0.05);
+  --radar-data-fill: rgba(249, 168, 212, 0.22);
+  --radar-data-stroke: #F472B6;
 }

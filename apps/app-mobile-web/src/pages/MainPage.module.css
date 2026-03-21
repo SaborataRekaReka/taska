@@ -6,26 +6,15 @@
 }
 
 .emotional {
-  background: var(--gradient-main-emotional);
+  background: transparent;
 }
 
 .dayBg {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none;
 }
 
 .emotionalBloom {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: var(--gradient-main-bloom);
+  display: none;
 }
 
 .main {

@@ -7,12 +7,13 @@
 }
 
 .card {
-  background: var(--color-bg-card);
-  border-radius: var(--radius-xl);
+  background: var(--surface-card);
+  border-radius: var(--r-huge);
   padding: 48px 40px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: var(--shadow-elevated);
+  max-width: 420px;
+  border: 1px solid var(--gray-divider);
+  box-shadow: 0 8px 32px rgba(17, 18, 40, 0.06);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -32,34 +33,40 @@
 }
 
 .input {
-  background: var(--auth-input-bg);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--gray-divider);
+  border-radius: var(--r-control);
+  padding: 14px 18px;
   font-size: 15px;
-  transition: background var(--dur-200) var(--ease-standard);
+  font-weight: var(--font-weight-medium);
+  color: var(--navy);
+  transition: border-color var(--dur-200) var(--ease-standard), box-shadow var(--dur-200) var(--ease-standard);
 }
 
 .input:focus {
-  background: var(--auth-input-focus-bg);
+  border-color: var(--accent-yellow);
+  box-shadow: 0 0 0 3px var(--accent-yellow-muted);
 }
 
 .button {
-  background: var(--color-primary);
-  color: var(--color-primary-text);
-  border-radius: var(--radius-md);
+  background: var(--accent-yellow);
+  color: var(--navy);
+  border-radius: var(--r-control);
   padding: 14px;
   font-size: 15px;
   font-weight: var(--font-weight-semibold);
   margin-top: 8px;
-  transition: opacity var(--dur-200) var(--ease-standard);
+  transition: background var(--dur-200) var(--ease-standard), transform var(--dur-200) var(--ease-standard);
 }
 
 .button:hover {
-  opacity: 0.9;
+  background: var(--accent-yellow-hover);
+  transform: translateY(-1px);
 }
 
 .button:disabled {
   opacity: 0.5;
+  transform: none;
 }
 
 .error {

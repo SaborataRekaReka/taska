@@ -7,8 +7,7 @@ import { MoodSelector } from './MoodSelector';
 import { GradientBlob } from '../GradientBackground';
 import { AiProcessIndicator } from '../AiProcessIndicator';
 import { computeDayProfile } from './computeDayProfile';
-import { profileToColors, energyToSpread } from '../../lib/profileColors';
-import { useUiStore } from '../../stores/ui';
+import { useUiStore, type DayTheme } from '../../stores/ui';
 import aiStarsIcon from '../../assests/ai_stars.svg';
 import type { DayProfile, DayTask, MoodLevel } from './types';
 import styles from './MyDayModal.module.css';
@@ -72,6 +71,34 @@ function capitalize(value: string): string {
   return value[0].toUpperCase() + value.slice(1);
 }
 
+function getThemeLabel(theme: DayTheme): string {
+  const labels: Record<DayTheme, string> = {
+    good: 'Хороший день',
+    calm: 'Спокойный день',
+    energy: 'Энергичный день',
+    hard: 'Тяжёлый день',
+    focus: 'День фокуса',
+    productive: 'Продуктивный день',
+  };
+  return labels[theme];
+}
+
+function getThemeColors(theme: DayTheme): [string, string] {
+  const colors: Record<DayTheme, [string, string]> = {
+    good: ['#FEDC26', '#a8e063'],
+    calm: ['#38BDF8', '#64e8de'],
+    energy: ['#FB923C', '#fcd34d'],
+    hard: ['#A78BFA', '#c4b5fd'],
+    focus: ['#34D399', '#6ee7b7'],
+    productive: ['#F472B6', '#fda4af'],
+  };
+  return colors[theme];
+}
+
+function energyToSpread(energy: number): number {
+  return 0.3 + (energy / 20) * 0.4;
+}
+
 export function MyDayModal({
   isOpen,
   onClose,
@@ -80,12 +107,12 @@ export function MyDayModal({
   closeOnBackdrop = true,
   onCreateMyDay,
 }: MyDayModalProps) {
-  const [mood, setMood] = useState<MoodLevel>(3);
+  const [mood, setMood] = useState<MoodLevel>(4);
   const [energy, setEnergy] = useState<number>(11);
   const [wishes, setWishes] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const setDayColors = useUiStore((s) => s.setDayColors);
+  const applyDayTheme = useUiStore((s) => s.applyDayTheme);
 
   const effectiveTasks = tasks.length > 0 ? tasks : MOCK_DAY_TASKS;
 
@@ -94,7 +121,23 @@ export function MyDayModal({
     [effectiveTasks, mood, energy, wishes],
   );
 
-  const [c0, c1] = useMemo(() => profileToColors(profile, mood), [profile, mood]);
+  const previewTheme = useMemo((): DayTheme => {
+    // mood: 1 = очень тяжело, 2 = ниже среднего, 3 = спокойно, 4 = хорошо, 5 = очень бодро
+    if (mood === 1) return 'hard';
+    if (mood === 2) return energy <= 10 ? 'hard' : 'calm';
+    if (mood === 3) return 'calm';
+    if (mood === 4) {
+      if (energy >= 15) return 'energy';
+      if (energy >= 10) return 'good';
+      return 'focus';
+    }
+    // mood === 5 (очень бодро)
+    if (energy >= 15) return 'productive';
+    if (energy >= 10) return 'energy';
+    return 'good';
+  }, [mood, energy]);
+
+  const [blobC0, blobC1] = useMemo(() => getThemeColors(previewTheme), [previewTheme]);
   const blobSpread = useMemo(() => energyToSpread(energy), [energy]);
 
   useEffect(() => {
@@ -153,7 +196,8 @@ export function MyDayModal({
         energy,
         wishes,
       });
-      setDayColors([c0, c1], energy);
+      applyDayTheme(mood, energy);
+      onClose();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Не удалось собрать "Мой день". Попробуйте еще раз.';
       setCreateError(message);
@@ -242,9 +286,17 @@ export function MyDayModal({
               ) : null}
             </section>
 
-            <section className={styles.rightColumn}>
-              <GradientBlob c0={c0} c1={c1} size={360} scale={1.3} spread={blobSpread} />
+            <section className={styles.rightColumn} data-theme-preview={previewTheme}>
+              <GradientBlob
+                c0={blobC0}
+                c1={blobC1}
+                size={360}
+                scale={1.3}
+                spread={blobSpread}
+                id="myday-blob"
+              />
               <DayProfileRadar profile={profile} />
+              <p className={styles.themeLabel}>{getThemeLabel(previewTheme)}</p>
             </section>
           </motion.div>
         </motion.div>

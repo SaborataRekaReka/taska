@@ -5,18 +5,18 @@
 }
 
 .bar {
-  width: 4px;
-  height: 25.82px;
+  width: 5px;
+  height: 26px;
   border-radius: 999px;
-  background: var(--gray-energy-track);
+  background: var(--gray-divider);
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .bar:hover {
   transform: translateY(-1px);
-  background: var(--gray-energy-hover);
+  background: var(--accent-yellow-soft);
 }
 
 .filled {
-  background: var(--gray-energy-filled);
+  background: var(--accent-yellow);
 }
