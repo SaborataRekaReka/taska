@@ -8,6 +8,7 @@ import type {
   AuthResponse,
   List,
   Task,
+  MyDayPlanningContext,
 } from '../lib/types';
 import { useAuthStore } from '../stores/auth';
 import { useUiStore } from '../stores/ui';
@@ -186,6 +187,7 @@ export function useCreateAiPlan() {
         taskIds?: string[];
         search?: string;
         limit?: number;
+        myDay?: MyDayPlanningContext;
       };
     }) => api.post<AiPlanResponse>('/ai/plan', data),
   });

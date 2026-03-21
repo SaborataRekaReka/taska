@@ -13,6 +13,23 @@ export type AiOperationType =
   | 'UPDATE_SUBTASK'
   | 'DELETE_SUBTASK';
 
+
+export type MyDayIntent = 'LIGHT' | 'BALANCED' | 'PROGRESS' | 'FOCUS' | 'CATCH_UP';
+export type MyDayFocusCapacity = 'LOW' | 'MEDIUM' | 'HIGH';
+export type MyDayStressLevel = 'LOW' | 'MEDIUM' | 'HIGH';
+export type MyDayInteractionPreference = 'SOLO' | 'MIXED' | 'SOCIAL';
+
+export interface MyDayPlanningContext {
+  mood?: number;
+  energyLevel?: number;
+  wishes?: string[];
+  timeBudgetMinutes?: number | null;
+  dayIntent?: MyDayIntent | null;
+  focusCapacity?: MyDayFocusCapacity | null;
+  stressLevel?: MyDayStressLevel | null;
+  interactionPreference?: MyDayInteractionPreference | null;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -96,6 +113,8 @@ export interface AiPlanOperation {
 }
 
 export interface AiPlanResponse {
+  planKind?: 'GENERIC' | 'MY_DAY';
+  plannerContext?: Record<string, unknown> | null;
   operationId: string;
   status: AiOperationStatus;
   scope: AiScope;
@@ -148,6 +167,8 @@ export interface AiOperationDetail {
     assistantMessage: string;
     operations: AiPlanOperation[];
     warnings: string[];
+    planKind?: 'GENERIC' | 'MY_DAY';
+    plannerContext?: Record<string, unknown> | null;
   };
   executionPayload?: Record<string, unknown> | null;
   undoPayload?: Record<string, unknown> | null;
