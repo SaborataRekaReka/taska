@@ -241,6 +241,16 @@ export function MainPage() {
     mood: MoodLevel;
     energy: number;
     wishes: string[];
+    myDayContext: {
+      mood: MoodLevel;
+      energyLevel: number;
+      wishes: string[];
+      dayIntent: 'LIGHT' | 'BALANCED' | 'PROGRESS' | 'FOCUS' | 'CATCH_UP';
+      focusCapacity: 'LOW' | 'MEDIUM' | 'HIGH';
+      stressLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+      timeBudgetMinutes: number | null;
+      interactionPreference: 'SOLO' | 'MIXED' | 'SOCIAL';
+    };
   }): Promise<void> {
     setSaveMyDayError(null);
     const todayIso = new Date().toISOString();
@@ -278,9 +288,11 @@ export function MainPage() {
         ? {
             taskIds: contextTaskIds,
             limit: contextTaskIds.length,
+            myDay: payload.myDayContext,
           }
         : {
             limit: 1,
+            myDay: payload.myDayContext,
           },
     });
 
