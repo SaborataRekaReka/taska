@@ -12,6 +12,17 @@ import aiStarsIcon from '../../assests/ai_stars.svg';
 import type { DayProfile, DayTask, MoodLevel } from './types';
 import styles from './MyDayModal.module.css';
 
+type MyDayContextPayload = {
+  mood: MoodLevel;
+  energyLevel: number;
+  wishes: string[];
+  dayIntent: 'LIGHT' | 'BALANCED' | 'PROGRESS' | 'FOCUS' | 'CATCH_UP';
+  focusCapacity: 'LOW' | 'MEDIUM' | 'HIGH';
+  stressLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  timeBudgetMinutes: number | null;
+  interactionPreference: 'SOLO' | 'MIXED' | 'SOCIAL';
+};
+
 interface MyDayModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +34,7 @@ interface MyDayModalProps {
     mood: MoodLevel;
     energy: number;
     wishes: string[];
+    myDayContext: MyDayContextPayload;
   }) => Promise<void> | void;
 }
 
@@ -97,6 +109,57 @@ function getThemeColors(theme: DayTheme): [string, string] {
 
 function energyToSpread(energy: number): number {
   return 0.3 + (energy / 20) * 0.4;
+}
+
+function inferMyDayContext(
+  mood: MoodLevel,
+  energy: number,
+  wishes: string[],
+): MyDayContextPayload {
+  const hasWish = (value: string) => wishes.includes(value);
+
+  const dayIntent = hasWish('Ничего сложного')
+    ? 'LIGHT'
+    : hasWish('Одно большое дело')
+      ? 'FOCUS'
+      : hasWish('Только срочное')
+        ? 'CATCH_UP'
+        : hasWish('Побольше поработать')
+          ? 'PROGRESS'
+          : energy <= 7
+            ? 'LIGHT'
+            : energy >= 16
+              ? 'PROGRESS'
+              : 'BALANCED';
+
+  const focusCapacity = hasWish('Ничего сложного')
+    ? 'LOW'
+    : hasWish('Одно большое дело')
+      ? 'HIGH'
+      : energy <= 7
+        ? 'LOW'
+        : energy >= 15
+          ? 'HIGH'
+          : 'MEDIUM';
+
+  const stressLevel = hasWish('Ничего сложного')
+    ? 'HIGH'
+    : mood <= 2
+      ? 'HIGH'
+      : mood === 3
+        ? 'MEDIUM'
+        : 'LOW';
+
+  return {
+    mood,
+    energyLevel: energy,
+    wishes,
+    dayIntent,
+    focusCapacity,
+    stressLevel,
+    timeBudgetMinutes: null,
+    interactionPreference: 'MIXED' as const,
+  };
 }
 
 export function MyDayModal({
@@ -195,6 +258,7 @@ export function MyDayModal({
         mood,
         energy,
         wishes,
+        myDayContext: inferMyDayContext(mood, energy, wishes),
       });
       applyDayTheme(mood, energy);
       onClose();
