@@ -6,11 +6,12 @@ import { SubtasksModule } from '../subtasks/module.js';
 import { TasksModule } from '../tasks/module.js';
 import { AiAssistantController } from './controller.js';
 import { AiAssistantService } from './ai-assistant.service.js';
+import { DayPlanningService } from './day-planning.service.js';
 
 @Module({
   imports: [HistoryModule, ListsModule, TasksModule, SubtasksModule],
   controllers: [AiAssistantController],
-  providers: [AiAssistantService],
+  providers: [AiAssistantService, DayPlanningService],
   exports: [AiAssistantService],
 })
 export class AiAssistantModule {}

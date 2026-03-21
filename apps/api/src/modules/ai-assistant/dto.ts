@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -18,6 +19,64 @@ import {
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
 const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'DONE'] as const;
 const AI_SCOPES = ['GLOBAL', 'TASK'] as const;
+
+const DAY_INTENTS = ['LIGHT', 'BALANCED', 'PROGRESS', 'FOCUS', 'CATCH_UP'] as const;
+const FOCUS_CAPACITIES = ['LOW', 'MEDIUM', 'HIGH'] as const;
+const STRESS_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
+const INTERACTION_PREFERENCES = ['SOLO', 'MIXED', 'SOCIAL'] as const;
+
+export class MyDayContextDto {
+  @ApiPropertyOptional({ minimum: 1, maximum: 5, description: 'Current mood level used by My Day planning.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  mood?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 20, description: 'Current energy level used by My Day planning.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  energyLevel?: number;
+
+  @ApiPropertyOptional({ type: () => [String], description: 'Soft preference chips chosen in My Day setup.' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  wishes?: string[];
+
+  @ApiPropertyOptional({ minimum: 15, maximum: 720, nullable: true })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(15)
+  @Max(720)
+  timeBudgetMinutes?: number | null;
+
+  @ApiPropertyOptional({ enum: DAY_INTENTS, nullable: true })
+  @IsOptional()
+  @IsEnum(DAY_INTENTS)
+  dayIntent?: (typeof DAY_INTENTS)[number] | null;
+
+  @ApiPropertyOptional({ enum: FOCUS_CAPACITIES, nullable: true })
+  @IsOptional()
+  @IsEnum(FOCUS_CAPACITIES)
+  focusCapacity?: (typeof FOCUS_CAPACITIES)[number] | null;
+
+  @ApiPropertyOptional({ enum: STRESS_LEVELS, nullable: true })
+  @IsOptional()
+  @IsEnum(STRESS_LEVELS)
+  stressLevel?: (typeof STRESS_LEVELS)[number] | null;
+
+  @ApiPropertyOptional({ enum: INTERACTION_PREFERENCES, nullable: true })
+  @IsOptional()
+  @IsEnum(INTERACTION_PREFERENCES)
+  interactionPreference?: (typeof INTERACTION_PREFERENCES)[number] | null;
+}
+
 const AI_OPERATION_TYPES = [
   'CREATE_LIST',
   'UPDATE_LIST',
@@ -30,6 +89,12 @@ const AI_OPERATION_TYPES = [
 ] as const;
 
 export class AiPlanContextDto {
+  @ApiPropertyOptional({ type: () => MyDayContextDto, description: 'Structured My Day planning context.' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MyDayContextDto)
+  myDay?: MyDayContextDto;
+
   @ApiPropertyOptional({ description: 'Explicit list of list IDs relevant to the planning context.' })
   @IsOptional()
   @IsArray()

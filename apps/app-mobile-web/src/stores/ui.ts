@@ -128,7 +128,7 @@ export const useUiStore = create<UiState>()(
         isMyDaySaved: state.isMyDaySaved,
         dayEnergy: state.dayEnergy,
       }),
-      onRehydrate: () => (state) => {
+      onRehydrateStorage: () => (state) => {
         if (typeof window !== 'undefined' && state?.dayTheme) {
           applyThemeToDOM(state.dayTheme);
         }

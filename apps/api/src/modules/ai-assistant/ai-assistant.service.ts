@@ -23,6 +23,7 @@ import type {
   CreateAiPlanDto,
   ReviseAiPlanDto,
 } from './dto.js';
+import { DayPlanningService } from './day-planning.service.js';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_CHAT_MODEL = 'gpt-4.1-mini';
@@ -71,6 +72,8 @@ export interface OperationPlan {
   assistantMessage: string;
   operations: PlanOperation[];
   warnings: string[];
+  planKind?: 'GENERIC' | 'MY_DAY';
+  plannerContext?: Record<string, unknown>;
 }
 
 interface ExecutionMutationResult {
@@ -140,6 +143,7 @@ export class AiAssistantService {
     private readonly listsService: ListsService,
     private readonly tasksService: TasksService,
     private readonly subtasksService: SubtasksService,
+    private readonly dayPlanningService: DayPlanningService,
   ) {}
 
   async createPlan(userId: string, dto: CreateAiPlanDto) {
@@ -150,19 +154,20 @@ export class AiAssistantService {
 
     const context = await this.buildContext(userId, dto);
     const plan = await this.generatePlan(dto.prompt, scope, context);
-    const normalizedPlan = this.normalizePlan(scope, plan);
+    const normalizedPlan = this.finalizePlan(scope, plan, context.plannerMeta);
 
     const operation = await this.prisma.aiOperation.create({
       data: {
         userId,
         scope,
         taskId: dto.taskId ?? null,
-        operationType: 'PLAN',
+        operationType: context.plannerMeta?.planKind === 'MY_DAY' ? 'BUILD_MY_DAY' : 'PLAN',
         model: this.resolveModel(),
         prompt: dto.prompt,
         planPayload: this.asJson(normalizedPlan),
         executionPayload: this.asJson({
           contextSummary: context.summary,
+          plannerContext: context.plannerMeta ?? null,
         }),
       },
     });
@@ -177,6 +182,8 @@ export class AiAssistantService {
       operations: normalizedPlan.operations,
       warnings: normalizedPlan.warnings,
       model: operation.model,
+      planKind: normalizedPlan.planKind,
+      plannerContext: normalizedPlan.plannerContext ?? null,
     };
   }
 
@@ -187,6 +194,10 @@ export class AiAssistantService {
     }
 
     const existingPlan = this.readPlan(operation.scope, operation.planPayload);
+    const existingExecutionPayload = this.toRecord(operation.executionPayload);
+    const existingPlannerContext = existingExecutionPayload?.plannerContext && typeof existingExecutionPayload.plannerContext === 'object' && !Array.isArray(existingExecutionPayload.plannerContext)
+      ? existingExecutionPayload.plannerContext as Record<string, unknown>
+      : null;
     const revisedPlan = dto.operations?.length
       ? this.normalizePlan(operation.scope, {
           version: 1,
@@ -206,7 +217,7 @@ export class AiAssistantService {
           }),
         );
 
-    const normalizedPlan = this.normalizePlan(operation.scope, revisedPlan);
+    const normalizedPlan = this.finalizePlan(operation.scope, revisedPlan, existingPlannerContext);
     const updated = await this.prisma.aiOperation.update({
       where: { id: operation.id },
       data: {
@@ -223,6 +234,8 @@ export class AiAssistantService {
       assistantMessage: normalizedPlan.assistantMessage,
       operations: normalizedPlan.operations,
       warnings: normalizedPlan.warnings,
+      planKind: normalizedPlan.planKind,
+      plannerContext: normalizedPlan.plannerContext ?? null,
     };
   }
 
@@ -686,8 +699,18 @@ export class AiAssistantService {
       take: limit,
     });
 
+    const normalizedMyDay = this.dayPlanningService.normalizeMyDayContext(dto.context?.myDay);
+    const plannerMeta = normalizedMyDay
+      ? {
+          planKind: 'MY_DAY' as const,
+          preview: this.dayPlanningService.buildMyDayPreview(normalizedMyDay, tasks),
+        }
+      : undefined;
+
     return {
-      summary: `Global plan over ${lists.length} lists and ${tasks.length} tasks`,
+      summary: plannerMeta?.planKind === 'MY_DAY'
+        ? `My Day planning over ${tasks.length} tasks`
+        : `Global plan over ${lists.length} lists and ${tasks.length} tasks`,
       payload: {
         lists,
         smartLists: [MY_DAY_SMART_LIST_HINT, ALL_TECH_LIST_HINT],
@@ -695,7 +718,10 @@ export class AiAssistantService {
         reservedVirtualListNames: VIRTUAL_TECH_LIST_NAMES,
         protectedRealListNames: PROTECTED_REAL_LIST_NAMES,
         tasks,
+        myDay: normalizedMyDay,
+        plannerMeta,
       },
+      plannerMeta,
     };
   }
 
@@ -827,6 +853,19 @@ export class AiAssistantService {
     }
 
     return this.normalizePlan(scope, parsed);
+  }
+
+  private finalizePlan(scope: 'GLOBAL' | 'TASK', value: unknown, plannerContext?: Record<string, unknown> | null): OperationPlan {
+    const normalized = this.normalizePlan(scope, value);
+    if (!plannerContext) {
+      return normalized;
+    }
+
+    return {
+      ...normalized,
+      planKind: plannerContext.planKind === 'MY_DAY' ? 'MY_DAY' : 'GENERIC',
+      plannerContext,
+    };
   }
 
   private normalizePlan(scope: 'GLOBAL' | 'TASK', value: unknown): OperationPlan {
