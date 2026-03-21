@@ -16,7 +16,13 @@
 .left {
   display: flex;
   align-items: center;
+  gap: 10px;
   justify-self: start;
+}
+
+.logoButton {
+  display: inline-flex;
+  align-items: center;
 }
 
 .logo {
@@ -25,6 +31,28 @@
   letter-spacing: -0.5px;
   line-height: 1;
   color: var(--navy);
+}
+
+.adminLink {
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.adminLink:hover {
+  background: var(--surface-card-hover);
+}
+
+.adminLinkActive {
+  border-color: var(--accent-yellow);
+  background: var(--accent-yellow-soft);
 }
 
 .dayButton {
@@ -207,5 +235,25 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 1100px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .left {
+    width: 100%;
+  }
+
+  .dayButton {
+    justify-self: start;
+  }
+
+  .right {
+    width: 100%;
+    justify-self: start;
   }
 }

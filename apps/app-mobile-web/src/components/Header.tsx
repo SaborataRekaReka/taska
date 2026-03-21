@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import aiStarsIcon from '../assests/ai_stars.svg';
 import { useAuthStore } from '../stores/auth';
@@ -24,12 +25,16 @@ function buildFullName(givenName: string | null, familyName: string | null): str
 }
 
 export function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const openMyDayModal = useUiStore((s) => s.openMyDayModal);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isAvatarBroken, setIsAvatarBroken] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const isAiAdminRoute = location.pathname.startsWith('/app/ai-admin');
 
   const initials = useMemo(() => {
     if (!user) {
@@ -89,10 +94,31 @@ export function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.left}>
-          <span className={styles.logo}>TASKA</span>
+          <button type="button" className={styles.logoButton} onClick={() => navigate('/app')}>
+            <span className={styles.logo}>TASKA</span>
+          </button>
+          {user ? (
+            <button
+              type="button"
+              className={`${styles.adminLink} ${isAiAdminRoute ? styles.adminLinkActive : ''}`}
+              onClick={() => navigate('/app/ai-admin')}
+            >
+              AI Admin
+            </button>
+          ) : null}
         </div>
-        <button type="button" className={styles.dayButton} onClick={openMyDayModal}>
-          {'\u041c\u043e\u0439 \u0434\u0435\u043d\u044c'}
+        <button
+          type="button"
+          className={styles.dayButton}
+          onClick={() => {
+            if (isAiAdminRoute) {
+              navigate('/app');
+              return;
+            }
+            openMyDayModal();
+          }}
+        >
+          {isAiAdminRoute ? 'Back to App' : '\u041c\u043e\u0439 \u0434\u0435\u043d\u044c'}
           <img src={aiStarsIcon} alt="" className={styles.sparkle} />
         </button>
         <div className={styles.right}>

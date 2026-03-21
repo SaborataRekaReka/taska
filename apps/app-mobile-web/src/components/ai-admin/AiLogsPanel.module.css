@@ -1,0 +1,116 @@
+.section {
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 17px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.type {
+  min-height: 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.typeFAILED {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.typeUNDONE {
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.typeMY_DAY_FALLBACK {
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.itemTitle {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.message {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.linkBtn {
+  width: fit-content;
+  min-height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.linkBtn:hover {
+  background: var(--surface-card-hover);
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+}

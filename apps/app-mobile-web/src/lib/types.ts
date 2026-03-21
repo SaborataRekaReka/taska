@@ -3,6 +3,8 @@ export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 export type AuthProvider = 'LOCAL' | 'GOOGLE';
 export type AiScope = 'GLOBAL' | 'TASK';
 export type AiOperationStatus = 'PLANNED' | 'CONFIRMED' | 'EXECUTED' | 'UNDONE' | 'FAILED';
+export type HistoryEntityType = 'LIST' | 'TASK' | 'SUBTASK' | 'AI_OPERATION';
+export type HistoryActionType = 'CREATED' | 'UPDATED' | 'DELETED' | 'RESTORED' | 'AI_EXECUTED' | 'AI_UNDONE';
 export type AiOperationType =
   | 'CREATE_LIST'
   | 'UPDATE_LIST'
@@ -173,4 +175,63 @@ export interface AiOperationDetail {
   executionPayload?: Record<string, unknown> | null;
   undoPayload?: Record<string, unknown> | null;
   createdAt: string;
+}
+
+export interface HistoryEvent {
+  id: string;
+  userId: string;
+  entityType: HistoryEntityType;
+  entityId: string;
+  actionType: HistoryActionType;
+  payload: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AiHealthStatus {
+  module: string;
+  status: string;
+}
+
+export interface AiOperationsListResponse {
+  items: AiOperationDetail[];
+  total: number;
+  limit: number;
+}
+
+export interface AiRuntimeInfo {
+  module: string;
+  status: string;
+  safeMode: boolean;
+  planningModel: string;
+  chatModel: string;
+  capabilities: {
+    plan: boolean;
+    revise: boolean;
+    confirm: boolean;
+    execute: boolean;
+    undo: boolean;
+    listOperations: boolean;
+    runtime: boolean;
+    adminConfig: boolean;
+    dryRun: boolean;
+  };
+  trustBoundary: {
+    modelCanPropose: boolean;
+    modelCanExecute: boolean;
+  };
+  timestamp: string;
+}
+
+export interface AiAdminConfig {
+  id: string;
+  userId: string;
+  myDayAutoConfirm: boolean;
+  myDayAutoExecute: boolean;
+  myDayTaskLimit: number;
+  blockDeleteOperations: boolean;
+  requireUndoReason: boolean;
+  operatorNotes: string | null;
+  promptGuardrails: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

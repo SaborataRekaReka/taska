@@ -5,6 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import type {
   AiOperationScope,
   HistoryEntityType,
@@ -21,7 +22,9 @@ import { SubtasksService } from '../subtasks/subtasks.service.js';
 import { TasksService } from '../tasks/tasks.service.js';
 import type {
   CreateAiPlanDto,
+  ListAiOperationsQueryDto,
   ReviseAiPlanDto,
+  UpdateAiAdminConfigDto,
 } from './dto.js';
 import { DayPlanningService } from './day-planning.service.js';
 
@@ -85,6 +88,20 @@ interface ExecutionMutationResult {
   undo: UndoMutation;
 }
 
+interface AiAdminConfigRow {
+  id: string;
+  userId: string;
+  myDayAutoConfirm: boolean;
+  myDayAutoExecute: boolean;
+  myDayTaskLimit: number;
+  blockDeleteOperations: boolean;
+  requireUndoReason: boolean;
+  operatorNotes: string | null;
+  promptGuardrails: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 type UndoMutation =
   | { type: 'DELETE_LIST'; listId: string }
   | { type: 'RESTORE_LIST'; listId: string; previousName: string }
@@ -133,6 +150,20 @@ const NO_LIST_SYSTEM_HINT = {
     moveTask: 'Use UPDATE_TASK and set task.listId to null.',
     note: 'Do not use CREATE_LIST/UPDATE_LIST for "Без списка".',
   },
+};
+
+const DEFAULT_AI_ADMIN_CONFIG = {
+  myDayAutoConfirm: true,
+  myDayAutoExecute: true,
+  myDayTaskLimit: 4,
+  blockDeleteOperations: false,
+  requireUndoReason: true,
+  operatorNotes: null as string | null,
+  promptGuardrails: [
+    'Never create physical list "Мой день".',
+    'Prefer UPDATE_TASK over DELETE_TASK in My Day flows.',
+    'Always keep ownership and list protection constraints.',
+  ].join('\n'),
 };
 
 @Injectable()
@@ -396,23 +427,123 @@ export class AiAssistantService {
 
   async getOperation(userId: string, operationId: string) {
     const operation = await this.findOwnedOperation(userId, operationId);
-    return {
-      operationId: operation.id,
-      scope: operation.scope,
-      taskId: operation.taskId,
-      status: operation.status,
-      prompt: operation.prompt,
-      model: operation.model,
-      approvedAt: operation.approvedAt,
-      executedAt: operation.executedAt,
-      undoneAt: operation.undoneAt,
-      failedAt: operation.failedAt,
-      errorMessage: operation.errorMessage,
-      plan: this.readPlan(operation.scope, operation.planPayload),
-      executionPayload: this.toRecord(operation.executionPayload),
-      undoPayload: this.toRecord(operation.undoPayload),
-      createdAt: operation.createdAt,
+    return this.serializeOperation(operation);
+  }
+
+  async listOperations(userId: string, query: ListAiOperationsQueryDto) {
+    const take = query.limit ?? 40;
+    const normalizedSearch = query.search?.trim();
+
+    const where: Prisma.AiOperationWhereInput = {
+      userId,
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.scope ? { scope: query.scope } : {}),
+      ...(normalizedSearch
+        ? {
+            OR: [
+              { id: { contains: normalizedSearch } },
+              { prompt: { contains: normalizedSearch, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
     };
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.aiOperation.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take,
+      }),
+      this.prisma.aiOperation.count({ where }),
+    ]);
+
+    return {
+      items: rows.map((item) => this.serializeOperation(item)),
+      total,
+      limit: take,
+    };
+  }
+
+  getRuntime() {
+    const planningModel = this.resolveModel();
+    const chatModel = process.env.OPENAI_MODEL_CHAT?.trim() || DEFAULT_CHAT_MODEL;
+
+    return {
+      module: 'ai-assistant',
+      status: 'active',
+      safeMode: true,
+      planningModel,
+      chatModel,
+      capabilities: {
+        plan: true,
+        revise: true,
+        confirm: true,
+        execute: true,
+        undo: true,
+        listOperations: true,
+        runtime: true,
+        adminConfig: true,
+        dryRun: false,
+      },
+      trustBoundary: {
+        modelCanPropose: true,
+        modelCanExecute: false,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async getAdminConfig(userId: string) {
+    const config = await this.ensureAdminConfig(userId);
+    return this.serializeAdminConfig(config);
+  }
+
+  async updateAdminConfig(userId: string, dto: UpdateAiAdminConfigDto) {
+    const normalizedOperatorNotes = dto.operatorNotes === undefined ? undefined : dto.operatorNotes?.trim() ?? null;
+    const normalizedPromptGuardrails = dto.promptGuardrails === undefined ? undefined : dto.promptGuardrails?.trim() ?? null;
+
+    const current = await this.ensureAdminConfig(userId);
+    const next = {
+      myDayAutoConfirm: dto.myDayAutoConfirm ?? current.myDayAutoConfirm,
+      myDayAutoExecute: dto.myDayAutoExecute ?? current.myDayAutoExecute,
+      myDayTaskLimit: dto.myDayTaskLimit ?? current.myDayTaskLimit,
+      blockDeleteOperations: dto.blockDeleteOperations ?? current.blockDeleteOperations,
+      requireUndoReason: dto.requireUndoReason ?? current.requireUndoReason,
+      operatorNotes: normalizedOperatorNotes === undefined ? current.operatorNotes : normalizedOperatorNotes,
+      promptGuardrails: normalizedPromptGuardrails === undefined ? current.promptGuardrails : normalizedPromptGuardrails,
+    };
+
+    const rows = await this.prisma.$queryRaw<AiAdminConfigRow[]>`
+      UPDATE "AiAdminConfig"
+      SET
+        "myDayAutoConfirm" = ${next.myDayAutoConfirm},
+        "myDayAutoExecute" = ${next.myDayAutoExecute},
+        "myDayTaskLimit" = ${next.myDayTaskLimit},
+        "blockDeleteOperations" = ${next.blockDeleteOperations},
+        "requireUndoReason" = ${next.requireUndoReason},
+        "operatorNotes" = ${next.operatorNotes},
+        "promptGuardrails" = ${next.promptGuardrails},
+        "updatedAt" = NOW()
+      WHERE "userId" = ${userId}
+      RETURNING
+        "id",
+        "userId",
+        "myDayAutoConfirm",
+        "myDayAutoExecute",
+        "myDayTaskLimit",
+        "blockDeleteOperations",
+        "requireUndoReason",
+        "operatorNotes",
+        "promptGuardrails",
+        "createdAt",
+        "updatedAt"
+    `;
+
+    if (!rows[0]) {
+      throw new NotFoundException('AI admin config not found');
+    }
+
+    return this.serializeAdminConfig(rows[0]);
   }
 
   private async executePlanOperation(userId: string, item: PlanOperation): Promise<ExecutionMutationResult> {
@@ -1054,6 +1185,114 @@ export class AiAssistantService {
       return null;
     }
     return value as Record<string, unknown>;
+  }
+
+  private serializeOperation(operation: {
+    id: string;
+    scope: AiOperationScope;
+    taskId: string | null;
+    status: string;
+    prompt: string;
+    model: string | null;
+    approvedAt: Date | null;
+    executedAt: Date | null;
+    undoneAt: Date | null;
+    failedAt: Date | null;
+    errorMessage: string | null;
+    planPayload: Prisma.JsonValue;
+    executionPayload: Prisma.JsonValue | null;
+    undoPayload: Prisma.JsonValue | null;
+    createdAt: Date;
+  }) {
+    return {
+      operationId: operation.id,
+      scope: operation.scope,
+      taskId: operation.taskId,
+      status: operation.status,
+      prompt: operation.prompt,
+      model: operation.model,
+      approvedAt: operation.approvedAt,
+      executedAt: operation.executedAt,
+      undoneAt: operation.undoneAt,
+      failedAt: operation.failedAt,
+      errorMessage: operation.errorMessage,
+      plan: this.readPlan(operation.scope, operation.planPayload),
+      executionPayload: this.toRecord(operation.executionPayload),
+      undoPayload: this.toRecord(operation.undoPayload),
+      createdAt: operation.createdAt,
+    };
+  }
+
+  private async ensureAdminConfig(userId: string) {
+    await this.prisma.$executeRaw`
+      INSERT INTO "AiAdminConfig" (
+        "id",
+        "userId",
+        "myDayAutoConfirm",
+        "myDayAutoExecute",
+        "myDayTaskLimit",
+        "blockDeleteOperations",
+        "requireUndoReason",
+        "operatorNotes",
+        "promptGuardrails",
+        "createdAt",
+        "updatedAt"
+      )
+      VALUES (
+        ${randomUUID()},
+        ${userId},
+        ${DEFAULT_AI_ADMIN_CONFIG.myDayAutoConfirm},
+        ${DEFAULT_AI_ADMIN_CONFIG.myDayAutoExecute},
+        ${DEFAULT_AI_ADMIN_CONFIG.myDayTaskLimit},
+        ${DEFAULT_AI_ADMIN_CONFIG.blockDeleteOperations},
+        ${DEFAULT_AI_ADMIN_CONFIG.requireUndoReason},
+        ${DEFAULT_AI_ADMIN_CONFIG.operatorNotes},
+        ${DEFAULT_AI_ADMIN_CONFIG.promptGuardrails},
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT ("userId") DO NOTHING
+    `;
+
+    const rows = await this.prisma.$queryRaw<AiAdminConfigRow[]>`
+      SELECT
+        "id",
+        "userId",
+        "myDayAutoConfirm",
+        "myDayAutoExecute",
+        "myDayTaskLimit",
+        "blockDeleteOperations",
+        "requireUndoReason",
+        "operatorNotes",
+        "promptGuardrails",
+        "createdAt",
+        "updatedAt"
+      FROM "AiAdminConfig"
+      WHERE "userId" = ${userId}
+      LIMIT 1
+    `;
+
+    if (!rows[0]) {
+      throw new NotFoundException('AI admin config not found');
+    }
+
+    return rows[0];
+  }
+
+  private serializeAdminConfig(config: AiAdminConfigRow) {
+    return {
+      id: config.id,
+      userId: config.userId,
+      myDayAutoConfirm: config.myDayAutoConfirm,
+      myDayAutoExecute: config.myDayAutoExecute,
+      myDayTaskLimit: config.myDayTaskLimit,
+      blockDeleteOperations: config.blockDeleteOperations,
+      requireUndoReason: config.requireUndoReason,
+      operatorNotes: config.operatorNotes,
+      promptGuardrails: config.promptGuardrails,
+      createdAt: config.createdAt,
+      updatedAt: config.updatedAt,
+    };
   }
 
   private extractOutputText(body: JsonSchemaResponse): string {

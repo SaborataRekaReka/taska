@@ -1,0 +1,301 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.main {
+  max-width: calc(var(--content-width) + var(--side-padding) * 2);
+  width: 100%;
+  margin: 0 auto;
+  padding: 18px var(--side-padding) 90px;
+  flex: 1;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.workspace {
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.workspaceHeader {
+  border-bottom: 1px solid var(--gray-divider);
+  padding-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.workspaceHeader h1 {
+  font-size: 24px;
+  line-height: 1.15;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.workspaceHeader p {
+  margin-top: 6px;
+  max-width: 720px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.feedMeta {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedMeta span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.adapterBadge {
+  min-height: 24px;
+  border-radius: 999px;
+  border: 1px dashed var(--gray-border);
+  background: var(--surface-elevated);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 11px !important;
+  color: var(--text-secondary);
+}
+
+.feedMeta button {
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.feedMeta button:hover {
+  background: var(--surface-card-hover);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loadingRow {
+  display: flex;
+  align-items: center;
+}
+
+.error {
+  border-radius: var(--r-control);
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.success {
+  border-radius: var(--r-control);
+  border: 1px solid rgba(16, 185, 129, 0.24);
+  background: rgba(16, 185, 129, 0.12);
+  color: #065f46;
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.draftSection {
+  border: 1px solid var(--gray-divider);
+  border-radius: var(--r-card);
+  background: var(--surface-elevated);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.draftHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.draftHeader h3 {
+  font-size: 18px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.draftBadge {
+  min-height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badgeOk {
+  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.14);
+  color: #065f46;
+}
+
+.badgeWarn {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+}
+
+.policyToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px dashed var(--gray-border);
+  border-radius: var(--r-control);
+  background: var(--surface-card);
+  padding: 8px 10px;
+}
+
+.policyState {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.policyActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.policyButton {
+  min-height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  padding: 0 12px;
+  font-size: 12px;
+  transition: background var(--dur-150) var(--ease-standard), opacity var(--dur-150) var(--ease-standard);
+}
+
+.policyButton:hover:not(:disabled) {
+  background: var(--surface-card-hover);
+}
+
+.policyButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.policyButtonPrimary {
+  border-color: var(--accent-yellow);
+  background: var(--accent-yellow-soft);
+}
+
+.draftText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field textarea {
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  min-height: 40px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.invariants {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+@media (max-width: 1200px) {
+  .main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .main {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: 56px;
+  }
+
+  .workspace {
+    padding: 14px;
+  }
+
+  .workspaceHeader h1 {
+    font-size: 20px;
+  }
+
+  .policyToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

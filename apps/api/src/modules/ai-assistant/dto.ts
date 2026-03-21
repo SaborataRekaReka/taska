@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsIn,
@@ -19,6 +20,7 @@ import {
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
 const TASK_STATUSES = ['TODO', 'IN_PROGRESS', 'DONE'] as const;
 const AI_SCOPES = ['GLOBAL', 'TASK'] as const;
+const AI_OPERATION_STATUSES = ['PLANNED', 'CONFIRMED', 'EXECUTED', 'UNDONE', 'FAILED'] as const;
 
 const DAY_INTENTS = ['LIGHT', 'BALANCED', 'PROGRESS', 'FOCUS', 'CATCH_UP'] as const;
 const FOCUS_CAPACITIES = ['LOW', 'MEDIUM', 'HIGH'] as const;
@@ -152,11 +154,77 @@ export class ConfirmAiOperationDto {
   note?: string;
 }
 
+export class ListAiOperationsQueryDto {
+  @ApiPropertyOptional({ enum: AI_OPERATION_STATUSES })
+  @IsOptional()
+  @IsEnum(AI_OPERATION_STATUSES)
+  status?: (typeof AI_OPERATION_STATUSES)[number];
+
+  @ApiPropertyOptional({ enum: AI_SCOPES })
+  @IsOptional()
+  @IsEnum(AI_SCOPES)
+  scope?: (typeof AI_SCOPES)[number];
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 100, default: 40 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({ description: 'Search by operation id or prompt text.' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  search?: string;
+}
+
 export class UndoAiOperationDto {
   @ApiPropertyOptional({ description: 'Optional reason for undoing the AI operation.' })
   @IsOptional()
   @IsString()
   reason?: string;
+}
+
+export class UpdateAiAdminConfigDto {
+  @ApiPropertyOptional({ description: 'Auto-confirm My Day plans.' })
+  @IsOptional()
+  @IsBoolean()
+  myDayAutoConfirm?: boolean;
+
+  @ApiPropertyOptional({ description: 'Auto-execute My Day plans after confirm.' })
+  @IsOptional()
+  @IsBoolean()
+  myDayAutoExecute?: boolean;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 12, description: 'Target task limit for My Day plan.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  myDayTaskLimit?: number;
+
+  @ApiPropertyOptional({ description: 'Draft policy to block delete operations.' })
+  @IsOptional()
+  @IsBoolean()
+  blockDeleteOperations?: boolean;
+
+  @ApiPropertyOptional({ description: 'Require reason for undo actions in admin UI.' })
+  @IsOptional()
+  @IsBoolean()
+  requireUndoReason?: boolean;
+
+  @ApiPropertyOptional({ description: 'Operator notes for AI admin.' })
+  @IsOptional()
+  @IsString()
+  operatorNotes?: string | null;
+
+  @ApiPropertyOptional({ description: 'Prompt guardrails used by operator.' })
+  @IsOptional()
+  @IsString()
+  promptGuardrails?: string | null;
 }
 
 export class AiTaskPatchDto {

@@ -1,12 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../core/auth.guard.js';
 import { CurrentUserId } from '../../core/user.decorator.js';
 import {
   ConfirmAiOperationDto,
   CreateAiPlanDto,
+  ListAiOperationsQueryDto,
   ReviseAiPlanDto,
+  UpdateAiAdminConfigDto,
   UndoAiOperationDto,
 } from './dto.js';
 import { AiAssistantService } from './ai-assistant.service.js';
@@ -32,6 +34,19 @@ export class AiAssistantController {
     @Body() dto: ReviseAiPlanDto,
   ) {
     return this.aiAssistantService.revisePlan(userId, operationId, dto);
+  }
+
+  @Get('operations')
+  @ApiOperation({ summary: 'List AI operations for current user' })
+  @ApiQuery({ name: 'status', required: false, enum: ['PLANNED', 'CONFIRMED', 'EXECUTED', 'UNDONE', 'FAILED'] })
+  @ApiQuery({ name: 'scope', required: false, enum: ['GLOBAL', 'TASK'] })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  listOperations(
+    @CurrentUserId() userId: string,
+    @Query() query: ListAiOperationsQueryDto,
+  ) {
+    return this.aiAssistantService.listOperations(userId, query);
   }
 
   @Get('operations/:id')
@@ -70,5 +85,26 @@ export class AiAssistantController {
   @ApiOperation({ summary: 'AI assistant module health' })
   getHealth(): { module: string; status: string } {
     return { module: 'ai-assistant', status: 'active' };
+  }
+
+  @Get('runtime')
+  @ApiOperation({ summary: 'AI assistant runtime information and capability flags' })
+  getRuntime() {
+    return this.aiAssistantService.getRuntime();
+  }
+
+  @Get('admin/config')
+  @ApiOperation({ summary: 'Get persisted AI admin config for current user' })
+  getAdminConfig(@CurrentUserId() userId: string) {
+    return this.aiAssistantService.getAdminConfig(userId);
+  }
+
+  @Patch('admin/config')
+  @ApiOperation({ summary: 'Update persisted AI admin config for current user' })
+  updateAdminConfig(
+    @CurrentUserId() userId: string,
+    @Body() dto: UpdateAiAdminConfigDto,
+  ) {
+    return this.aiAssistantService.updateAdminConfig(userId, dto);
   }
 }

@@ -2,7 +2,7 @@
 
 > Этот документ — единственный источник правды об архитектурных решениях. Обновляется агентом после каждого значимого изменения.
 >
-> **Последнее обновление:** 2026-03-20 | **Стадия:** B2+C1-C4 + D0-D6 завершены, E1-E2 AI safe-mode foundation + frontend chat реализованы
+> **Последнее обновление:** 2026-03-21 | **Стадия:** B2+C1-C4 + D0-D6 завершены, E1-E2 реализованы + AI Admin UI + persisted admin config endpoints
 
 ---
 
@@ -131,7 +131,7 @@
 ```
 id, email, passwordHash?, displayName?, provider (LOCAL|GOOGLE), providerUserId?, avatarUrl?, givenName?, familyName?, emailVerified, createdAt, updatedAt
 ```
-Связи: lists[], tasks[], subtasks[], historyEvents[], aiOperations[]
+Связи: lists[], tasks[], subtasks[], historyEvents[], aiOperations[], aiAdminConfig?
 
 ### List
 ```
@@ -161,6 +161,12 @@ id, userId, entityType (LIST|TASK|SUBTASK|AI_OPERATION), entityId, actionType (C
 ```
 id, userId, taskId?, scope (GLOBAL|TASK), operationType, model?, prompt, planPayload (JSON), executionPayload?, undoPayload?, status (PLANNED|CONFIRMED|EXECUTED|UNDONE|FAILED), approvedAt?, executedAt?, undoneAt?, failedAt?, errorMessage?, createdAt
 ```
+
+### AiAdminConfig
+```
+id, userId(unique), myDayAutoConfirm, myDayAutoExecute, myDayTaskLimit, blockDeleteOperations, requireUndoReason, operatorNotes?, promptGuardrails?, createdAt, updatedAt
+```
+Назначение: persisted operator policy controls для AI Admin UI.
 
 ---
 
@@ -240,11 +246,15 @@ Register/Login response:
 |--------|------|----------|--------|
 | POST | `/ai/chat` | Free-form чатовый endpoint | ⏳ planned |
 | POST | `/ai/plan` | Структурированный план изменений через OpenAI без мутаций | ✅ foundation |
+| GET | `/ai/operations` | Список AI-операций с фильтрами (`status`,`scope`,`search`,`limit`) | ✅ foundation |
 | POST | `/ai/operations/:id/revise` | Ревизия pending-плана до confirm | ✅ foundation |
 | GET | `/ai/operations/:id` | Детали AI-операции, preview/execution/undo payload | ✅ foundation |
 | POST | `/ai/operations/:id/confirm` | Подтвердить план | ✅ foundation |
 | POST | `/ai/operations/:id/execute` | Применить детерминированно backend-сервисами | ✅ foundation |
 | POST | `/ai/operations/:id/undo` | Откатить AI-операцию | ✅ foundation |
+| GET | `/ai/runtime` | Runtime-инфо (модели, trust boundary, capability flags) | ✅ foundation |
+| GET | `/ai/admin/config` | Получить persisted AI admin policy для текущего пользователя | ✅ foundation |
+| PATCH | `/ai/admin/config` | Обновить persisted AI admin policy для текущего пользователя | ✅ foundation |
 
 #### Statistics (для "Мой день")
 | Method | Path | Статус |
@@ -289,8 +299,8 @@ UI action
 3. POST /ai/plan с контекстом [настроение, энергия, предпочтения, все задачи]
 4. AI формирует персонализированный дневной план
 5. Пользователь нажимает "Создать мой день"
-6. Plan применяется через confirm → execute поток
-7. Экран "Мой день" показывает radar chart (важность/срочность/длительность)
+6. Plan применяется через policy-aware confirm/execute поток (persisted `AiAdminConfig`)
+7. Если execute выполнен, экран "Мой день" показывает radar chart (важность/срочность/длительность)
 ```
 
 ---
@@ -356,7 +366,7 @@ UI action
 | UnifiedErrorFilter | ✅ |
 | Swagger/OpenAPI | ✅ |
 | Prisma schema v1 | ✅ |
-| DB migration 0001_init | ✅ |
+| DB migrations 0001_init ... 0004_ai_admin_config | ✅ |
 | Seed script | ✅ |
 | Docker Compose | ✅ |
 | .env.example | ✅ |

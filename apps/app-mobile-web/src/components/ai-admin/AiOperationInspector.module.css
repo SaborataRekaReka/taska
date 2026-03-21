@@ -1,0 +1,218 @@
+.section {
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 17px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.boundary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.proposed,
+.executed {
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+}
+
+.proposed {
+  background: rgba(59, 130, 246, 0.13);
+  border-color: rgba(59, 130, 246, 0.24);
+  color: #1d4ed8;
+}
+
+.executed {
+  background: rgba(16, 185, 129, 0.13);
+  border-color: rgba(16, 185, 129, 0.24);
+  color: #047857;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.metaCard {
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.metaValue {
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.block {
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blockTitle {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.summary,
+.assistant {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.assistant {
+  color: var(--text-secondary);
+}
+
+.warningList {
+  padding: 10px;
+  border-radius: var(--r-control);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.warningList p {
+  font-size: 12px;
+  color: #92400e;
+}
+
+.prompt,
+.json {
+  width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 10px;
+  background: rgba(17, 24, 39, 0.06);
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  padding: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  font-family: ui-monospace, sfmono-regular, menlo, monospace;
+}
+
+.operationList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.operationItem {
+  border-radius: 10px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.operationType {
+  font-size: 11px;
+  min-height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  background: var(--surface-elevated);
+}
+
+.operationKey {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: ui-monospace, sfmono-regular, menlo, monospace;
+}
+
+.operationMeta {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.payloadGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.timeline {
+  border: 1px dashed var(--gray-border);
+  border-radius: var(--r-control);
+  background: var(--surface-elevated);
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeNode {
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+}
+
+.timeActive {
+  color: var(--text-primary);
+}
+
+.timeArrow {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+}

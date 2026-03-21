@@ -74,8 +74,27 @@ model User {
   historyEvents  History[]
   aiOperations   AiOperation[]
   preferences    UserPreferences?
+  aiAdminConfig  AiAdminConfig?
 
   @@unique([provider, providerUserId])
+}
+
+model AiAdminConfig {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  myDayAutoConfirm      Boolean  @default(true)
+  myDayAutoExecute      Boolean  @default(true)
+  myDayTaskLimit        Int      @default(4)
+  blockDeleteOperations Boolean  @default(false)
+  requireUndoReason     Boolean  @default(true)
+  operatorNotes         String?
+  promptGuardrails      String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([updatedAt])
 }
 
 model UserPreferences {

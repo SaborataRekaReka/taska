@@ -10,6 +10,7 @@ import { MyDayModal } from '../components/my-day/MyDayModal';
 import { GradientBlob } from '../components/GradientBackground';
 import { energyToSpread } from '../lib/profileColors';
 import {
+  useAiAdminConfig,
   useAllTasks,
   useConfirmAiOperation,
   useCreateAiPlan,
@@ -24,6 +25,11 @@ import type { DayProfile, DayTask, MoodLevel } from '../components/my-day/types'
 import type { AiPlanOperation, Task } from '../lib/types';
 import { useUiStore } from '../stores/ui';
 import styles from './MainPage.module.css';
+
+const DEFAULT_MY_DAY_POLICY = {
+  myDayAutoConfirm: true,
+  myDayAutoExecute: true,
+} as const;
 
 function mapPriority(priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): DayTask['priority'] {
   if (priority === 'LOW') return 'low';
@@ -77,6 +83,13 @@ function getMyDayTaskLimitByEnergy(energy: number): number {
   return 5;
 }
 
+function normalizeTaskLimit(value: number | undefined, fallback: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+  return Math.max(1, Math.min(12, Math.round(value)));
+}
+
 function isSameLocalDay(dateIso: string, reference: Date): boolean {
   const value = new Date(dateIso);
   return (
@@ -96,7 +109,7 @@ function hasMyDayDeadlineMutation(operations: AiPlanOperation[]): boolean {
   });
 }
 
-function buildMyDayFallbackOperations(tasks: Task[], energy: number): AiPlanOperation[] {
+function buildMyDayFallbackOperations(tasks: Task[], taskLimit: number): AiPlanOperation[] {
   const activeTasks = tasks
     .filter((task) => task.status !== 'DONE')
     .sort((a, b) => {
@@ -109,7 +122,7 @@ function buildMyDayFallbackOperations(tasks: Task[], energy: number): AiPlanOper
       return aDeadline - bDeadline;
     });
 
-  const selected = activeTasks.slice(0, getMyDayTaskLimitByEnergy(energy));
+  const selected = activeTasks.slice(0, taskLimit);
   const now = new Date();
 
   return selected.map((task, index) => {
@@ -170,6 +183,7 @@ export function MainPage() {
   const reviseAiPlan = useReviseAiPlan();
   const confirmAiOperation = useConfirmAiOperation();
   const executeAiOperation = useExecuteAiOperation();
+  const aiAdminConfig = useAiAdminConfig();
   const { data: preferences } = usePreferences();
   const { data: visibleTasks = [], isLoading: isVisibleTasksLoading } = useTasks();
   const updatePreferences = useUpdatePreferences();
@@ -258,6 +272,14 @@ export function MainPage() {
     const taskSnapshot = allTasks.map((task, index) => `${index + 1}. ${formatTaskForPrompt(task)}`).join('\n');
     const taskIds = allTasks.map((task) => task.id);
     const contextTaskIds = taskIds.slice(0, 50);
+    const targetTaskLimit = normalizeTaskLimit(
+      aiAdminConfig.data?.myDayTaskLimit,
+      getMyDayTaskLimitByEnergy(payload.energy),
+    );
+    const shouldAutoConfirm = aiAdminConfig.data?.myDayAutoConfirm ?? DEFAULT_MY_DAY_POLICY.myDayAutoConfirm;
+    const shouldAutoExecute = shouldAutoConfirm
+      ? (aiAdminConfig.data?.myDayAutoExecute ?? DEFAULT_MY_DAY_POLICY.myDayAutoExecute)
+      : false;
 
     const prompt = [
       'Build "My Day" for the user in safe-mode operation plan format.',
@@ -276,6 +298,7 @@ export function MainPage() {
       'Use mostly UPDATE_TASK with deadline set to today; optionally CREATE_SUBTASK for breakdown.',
       'Do not delete tasks and do not create extra lists.',
       'Return at least one operation that makes tasks appear in dueToday filter.',
+      `Target task count for My Day: ${targetTaskLimit}.`,
       `Total tasks available: ${allTasks.length}.`,
       'Task snapshot:',
       taskSnapshot || 'No tasks available.',
@@ -297,7 +320,7 @@ export function MainPage() {
     });
 
     if (!hasMyDayDeadlineMutation(plan.operations)) {
-      const fallbackOperations = buildMyDayFallbackOperations(allTasks, payload.energy);
+      const fallbackOperations = buildMyDayFallbackOperations(allTasks, targetTaskLimit);
       if (fallbackOperations.length === 0) {
         throw new Error('No active tasks available to build My Day.');
       }
@@ -310,10 +333,26 @@ export function MainPage() {
       });
     }
 
+    if (!shouldAutoConfirm) {
+      closeMyDayModal();
+      window.alert(
+        'My Day plan created in safe-mode and is waiting for manual confirm in AI Admin.',
+      );
+      return;
+    }
+
     await confirmAiOperation.mutateAsync({
       operationId: plan.operationId,
-      note: 'Auto-build My Day from balance modal',
+      note: 'Auto-confirm My Day from balance modal',
     });
+
+    if (!shouldAutoExecute) {
+      closeMyDayModal();
+      window.alert(
+        'My Day plan confirmed and is waiting for manual execute in AI Admin.',
+      );
+      return;
+    }
 
     await executeAiOperation.mutateAsync(plan.operationId);
 

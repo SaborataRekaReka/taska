@@ -151,12 +151,16 @@ This file is the module entry point on the backend.
 
 ### Endpoints currently exposed
 - `POST /ai/plan`
+- `GET /ai/operations`
 - `POST /ai/operations/:id/revise`
 - `GET /ai/operations/:id`
 - `POST /ai/operations/:id/confirm`
 - `POST /ai/operations/:id/execute`
 - `POST /ai/operations/:id/undo`
 - `GET /ai/health`
+- `GET /ai/runtime`
+- `GET /ai/admin/config`
+- `PATCH /ai/admin/config`
 
 ---
 
@@ -205,6 +209,17 @@ Can include:
 
 #### `ConfirmAiOperationDto` and `UndoAiOperationDto`
 Used for confirm/undo user intent notes.
+
+#### `UpdateAiAdminConfigDto`
+Used by `PATCH /ai/admin/config`.
+Contains operator-level persisted controls:
+- `myDayAutoConfirm`
+- `myDayAutoExecute`
+- `myDayTaskLimit`
+- `blockDeleteOperations`
+- `requireUndoReason`
+- `operatorNotes`
+- `promptGuardrails`
 
 ---
 
@@ -349,9 +364,11 @@ It also imports dependent modules:
 ## 5.6. `apps/api/prisma/schema.prisma`
 
 Role:
-- contains the persisted shape of `AiOperation` and related entities.
+- contains the persisted shape of `AiOperation`, `AiAdminConfig`, and related entities.
 
-The AI assistant depends primarily on the `AiOperation` model.
+The AI assistant depends primarily on:
+- `AiOperation` for lifecycle/plans/execution state.
+- `AiAdminConfig` for persisted operator policy controls used by AI Admin.
 
 ### Relevant `AiOperation` fields
 - `id`
@@ -370,6 +387,21 @@ The AI assistant depends primarily on the `AiOperation` model.
 
 This table is the durable source of truth for AI operation state.
 
+### Relevant `AiAdminConfig` fields
+- `id`
+- `userId` (unique)
+- `myDayAutoConfirm`
+- `myDayAutoExecute`
+- `myDayTaskLimit`
+- `blockDeleteOperations`
+- `requireUndoReason`
+- `operatorNotes`
+- `promptGuardrails`
+- `createdAt`
+- `updatedAt`
+
+This table is the durable source of truth for per-user AI admin policy settings.
+
 ---
 
 ## 6. Main frontend files and what each one does
@@ -386,6 +418,11 @@ Role:
 - `useExecuteAiOperation()`
 - `useUndoAiOperation()`
 - `useAiOperation()`
+- `useAiOperationsFeed()`
+- `useAiOperationHealth()`
+- `useAiRuntime()`
+- `useAiAdminConfig()`
+- `useUpdateAiAdminConfig()`
 
 ### Important detail
 
@@ -412,6 +449,8 @@ Role:
 - `AiOperationDetail`
 - `AiPlanOperation`
 - `MyDayPlanningContext`
+- `AiRuntimeInfo`
+- `AiAdminConfig`
 
 ### Why this matters
 
@@ -462,15 +501,16 @@ Role:
    - structured `myDay` context;
 4. checks if the plan actually created a today-bound mutation;
 5. if not, sends a revise request with deterministic fallback operations;
-6. auto-confirms the operation;
-7. auto-executes the operation;
-8. updates local UI state and saved-day flags.
+6. applies My Day execution policy from persisted AI admin config (`/ai/admin/config`);
+7. auto-confirms only when policy allows;
+8. auto-executes only when policy allows;
+9. updates local UI state and saved-day flags after execute.
 
 ### Important product note
 
-Today My Day is still auto-confirm + auto-execute from the modal flow.
-So while the backend is safe-mode capable, this specific UX path currently chooses to advance immediately after the plan stage.
-That is an important implementation detail for future admin tooling.
+Default behavior still auto-confirms + auto-executes, but this is now controlled by persisted operator policy (`myDayAutoConfirm`, `myDayAutoExecute`, `myDayTaskLimit`).
+So the flow can be switched to manual confirm/execute without changing frontend code.
+That is an important implementation detail for AI operations governance.
 
 ---
 
@@ -486,6 +526,27 @@ Relevant to AI because it manages:
 - theme application after My Day creation.
 
 This is not AI-planning logic itself, but it affects the visible My Day experience.
+
+---
+
+## 6.6. `apps/app-mobile-web/src/pages/AiAdminPage.tsx`
+
+Role:
+- centralized operator UI for AI assistant administration.
+
+### What it currently does
+- shows an operation feed and lifecycle metrics;
+- supports filtering/inspection over `AiOperation` details;
+- allows operator actions (`confirm`, `execute`, `undo`) from one screen;
+- shows runtime and health metadata;
+- reads/writes persisted admin policy via:
+  - `GET /ai/admin/config`
+  - `PATCH /ai/admin/config`
+- surfaces draft safety/prompt controls with explicit saved/dirty status.
+
+### Important note
+
+This page is now the practical control surface for AI operations, but it is still not a full operator suite (for example, no dry-run simulation endpoint yet).
 
 ---
 
@@ -623,9 +684,9 @@ The current flow for My Day is:
 7. backend stores the plan as `AiOperation`;
 8. frontend checks whether the returned operations actually place tasks into today;
 9. if not, frontend revises the plan with deterministic fallback operations;
-10. frontend confirms;
-11. frontend executes;
-12. tasks become part of virtual My Day through today-bound deadlines.
+10. frontend conditionally confirms according to persisted policy;
+11. frontend conditionally executes according to persisted policy;
+12. if executed, tasks become part of virtual My Day through today-bound deadlines.
 
 ## 11.2. What My Day means technically today
 
@@ -651,7 +712,7 @@ The system does **not yet** fully implement:
 - a full backend scoring engine;
 - deferred-task rationale payloads;
 - planner-grade explanation objects;
-- explicit admin console / operator controls.
+- a full operator suite with dry-run simulation and prompt versioning.
 
 So My Day is now **more structured than before**, but still not the full target hybrid planner.
 
@@ -768,15 +829,14 @@ The current assistant is powerful but still transitional.
 ### Main limitations
 - no full backend scoring engine yet;
 - no true multi-variant day-plan builder yet;
-- no centralized admin panel yet;
-- no explicit operator prompt-management UI;
+- AI Admin exists but does not yet include full prompt-template management;
 - no test harness UI for plan simulation yet;
 - some My Day logic still relies on frontend prompt composition and fallback;
 - current My Day UX auto-confirms/auto-executes rather than exposing a rich review step.
 
 ---
 
-## 17. What to treat as the main source files for future admin tooling
+## 17. What to treat as the main source files for AI admin tooling
 
 If the next step is to build an admin or operator interface for AI control, the most important source files are:
 
@@ -790,6 +850,9 @@ If the next step is to build an admin or operator interface for AI control, the 
 ### Frontend
 - `apps/app-mobile-web/src/hooks/queries.ts`
 - `apps/app-mobile-web/src/lib/types.ts`
+- `apps/app-mobile-web/src/lib/ai-admin.ts`
+- `apps/app-mobile-web/src/pages/AiAdminPage.tsx`
+- `apps/app-mobile-web/src/components/ai-admin/*`
 - `apps/app-mobile-web/src/pages/MainPage.tsx`
 - `apps/app-mobile-web/src/components/my-day/MyDayModal.tsx`
 - `apps/app-mobile-web/src/components/HeroPanel.tsx`
@@ -847,3 +910,17 @@ That interface should likely centralize:
 - maybe dry-run tools for AI plans.
 
 This document is meant to be the reference base for that next step.
+
+### 20.1. Execution spec for Codex
+
+For direct implementation guidance, use:
+
+- `ai-assistant-admin-ui-codex-spec.md`
+
+That file defines:
+
+- frontend-first scope,
+- exact file-level implementation plan,
+- route and data adapter strategy,
+- acceptance criteria,
+- explicit backend-start gate.

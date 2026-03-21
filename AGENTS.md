@@ -20,7 +20,7 @@
 
 ---
 
-## 2) Текущее состояние проекта (обновлено: 2026-03-20)
+## 2) Текущее состояние проекта (обновлено: 2026-03-21)
 
 ### Выполненные этапы
 | Этап | Статус | Описание |
@@ -42,11 +42,6 @@
 ### Не начатые этапы
 | Этап | Описание |
 |------|----------|
-
-### Не начатые этапы
-| Этап | Описание |
-|------|----------|
-| E2 | Frontend AI chat + proposal cards |
 | F | Polishing, документация |
 
 ### Текущее состояние модулей
@@ -56,7 +51,7 @@
 - **tasks**: полный CRUD + 6 фильтров + includes subtasks/list
 - **subtasks**: полный CRUD через /tasks/:taskId/subtasks + ownership
 - **history**: append-only запись + read API с фильтрами
-- **ai-assistant**: safe-mode foundation — `/ai/plan`, `/ai/operations/:id`, `/confirm`, `/execute`, `/undo`, `/revise`, OpenAI-backed structured planning
+- **ai-assistant**: safe-mode + admin foundation — `/ai/plan`, `/ai/operations`, `/ai/operations/:id`, `/confirm`, `/execute`, `/undo`, `/revise`, `/ai/runtime`, `/ai/admin/config`
 
 ### Frontend (apps/app-mobile-web) — React + Vite
 - **Design tokens**: палитра, glass, градиенты, семантика, z-index, motion — в `src/styles/global.css`; обзор и правила — `src/styles/DESIGN_TOKENS.md`. В CSS-модулях только `var(--token)`.
@@ -92,7 +87,7 @@ TASKA 2.0/
 ├── apps/
 │   ├── api/                    # NestJS + Fastify backend
 │   │   ├── prisma/
-│   │   │   ├── schema.prisma   # DB schema: User, List, Task, Subtask, History, AiOperation
+│   │   │   ├── schema.prisma   # DB schema: User, List, Task, Subtask, History, AiOperation, AiAdminConfig
 │   │   │   ├── migrations/     # 0001_init — базовая схема
 │   │   │   └── seed.mjs        # Создает дефолтные списки для тестового пользователя
 │   │   └── src/
@@ -231,11 +226,15 @@ curl http://localhost:3000/openapi.json
 
 ### AI Assistant (`/ai`) — 🟡 FOUNDATION IMPLEMENTED
 - `POST /ai/plan` — сформировать структурированный safe-mode план изменений через OpenAI
+- `GET /ai/operations` — получить список AI-операций (фильтры: `status`, `scope`, `search`, `limit`)
 - `POST /ai/operations/:id/revise` — пересобрать/отредактировать pending-план до подтверждения
 - `GET /ai/operations/:id` — получить сохраненный preview/execution/undo payload
 - `POST /ai/operations/:id/confirm` — подтвердить план
 - `POST /ai/operations/:id/execute` — применить подтвержденный план backend-сервисами
 - `POST /ai/operations/:id/undo` — откатить последнюю AI-операцию
+- `GET /ai/runtime` — runtime-информация и capability flags для AI admin
+- `GET /ai/admin/config` — получить persisted AI admin policy для текущего пользователя
+- `PATCH /ai/admin/config` — обновить persisted AI admin policy для текущего пользователя
 - `POST /ai/chat` — conversational endpoint (ещё не реализован)
 
 ---

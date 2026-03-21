@@ -1,0 +1,232 @@
+.section {
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.metaText {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.clearBtn {
+  min-height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+.clearBtn:hover {
+  background: var(--surface-card-hover);
+}
+
+.title {
+  font-size: 17px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 170px 170px minmax(200px, 1fr);
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.searchField {
+  min-width: 220px;
+}
+
+.field span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.field select,
+.field input {
+  min-height: 38px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 0 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.table thead th {
+  text-align: left;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+}
+
+.table tbody td {
+  font-size: 12px;
+  color: var(--text-primary);
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--gray-divider);
+  vertical-align: top;
+}
+
+.table tbody tr {
+  transition: background var(--dur-150) var(--ease-standard);
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-card-hover);
+}
+
+.selected {
+  background: var(--accent-yellow-soft);
+}
+
+.idCell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, sfmono-regular, menlo, monospace;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.statusPLANNED {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.statusCONFIRMED {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4338ca;
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.statusEXECUTED {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.statusUNDONE {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.statusFAILED {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.actions button {
+  min-height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 0 10px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.actions button:hover:not(:disabled) {
+  background: var(--surface-card-hover);
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.empty {
+  text-align: center;
+  padding: 28px 12px !important;
+  color: var(--text-secondary) !important;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    min-width: 860px;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 14px;
+  }
+
+  .table tbody td,
+  .table thead th {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

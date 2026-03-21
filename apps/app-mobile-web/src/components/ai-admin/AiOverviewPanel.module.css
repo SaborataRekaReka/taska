@@ -1,0 +1,100 @@
+.panel {
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-card);
+  border-radius: var(--r-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 17px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.health {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 6px 10px;
+}
+
+.healthLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.healthValue {
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.healthOk {
+  color: #0d6e42;
+}
+
+.healthWarn {
+  color: var(--semantic-danger);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.metricCard {
+  border-radius: var(--r-control);
+  border: 1px solid var(--gray-divider);
+  background: var(--surface-elevated);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metricLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.metricValue {
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.runtimeCard {
+  border-radius: var(--r-control);
+  border: 1px dashed var(--gray-border);
+  background: var(--surface-elevated);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.runtimeTitle {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.runtimeLine {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { listAiOperationsFromHistory } from '../lib/ai-admin';
 import { api } from '../lib/api';
 import type {
+  AiAdminConfig,
   AiExecutionResponse,
+  AiHealthStatus,
   AiOperationDetail,
   AiPlanResponse,
+  AiRuntimeInfo,
   AiUndoResponse,
   AuthResponse,
   List,
@@ -249,6 +253,49 @@ export function useAiOperation(operationId: string | null) {
     queryKey: ['ai-operation', operationId],
     queryFn: () => api.get<AiOperationDetail>(`/ai/operations/${operationId}`),
     enabled: Boolean(operationId),
+  });
+}
+
+export function useAiOperationsFeed(limit = 80) {
+  return useQuery({
+    queryKey: ['ai-operations-feed', limit],
+    queryFn: () => listAiOperationsFromHistory(limit),
+    refetchInterval: 20_000,
+  });
+}
+
+export function useAiOperationHealth() {
+  return useQuery({
+    queryKey: ['ai-health'],
+    queryFn: () => api.get<AiHealthStatus>('/ai/health'),
+    refetchInterval: 30_000,
+  });
+}
+
+export function useAiRuntime() {
+  return useQuery({
+    queryKey: ['ai-runtime'],
+    queryFn: () => api.get<AiRuntimeInfo>('/ai/runtime'),
+    refetchInterval: 30_000,
+  });
+}
+
+export function useAiAdminConfig() {
+  return useQuery({
+    queryKey: ['ai-admin-config'],
+    queryFn: () => api.get<AiAdminConfig>('/ai/admin/config'),
+  });
+}
+
+export function useUpdateAiAdminConfig() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<AiAdminConfig>) =>
+      api.patch<AiAdminConfig>('/ai/admin/config', data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ai-admin-config'] });
+      qc.invalidateQueries({ queryKey: ['ai-runtime'] });
+    },
   });
 }
 
